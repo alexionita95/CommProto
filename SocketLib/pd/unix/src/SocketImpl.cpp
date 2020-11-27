@@ -22,7 +22,7 @@ namespace socketlib {
     {
     }
 
-    uint32_t SocketImpl::send(const Message& message)
+    uint32_t SocketImpl::sendBytes(const Message& message)
     {
         if (socketHandle < 0 || !isInitialized) {
             return 0;

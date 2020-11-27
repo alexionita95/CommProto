@@ -1,5 +1,6 @@
 #include <SocketImpl.h>
 #include <stdio.h>
+#include <thread>
 
 using namespace commproto;
 socketlib::Message makeMessage(const std::string& msg)
@@ -9,11 +10,14 @@ socketlib::Message makeMessage(const std::string& msg)
     for (uint8_t c : msg) {
         msgBytes.push_back(c);
     }
+	msgBytes.push_back(0);
     return msgBytes;
 }
 
 std::string makeString(const socketlib::Message& msg)
 {
+	socketlib::Message copy(msg);
+	copy.push_back(0);
     return std::string(msg.data());
 }
 
@@ -45,11 +49,11 @@ int main(int argc, char*[])
             printf("Succesfully received a connection, sending messages.\n");
             socketlib::Message msg = makeMessage("Hello!");
             socketlib::Message msg2 = makeMessage(stopMsg);
-            if (msg.size() != client->send(msg)) {
+            if (msg.size() != client->sendBytes(msg)) {
                 printf("An error occurred while sending a message.\n");
                 return 0;
             }
-            if (msg2.size() != client->send(msg2)) {
+            if (msg2.size() != client->sendBytes(msg2)) {
                 printf("An error occurred while sending a message.\n");
                 return 0;
             }

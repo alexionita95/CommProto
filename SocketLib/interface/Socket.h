@@ -12,8 +12,8 @@ namespace socketlib {
     using SocketHandle = Socket*;
     class Socket {
     public:
-        //send a byte array, blocking
-        virtual uint32_t send(const Message& message) = 0;
+        //sendBytes a byte array, blocking
+        virtual uint32_t sendBytes(const Message& message) = 0;
 
         //block the thread until the socket receives [size] bytes
         virtual uint32_t receive(Message& message, const uint32_t size) = 0;

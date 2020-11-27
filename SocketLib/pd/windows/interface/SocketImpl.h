@@ -1,8 +1,16 @@
 #pragma once
 #include <Socket.h>
+#include <winsock2.h>
 
 namespace commproto {
 namespace socketlib {
+
+	enum class WsaStartupResult
+	{
+		AlreadyStarted,
+		StartupSucceeded,
+		StartupFailed
+	};
 
     enum class Mode : uint8_t {
         Unassigned,
@@ -13,6 +21,7 @@ namespace socketlib {
     class SocketImpl : public Socket {
     public:
         SocketImpl();
+		~SocketImpl();
 
         uint32_t sendBytes(const Message& message) override;
         uint32_t receive(Message& message, uint32_t size) override;
@@ -24,11 +33,14 @@ namespace socketlib {
 
     private:
         //returns a ready socket from acceptNext()
-        SocketImpl(const int32_t handle, const Mode mode, const bool initialized);
-        bool initFd();
+        SocketImpl(SOCKET handle, const Mode mode, const bool initialized);
         Mode socketMode;
         bool isInitialized;
-        int32_t socketHandle;
+		SOCKET socketHandle;
+
+	    static WsaStartupResult startWsa();
+	    static void stopWsa();
+		static bool isWsaStarted;
     };
 } // namespace socket
 } // namespace commproto
