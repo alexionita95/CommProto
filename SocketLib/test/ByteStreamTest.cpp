@@ -11,17 +11,6 @@ namespace commproto
 		namespace test
 		{
 			template <typename T>
-			const T & testValue()
-			{
-				return 42;
-			}
-			template <>
-			const std::string & testValue()
-			{
-				return "test";
-			}
-
-			template <typename T>
 			class ByteStreamTest : public testing::Test
 			{
 			};
@@ -31,7 +20,7 @@ namespace commproto
 
 			TYPED_TEST_P(ByteStreamTest,CanReadAndWrite)
 			{
-				const TypeParam input = testValue<TypeParam>();
+				const TypeParam input = 42;
 				TypeParam output;
 
 				ByteStream writer;
@@ -56,6 +45,27 @@ namespace commproto
 				std::string input = "test";
 				std::string output;
 
+
+				writer.write(input);
+
+				ByteStream reader(writer.getStream());
+
+				bool res = reader.read(output);
+
+				ASSERT_TRUE(res);
+				ASSERT_EQ(input, output);
+			}
+
+			TEST(ByteStream, CanReadAndWriteVector)
+			{
+				ByteStream writer;
+				std::vector<uint32_t> input;
+				std::vector<uint32_t> output;
+
+				for(uint32_t index = 0;index<42;++index)
+				{
+					input.push_back(42 - index);
+				}
 
 				writer.write(input);
 

@@ -14,7 +14,7 @@ namespace commproto
 
 			}
 
-			ByteStream(const std::vector<uint8_t> & stream_) : position(0) , stream(stream_)
+			ByteStream(const std::vector<uint8_t> & stream_) : position(0), stream(stream_)
 			{
 
 			}
@@ -24,12 +24,14 @@ namespace commproto
 			template <typename T>
 			void write(const T& value);
 
-
 			bool read(void* buf, const uint32_t size);
 			bool write(const void* buf, const uint32_t size);
 
-	
 
+			template <typename T>
+			bool read(std::vector<T> & vec);
+			template <typename T>
+			void write(const std::vector<T>& vec);
 
 			const std::vector<uint8_t> & getStream() const
 			{
@@ -48,6 +50,38 @@ namespace commproto
 			uint32_t valueSize = sizeof(value);
 			position += valueSize;
 			stream.insert(stream.end(), valuePtr, valuePtr + valueSize);
+		}
+
+		template <typename T>
+		bool ByteStream::read(std::vector<T>& vec)
+		{
+			uint32_t size = 0;
+			bool res = read(size);
+			if (!res)
+			{
+				return false;
+			}
+
+			vec.reserve(size);
+			for (uint32_t index = 0; index < size; ++index)
+			{
+				T temp;
+				if (!read(temp))
+				{
+					return false;
+				}
+				vec.emplace_back(temp);
+			}
+		}
+
+		template <typename T>
+		void ByteStream::write(const std::vector<T>& vec)
+		{
+			write<uint32_t>(vec.size());
+			for (const T& element : vec)
+			{
+				write(element);
+			}
 		}
 
 		template <typename  T>
@@ -76,7 +110,7 @@ namespace commproto
 		}
 
 		template <>
-		inline void ByteStream::write(const std::string & value){
+		inline void ByteStream::write(const std::string & value) {
 			write<uint32_t>(value.size());
 			write(value.c_str(), value.size());
 			write<uint8_t>(0);
@@ -97,7 +131,7 @@ namespace commproto
 		inline bool ByteStream::read(std::string & value) {
 			uint32_t size = 0;
 			bool res = read(size);
-			if(!res)
+			if (!res)
 			{
 				return false;
 			}
