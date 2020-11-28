@@ -30,3 +30,5 @@ endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
+
+add_subdirectory(test)
