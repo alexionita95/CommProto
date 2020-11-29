@@ -1,4 +1,6 @@
-#pragma once
+#ifndef COMMPROTO_SOCKET_IMPL_H
+#define COMMPROTO_SOCKET_IMPL_H
+
 #include <Socket.h>
 #include <winsock2.h>
 
@@ -44,3 +46,5 @@ namespace socketlib {
     };
 } // namespace socket
 } // namespace commproto
+
+#endif

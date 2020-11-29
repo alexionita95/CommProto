@@ -1,4 +1,6 @@
-#pragma once
+#ifndef COMMPROTO_BYTE_STREAM_H
+#define COMMPROTO_BYTE_STREAM_H
+
 #include <vector>
 #include <string>
 
@@ -72,6 +74,7 @@ namespace commproto
 				}
 				vec.emplace_back(temp);
 			}
+			return true;
 		}
 
 		template <typename T>
@@ -144,3 +147,5 @@ namespace commproto
 
 	}
 }
+
+#endif //COMMPROTO_BYTE_STREAM_H

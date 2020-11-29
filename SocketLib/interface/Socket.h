@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COMMPROTO_SOCKET_H
+#define COMMPROTO_SOCKET_H
 
 #include <cstdint>
 #include <string>
@@ -36,3 +37,5 @@ namespace socketlib {
 
 } // namespace core
 } // namespace commproto
+
+#endif //COMMPROTO_SOCKET_H
