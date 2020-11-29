@@ -1,6 +1,6 @@
 #ifndef COMMPROTO_SOCKET_H
 #define COMMPROTO_SOCKET_H
-
+#include <Common.h>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -8,7 +8,7 @@
 namespace commproto {
 namespace socketlib {
 
-    using Message = std::vector<char>;
+
     class Socket;
     using SocketHandle = Socket*;
     class Socket {
