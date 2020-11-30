@@ -3,6 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include <TypeName.h>
+#include <memory>
 
 namespace commproto
 {
@@ -22,6 +23,8 @@ namespace commproto
 			virtual uint32_t registerType(const std::string& type) = 0;
 			virtual bool hasType(const std::string& type) = 0;
 		};
+
+		using TypeMapperHandle = std::shared_ptr<TypeMapper>;
 
 		template <typename T>
 		uint32_t TypeMapper::registerType()

@@ -168,7 +168,7 @@ namespace commproto {
 				return nullptr;
 			}
 
-			return new SocketImpl(newConnection, Mode::Client, true);
+			return SocketHandle(new SocketImpl(newConnection, Mode::Client, true));
 		}
 
 		uint32_t SocketImpl::pollSocket()

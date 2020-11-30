@@ -4,13 +4,14 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace commproto {
 namespace socketlib {
 
 
     class Socket;
-    using SocketHandle = Socket*;
+    using SocketHandle = std::shared_ptr<Socket>;
     class Socket {
     public:
         //sendBytes a byte array, blocking

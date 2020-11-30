@@ -4,9 +4,11 @@ namespace commproto
 {
 	namespace data
 	{
-		TypeMapperImpl::TypeMapperImpl()
-			: counter(0)
+		TypeMapperImpl::TypeMapperImpl(const TypeMapperObserverHandle& observer_)
+			: counter{ 0 }
+			, observer{ observer_ }
 		{
+			TypeMapper::registerType<MappingType>();
 		}
 
 		uint32_t TypeMapperImpl::registerType(const std::string& type)
@@ -19,6 +21,7 @@ namespace commproto
 
 			uint32_t id = counter++;
 			types.emplace(type, id);
+			observer->notify(type, id);
 			return id;
 		}
 

@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <Common.h>
+#include <TypeBase.h>
 
 namespace commproto
 {
@@ -16,7 +18,7 @@ namespace commproto
 
 			}
 
-			ByteStream(const std::vector<uint8_t> & stream_) : position(0), stream(stream_)
+			ByteStream(const Message & stream_) : position(0), stream(stream_)
 			{
 
 			}
@@ -35,13 +37,20 @@ namespace commproto
 			template <typename T>
 			void write(const std::vector<T>& vec);
 
-			const std::vector<uint8_t> & getStream() const
+			const Message & getStream() const
 			{
 				return stream;
 			}
 
+			void writeHeader(data::TypeBase & data)
+			{
+				write(data.getSize());
+				write(data.type);
+			}
+
+
 		private:
-			std::vector<uint8_t> stream;
+			Message stream;
 			uint32_t position;
 		};
 
@@ -109,6 +118,7 @@ namespace commproto
 
 			const uint8_t* bufPtr = reinterpret_cast<const uint8_t*>(buf);
 			stream.insert(stream.end(), bufPtr, bufPtr + size);
+			position += size;
 			return true;
 		}
 
@@ -116,7 +126,6 @@ namespace commproto
 		inline void ByteStream::write(const std::string & value) {
 			write<uint32_t>(value.size());
 			write(value.c_str(), value.size());
-			write<uint8_t>(0);
 		}
 
 		inline bool ByteStream::read(void* buf, const uint32_t size)
@@ -127,6 +136,7 @@ namespace commproto
 			}
 
 			memcpy(buf, stream.data() + position, size);
+			position += size;
 			return true;
 		}
 

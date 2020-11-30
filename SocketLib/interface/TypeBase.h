@@ -25,9 +25,9 @@ namespace commproto
 		}
 
 		template <>
-		uint32_t sizeOf(const std::string & value)
+		inline uint32_t sizeOf(const std::string & value)
 		{
-			uint32_t size = sizeof(uint32_t) //first we write the size of the string
+			return sizeof(uint32_t) //first we write the size of the string
 				+ value.size(); //then the amount of chars
 		}
 
@@ -50,8 +50,8 @@ namespace commproto
 
 			BP_TYPE_DEFAULTS(TypeBase);
 
-			const uint32_t type;
-			virtual uint32_t getSize()
+			uint32_t type;
+			virtual uint32_t getSize() const
 			{
 				return sizeof(type);
 			}
