@@ -41,6 +41,9 @@ namespace commproto
 			case ValueType::real32:
 				parse<float>(std::move(msg), index, type);
 				break;
+			case ValueType::bool8:
+				parse<bool>(std::move(msg), index, type);
+				break;
 			default: ;
 			}
 		}

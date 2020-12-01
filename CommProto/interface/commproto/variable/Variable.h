@@ -5,6 +5,7 @@
 #include <commproto/variable/VariableBase.h>
 #include <commproto/variable/Context.h>
 #include <commproto/variable/VariableMessage.h>
+#include <commproto/parser/ByteStream.h>
 
 namespace commproto
 {
@@ -42,6 +43,12 @@ namespace commproto
 		inline void print(const std::string & val)
 		{
 			printf("Value = %s\n", val.c_str());
+		}
+
+		template <>
+		inline void print(const bool & val)
+		{
+			printf("Value = %s\n",val?"True":"False");
 		}
 
 		template <typename T, ValueType  UnderlyingType>
@@ -114,8 +121,10 @@ namespace commproto
 		using RealVariable = Variable<float, ValueType::real32>;
 		using RealVariableHandle = std::shared_ptr<RealVariable>;
 
+		using BoolVariable = Variable<bool, ValueType::bool8>;
+		using BoolVariableHandle = std::shared_ptr<BoolVariable>;
+
 	}
 }
-
 
 #endif

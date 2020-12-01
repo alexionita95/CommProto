@@ -46,6 +46,9 @@ namespace commproto
 			{
 				handle<float, ValueType::real32>(static_cast<VariableMessageTemplated<float>&>(var));
 			}
+
+			case ValueType::bool8:
+				handle<bool, ValueType::bool8>(static_cast<VariableMessageTemplated<bool>&>(var));
 			break;
 			}
 		}

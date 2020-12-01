@@ -18,6 +18,7 @@ namespace commproto
 			integer32,
 			string,
 			real32,
+			bool8
 		};
 
 		class VariableBase

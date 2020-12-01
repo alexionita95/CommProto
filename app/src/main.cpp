@@ -43,6 +43,9 @@ void printValue(variable::VariableBaseHandle & var)
 	case variable::ValueType::real32:
 		LOG_INFO("Got a real value: %f", std::static_pointer_cast<variable::RealVariable>(var)->get());
 		break;
+	case variable::ValueType::bool8:
+		LOG_INFO("Got a boolean value: %s", std::static_pointer_cast<variable::BoolVariable>(var)->get()?"True":"False");
+		break;
 	default:;
 	}
 }
@@ -76,6 +79,7 @@ int main(int argc, char*[])
 		variable::VariableCallback cb = &printValue;
 		ctx->subscribe(0, cb);
 		ctx->subscribe(1, cb);
+		ctx->subscribe(2, cb);
 
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
@@ -114,6 +118,10 @@ int main(int argc, char*[])
 
 		*var2 = "sup";
 
+		auto var3 = std::make_shared<variable::BoolVariable>(ctx, true);
+		ctx->registerOutVariable(var3);
+
+		*var3 = false;
 
 	}
 	return 0;
