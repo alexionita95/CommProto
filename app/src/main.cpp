@@ -1,12 +1,12 @@
 #include <SocketImpl.h>
 #include <stdio.h>
 #include <thread>
-#include <Common.h>
-#include <ParserDelegatorFactory.h>
-#include <MessageBuilder.h>
-#include "TypeMapper.h"
-#include "../../SocketLib/src/TypeMapperImpl.h"
-#include "Variable.h"
+#include <commproto/common/Common.h>
+#include <commproto/parser/ParserDelegatorFactory.h>
+#include <commproto/parser/MessageBuilder.h>
+#include <commproto/messages/MessageMapper.h>
+#include "../../CommProto/src/TypeMapperImpl.h"
+#include <commproto/variable/Variable.h>
 
 using namespace commproto;
 Message makeMessage(const std::string& msg)
@@ -28,41 +28,20 @@ std::string makeString(const Message& msg)
 }
 
 
-namespace apptest
-{
-	class TestData : public data::TypeBase
-	{
-	public:
-		TestData(uint32_t type_)
-			: TypeBase(type_)
-		{
-		}
-		BP_TYPE_DEFAULTS(TestData);
-
-	};
-
-
-}
-namespace commproto {
-	namespace data {
-		DEFINE_DATA_TYPE(apptest::TestData);
-	}
-}
-
-void printValue(data::VariableBaseHandle & var)
+void printValue(variable::VariableBaseHandle & var)
 {
 	switch (var->getType())
 	{
-	case data::ValueType::integer32:
+	case variable::ValueType::integer32:
 
-		printf("Got an integer value: %d\n", std::static_pointer_cast<data::IntegerVariable>(var)->get());
+		printf("Got an integer value: %d\n", std::static_pointer_cast<variable::IntegerVariable>(var)->get());
 
 		break;
-	case data::ValueType::string:
-		printf("Got a string value: %s\n", std::static_pointer_cast<data::StringVariable>(var)->get().c_str());
+	case variable::ValueType::string:
+		printf("Got a string value: %s\n", std::static_pointer_cast<variable::StringVariable>(var)->get().c_str());
 		break;
-	case data::ValueType::real32:
-		printf("Got a real value: %f\n", std::static_pointer_cast<data::RealVariable>(var)->get());
+	case variable::ValueType::real32:
+		printf("Got a real value: %f\n", std::static_pointer_cast<variable::RealVariable>(var)->get());
 		break;
 	default:;
 	}
@@ -76,7 +55,7 @@ int main(int argc, char*[])
 	bool server = argc == 2;
 	if (server) {
 
-		socketlib::SocketHandle server = std::make_shared<socketlib::SocketImpl>();
+		sockets::SocketHandle server = std::make_shared<sockets::SocketImpl>();
 		printf("Attempting to bind a socket to port %d...\n", port);
 		bool init = server->initServer(port);
 		if (!init) {
@@ -85,21 +64,21 @@ int main(int argc, char*[])
 		}
 		printf("Succesfully bound to port %d. Awaiting next connection...\n", port);
 
-		socketlib::SocketHandle client = server->acceptNext();
+		sockets::SocketHandle client = server->acceptNext();
 
 		if (!client) {
 			printf("An error occurred while waiting for a connection.\n");
 			return 0;
 		}
 
-		data::ContextHandle ctx = std::make_shared<data::ContextImpl>(client);
+		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client);
 
-		data::VariableCallback cb = &printValue;
+		variable::VariableCallback cb = &printValue;
 		ctx->subscribe(0, cb);
 		ctx->subscribe(1, cb);
 
-		data::ParserDelegatorHandle delegator = data::ParserDelegatorFactory::build(ctx);
-		data::MessageBuilderHandle builder = std::make_shared<data::MessageBuilder>(client, delegator);
+		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
+		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
 		while (true)
 		{
 			builder->pollAndRead();
@@ -107,7 +86,7 @@ int main(int argc, char*[])
 
 	}
 	else {
-		socketlib::SocketHandle client = std::make_shared<socketlib::SocketImpl>();
+		sockets::SocketHandle client = std::make_shared<sockets::SocketImpl>();
 		printf("Attempting to connect a client socket to %s:%d...\n", addr.c_str(), port);
 		bool init = client->initClient(addr, port);
 		if (!init) {
@@ -121,18 +100,18 @@ int main(int argc, char*[])
 		msg.emplace_back(sizeOfPtr);
 		client->sendBytes(msg);
 
-		data::TypeMapperObserverHandle observer = std::make_shared<data::TypeMapperObserver>(client);
-		data::TypeMapperHandle mapper = std::make_shared<data::TypeMapperImpl>(observer);
+		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
+		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
 
 		//mapper->registerType<apptest::TestData>();
 
-		data::ContextHandle ctx = std::make_shared<data::ContextImpl>(client, mapper->registerType<data::VariableMessage>());
+		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>());
 
-		auto var = std::make_shared<data::IntegerVariable>(ctx, 42);
+		auto var = std::make_shared<variable::IntegerVariable>(ctx, 42);
 		var->setIndex(ctx->registerOutVariable(var));
 		*var = 3;
 
-		auto var2 = std::make_shared<data::StringVariable>(ctx, "yooo");
+		auto var2 = std::make_shared<variable::StringVariable>(ctx, "yooo");
 		var2->setIndex(ctx->registerOutVariable(var2));
 
 		*var2 = "sup";
