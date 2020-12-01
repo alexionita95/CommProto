@@ -7,6 +7,7 @@
 #include <commproto/messages/MessageMapper.h>
 #include "../../CommProto/src/TypeMapperImpl.h"
 #include <commproto/variable/Variable.h>
+#include <commproto/variable/ContextImpl.h>
 
 using namespace commproto;
 Message makeMessage(const std::string& msg)

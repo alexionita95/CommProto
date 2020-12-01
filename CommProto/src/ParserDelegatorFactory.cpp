@@ -1,6 +1,8 @@
 #include <commproto/parser/ParserDelegatorFactory.h>
 #include  "MappingType.h"
 #include <commproto/variable/Variable.h>
+#include <commproto/variable/VariableParser.h>
+#include <commproto/variable/VariableHandler.h>
 
 namespace commproto
 {

@@ -19,9 +19,7 @@ namespace commproto
 			idToParser.emplace(id, it->second);
 		}
 
-
-
-		inline void ParserDelegator::parse(Message& msg)
+		void ParserDelegator::parse(Message& msg)
 		{
 			ByteStream stream(msg);
 			uint32_t msgId = 0;
