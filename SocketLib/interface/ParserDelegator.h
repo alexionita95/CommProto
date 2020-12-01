@@ -52,6 +52,7 @@ namespace commproto
 
 			stream.read(msgId);
 
+			printf("Attempting to parse a message with id %d...\n", msgId);
 			auto it = idToParser.find(msgId);
 			if(it == idToParser.end())
 			{
@@ -66,6 +67,7 @@ namespace commproto
 		template <class T>
 		void ParserDelegator::registerParser(const ParserHandle& parser)
 		{
+			
 			std::string typeName = TypeName<T>::name();
 			auto it = nameToParser.find(typeName);
 			
@@ -73,7 +75,7 @@ namespace commproto
 			{
 				return;
 			}
-			
+			printf("Registered a parser for %s.\n", typeName.c_str());
 			nameToParser.emplace(typeName, parser);
 		}
 

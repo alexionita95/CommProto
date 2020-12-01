@@ -1,6 +1,7 @@
 #ifndef COMMPROTO_PARSER_DELEGATOR_FACTORY_H
 #define COMMPROTO_PARSER_DELEGATOR_FACTORY_H
 #include <ParserDelegator.h>
+#include <Context.h>
 
 namespace commproto
 {
@@ -9,7 +10,7 @@ namespace commproto
 		class ParserDelegatorFactory
 		{
 		public:
-			static ParserDelegatorHandle build();
+			static ParserDelegatorHandle build(const ContextHandle& context);
 		};
     }
 }

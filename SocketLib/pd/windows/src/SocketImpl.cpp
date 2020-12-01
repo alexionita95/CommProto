@@ -36,6 +36,7 @@ namespace commproto {
 			{
 				return 0;
 			}
+			printf(">---> Sent %ld bytes...\n",static_cast<uint32_t>(message.size()));
 			return send(socketHandle, message.data(), message.size(), 0);
 		}
 
@@ -140,9 +141,6 @@ namespace commproto {
 			if (iResult == SOCKET_ERROR) {
 				return false;
 			}
-
-			int flags = 1;
-			setsockopt(socketHandle, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char*>(&flags), sizeof(flags));
 
 			isInitialized = true;
 			freeaddrinfo(result);

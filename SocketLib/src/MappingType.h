@@ -32,7 +32,6 @@ namespace  commproto
 
 		DEFINE_DATA_TYPE(MappingType);
 
-
 		class MappingTypeSerializer
 		{
 		public:
@@ -43,6 +42,7 @@ namespace  commproto
 				stream.writeHeader(data);
 				stream.write(mapping.name);
 				stream.write(mapping.typeId);
+				printf("Serialized a message with id:%d size:%d.\n", data.type, data.getSize());
 				return stream.getStream();
 			}
 		};

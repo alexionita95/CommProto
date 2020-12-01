@@ -1,5 +1,6 @@
 #include <ParserDelegatorFactory.h>
 #include "MappingType.h"
+#include "Variable.h"
 
 
 namespace commproto
@@ -42,7 +43,7 @@ namespace commproto
 		};
 
 
-		ParserDelegatorHandle ParserDelegatorFactory::build()
+		ParserDelegatorHandle ParserDelegatorFactory::build(const ContextHandle& context)
 		{
 
 			ParserDelegatorHandle delegator = std::make_shared<ParserDelegator>();
@@ -52,6 +53,9 @@ namespace commproto
 			delegator->registerParser<MappingType>(mappingParser);
 			delegator->registerMapping(TypeName<MappingType>::name(), 0);
 
+			ParserHandle variableParser = std::make_shared<VariableParser>(std::make_shared<VariableHandler>(context));
+
+			delegator->registerParser<VariableMessage>(variableParser);
 
 			return delegator;
 
