@@ -20,7 +20,6 @@ namespace commproto
 			}
 
 			uint32_t id = counter++;
-			printf("Sending a message about the registered new type: %s(id:%d).\n", type.c_str(), id);
 			types.emplace(type, id);
 			observer->notify(type, id);
 			

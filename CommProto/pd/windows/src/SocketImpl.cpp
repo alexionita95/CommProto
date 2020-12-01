@@ -2,6 +2,7 @@
 #include <sstream>
 #include <windows.h>
 #include <ws2tcpip.h>
+#include <Logging.h>
 
 namespace commproto {
 	namespace sockets {
@@ -36,7 +37,7 @@ namespace commproto {
 			{
 				return 0;
 			}
-			printf(">---> Sent %ld bytes...\n",static_cast<uint32_t>(message.size()));
+			LOG_INFO("Sent %ld bytes...",static_cast<uint32_t>(message.size()));
 			return send(socketHandle, message.data(), message.size(), 0);
 		}
 
@@ -47,6 +48,7 @@ namespace commproto {
 				return 0;
 			}
 			message.reserve(size);
+			LOG_INFO("Read %ld bytes...", static_cast<uint32_t>(message.size()));
 			return recv(socketHandle, message.data(), size, 0);
 		}
 

@@ -8,6 +8,7 @@
 #include "../../CommProto/src/TypeMapperImpl.h"
 #include <commproto/variable/Variable.h>
 #include <commproto/variable/ContextImpl.h>
+#include <Logging.h>
 
 using namespace commproto;
 Message makeMessage(const std::string& msg)
@@ -34,15 +35,13 @@ void printValue(variable::VariableBaseHandle & var)
 	switch (var->getType())
 	{
 	case variable::ValueType::integer32:
-
-		printf("Got an integer value: %d\n", std::static_pointer_cast<variable::IntegerVariable>(var)->get());
-
+		LOG_INFO("Got an integer value: %d", std::static_pointer_cast<variable::IntegerVariable>(var)->get());
 		break;
 	case variable::ValueType::string:
-		printf("Got a string value: %s\n", std::static_pointer_cast<variable::StringVariable>(var)->get().c_str());
+		LOG_INFO("Got a string value: %s", std::static_pointer_cast<variable::StringVariable>(var)->get().c_str());
 		break;
 	case variable::ValueType::real32:
-		printf("Got a real value: %f\n", std::static_pointer_cast<variable::RealVariable>(var)->get());
+		LOG_INFO("Got a real value: %f", std::static_pointer_cast<variable::RealVariable>(var)->get());
 		break;
 	default:;
 	}
@@ -57,18 +56,18 @@ int main(int argc, char*[])
 	if (server) {
 
 		sockets::SocketHandle server = std::make_shared<sockets::SocketImpl>();
-		printf("Attempting to bind a socket to port %d...\n", port);
+		LOG_INFO("Attempting to bind a socket to port %d...", port);
 		bool init = server->initServer(port);
 		if (!init) {
-			printf("An error occurred while attempting to bind to port %d.\n", port);
+			LOG_ERROR("An error occurred while attempting to bind to port %d.", port);
 			return 0;
 		}
-		printf("Succesfully bound to port %d. Awaiting next connection...\n", port);
+		LOG_INFO("Succesfully bound to port %d. Awaiting next connection...", port);
 
 		sockets::SocketHandle client = server->acceptNext();
 
 		if (!client) {
-			printf("An error occurred while waiting for a connection.\n");
+			printf("An error occurred while waiting for a connection.");
 			return 0;
 		}
 
@@ -88,10 +87,10 @@ int main(int argc, char*[])
 	}
 	else {
 		sockets::SocketHandle client = std::make_shared<sockets::SocketImpl>();
-		printf("Attempting to connect a client socket to %s:%d...\n", addr.c_str(), port);
+		LOG_INFO("Attempting to connect a client socket to %s:%d...", addr.c_str(), port);
 		bool init = client->initClient(addr, port);
 		if (!init) {
-			printf("An error occurred while attempting to connect.\n");
+			LOG_ERROR("An error occurred while attempting to connect.");
 			return 0;
 		}
 

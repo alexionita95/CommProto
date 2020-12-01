@@ -35,6 +35,8 @@ if(WIN32)
    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
 endif()
 
+target_link_libraries(${PROJECT_NAME} Logger)
+    
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
 
