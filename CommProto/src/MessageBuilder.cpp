@@ -26,7 +26,7 @@ namespace commproto
 				ptrSize = byte;
 				state = State::ReadingPacketSize;
 				expectedReadSize = sizeof(uint32_t);
-				printf("Read pointer size on client system: %d.\n", ptrSize);
+				printf("[>]Read pointer size on client system: %d.\n", ptrSize);
 			}
 			break;
 			case State::ReadingPacketSize:
@@ -42,13 +42,13 @@ namespace commproto
 					stream.read(expectedReadSize);
 					if (expectedReadSize == 0)
 					{
-						printf("\n[========]Possible error: 0 bytes read expected.\n");
+						printf("\n[!] Possible error: 0 bytes read expected.\n");
 						internal.clear();
 						return;
 					}
 					internal.clear();
 					state = State::ReadingPayload;
-					printf("\n[====]Expecting a message containing %d bytes.\n", expectedReadSize);
+					printf("\n[>]Expecting a message containing %d bytes.\n", expectedReadSize);
 				}
 			}
 			break;
@@ -60,7 +60,7 @@ namespace commproto
 				}
 				if (internal.size() == expectedReadSize)
 				{
-					printf("Finished reading a message containing %ld bytes.\n", internal.size());
+					printf("[>]Finished reading a message containing %ld bytes.\n", internal.size());
 					delegator->parse(internal);
 					internal.clear();
 					expectedReadSize = sizeof(uint32_t);

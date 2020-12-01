@@ -6,8 +6,9 @@ namespace commproto
 {
 	namespace variable
 	{
-		ContextImpl::ContextImpl(const sockets::SocketHandle& socket_, const uint32_t messageId_): socket{socket_}
-		                                                                                           , messageId{messageId_}
+		ContextImpl::ContextImpl(const sockets::SocketHandle& socket_, const uint32_t messageId_)
+			: socket{socket_}
+		    , messageId{messageId_}
 		{
 		}
 
@@ -60,6 +61,7 @@ namespace commproto
 		{
 			uint32_t index = outVariables.size();
 			outVariables.emplace_back(variable);
+			variable->setIndex(index);
 			notifyOut(index);
 			return index;
 		}
@@ -67,9 +69,8 @@ namespace commproto
 		uint32_t ContextImpl::registerInVariable(const VariableBaseHandle& variable)
 		{
 			uint32_t index = inVariables.size();
-			variable->printValue();
 			inVariables.push_back(variable);
-			inVariables[index]->printValue();
+			variable->setIndex(index);
 			notifyIn(index);
 
 			return index;

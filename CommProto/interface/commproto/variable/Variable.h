@@ -17,14 +17,12 @@ namespace commproto
 			template <typename T>
 			Message serialize(messages::MessageBase && data) const
 			{
-				static const char* const types[] = { "integer", "string", "real" };
 				VariableMessageTemplated<T>& value = static_cast<VariableMessageTemplated<T>&>(data);
 				parser::ByteStream stream;
 				stream.writeHeader(data);
 				stream.write(value.valueType);
 				stream.write(value.index);
 				stream.write(value.value);
-				printf("Serialized a message with id:%d type:%s size:%d(valuesize:%d).\n", data.type, types[static_cast<uint8_t>(value.valueType)], data.getSize(), sizeOf(value));
 				return stream.getStream();
 
 			}
@@ -103,8 +101,8 @@ namespace commproto
 		template <typename T, ValueType UnderlyingType>
 		Message Variable<T, UnderlyingType>::serialize()
 		{
-			printf("Sending a message to notift a variable update : [index:%d]\n", index);
-			return serializer.serialize < T >(std::move(VariableMessageTemplated<T>(context->getMessageType(), UnderlyingType, index, value)));
+			return serializer.serialize<T>(
+				std::move(VariableMessageTemplated<T>(context->getMessageType(), UnderlyingType, index, value)));
 		}
 
 		using IntegerVariable = Variable<uint32_t, ValueType::integer32>;
@@ -115,7 +113,7 @@ namespace commproto
 
 		using RealVariable = Variable<float, ValueType::real32>;
 		using RealVariableHandle = std::shared_ptr<RealVariable>;
-		
+
 	}
 }
 

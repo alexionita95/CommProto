@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <memory>
 #include <commproto/common/Common.h>
-#include <functional>
-
 
 namespace commproto
 {

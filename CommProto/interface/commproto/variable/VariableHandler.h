@@ -14,7 +14,7 @@ namespace commproto
 		{
 		public:
 			VariableHandler(const ContextHandle &ctx)
-				:context{ ctx }
+				: context{ ctx }
 			{
 
 			}
@@ -30,8 +30,6 @@ namespace commproto
 		inline void VariableHandler::handle(messages::MessageBase&& data)
 		{
 			auto& var = static_cast<VariableMessage&>(data);
-
-			printf("Handling a variable with type %d...\n", var.valueType);
 			switch (var.valueType)
 			{
 			case ValueType::integer32:
@@ -60,15 +58,12 @@ namespace commproto
 			{
 				//no variable was found, so we make a new one and pass it to the context
 				std::shared_ptr<Variable<T, U>> variable = std::make_shared<Variable<T, U>>(context, msg.value);
-				uint32_t index = context->registerInVariable(variable);
-				variable->setIndex(index);
-				variable->printValue();
+				context->registerInVariable(variable);
 				return;
 			}
 
 			//we found a variable, try to cast it to what we know it is and set its value
 			std::shared_ptr<Variable<T, U>> variable = std::static_pointer_cast<Variable<T, U>>(var);
-			variable->printValue();
 			if (!variable)
 			{
 				return;

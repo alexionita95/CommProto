@@ -104,16 +104,14 @@ int main(int argc, char*[])
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
 
-		//mapper->registerType<apptest::TestData>();
-
 		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>());
 
 		auto var = std::make_shared<variable::IntegerVariable>(ctx, 42);
-		var->setIndex(ctx->registerOutVariable(var));
+		ctx->registerOutVariable(var);
 		*var = 3;
 
 		auto var2 = std::make_shared<variable::StringVariable>(ctx, "yooo");
-		var2->setIndex(ctx->registerOutVariable(var2));
+		ctx->registerOutVariable(var2);
 
 		*var2 = "sup";
 

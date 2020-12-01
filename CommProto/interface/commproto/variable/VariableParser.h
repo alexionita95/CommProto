@@ -30,7 +30,6 @@ namespace commproto
 			msg.read(index);
 			ValueType type = static_cast<ValueType>(valueType);
 
-			printf("Handling a variable with type %d...\n", type);
 			switch (type)
 			{
 			case ValueType::integer32:
