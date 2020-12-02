@@ -1,6 +1,8 @@
 // Including Arduino.h is required for using Serial functions
 #include "Arduino.h"
 
+#include <Logging.h>
+
 #define LED 14
 
 // the setup routine runs once when you press reset:
@@ -18,8 +20,11 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
 	// Blink the inbuilt LED
+  LOG_INFO("This is a message from the logger.");
+
   digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);                       // wait for a second
+  delay(4000);                       // wait for a second
   digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);                       // wait for a second
+  LOG_ERROR("IT'S ALL SHUTTING DOWN, NO MORE LIGHT ON PIN %d",LED);
 }

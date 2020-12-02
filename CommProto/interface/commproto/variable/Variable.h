@@ -6,6 +6,7 @@
 #include <commproto/variable/Context.h>
 #include <commproto/variable/VariableMessage.h>
 #include <commproto/parser/ByteStream.h>
+#include <sstream>
 
 namespace commproto
 {
@@ -29,28 +30,6 @@ namespace commproto
 			}
 		};
 
-		template <typename T>
-		void print(const T & val) {
-		}
-
-		template <>
-		inline void print(const uint32_t & val)
-		{
-			printf("Value = %d\n", val);
-		}
-
-		template <>
-		inline void print(const std::string & val)
-		{
-			printf("Value = %s\n", val.c_str());
-		}
-
-		template <>
-		inline void print(const bool & val)
-		{
-			printf("Value = %s\n",val?"True":"False");
-		}
-
 		template <typename T, ValueType  UnderlyingType>
 		class Variable : public VariableBase
 		{
@@ -60,7 +39,7 @@ namespace commproto
 			//used to set the value by the owner, notifying the context that something has changed
 			Variable& operator=(const T& value_);
 
-			void printValue() override;
+            std::string toString() override;
 
 			Message serialize() override;
 
@@ -100,9 +79,11 @@ namespace commproto
 		}
 
 		template <typename T, ValueType UnderlyingType>
-		void Variable<T, UnderlyingType>::printValue()
+        std::string Variable<T, UnderlyingType>::toString()
 		{
-			print(value);
+            std::stringstream ss;
+            ss << value;
+            return ss.str();
 		}
 
 		template <typename T, ValueType UnderlyingType>
