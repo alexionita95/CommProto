@@ -89,8 +89,9 @@ int main(int argc, char*[])
 					continue;
 				}
 				
+				
 				*var = !var->get();
-
+				LOG_INFO("Toggling LED state to %s", var->get()?"on":"off");
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 			}
 				

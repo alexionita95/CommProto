@@ -32,7 +32,7 @@ namespace commproto
 				break;
 				case State::ReadingPacketSize:
 				{
-					if (internal.size() <= expectedReadSize)
+					if (internal.size() < expectedReadSize)
 					{
 						internal.push_back(byte);
 					}
@@ -54,7 +54,7 @@ namespace commproto
 				break;
 				case State::ReadingPayload:
 				{
-					if (internal.size() <= expectedReadSize)
+					if (internal.size() < expectedReadSize)
 					{
 						internal.push_back(byte);
 					}
