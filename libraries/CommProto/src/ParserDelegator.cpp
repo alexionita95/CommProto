@@ -1,4 +1,5 @@
 #include <commproto/parser/ParserDelegator.h>
+#include <Logging.h>
 
 namespace commproto
 {
@@ -16,6 +17,7 @@ namespace commproto
 			{
 				return;
 			}
+            LOG_DEBUG("Added a new parser mapping, %s - %d",name.c_str(), id);
 			idToParser.emplace(id, it->second);
 		}
 
@@ -25,7 +27,7 @@ namespace commproto
 			uint32_t msgId = 0;
 
 			stream.read(msgId);
-
+            LOG_DEBUG("Parsing a message with id %d",msgId);
 			auto it = idToParser.find(msgId);
 			if (it == idToParser.end())
 			{

@@ -24,7 +24,7 @@ namespace sockets {
         virtual uint32_t pollSocket() = 0;
 
         //block the thread until single byte of data can be read from the socket
-        virtual char readByte() = 0;
+        virtual int readByte() = 0;
 
         //initialize the socket as a client and connect it to [addr]:[port]
         virtual bool initClient(const std::string& addr, const uint32_t port) = 0;

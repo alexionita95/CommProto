@@ -8,6 +8,7 @@
 #endif
 #include <commproto/sockets/Socket.h>
 #include <commproto/common/Common.h>
+#include <Logging.h>
 
 namespace commproto
 {
@@ -40,7 +41,8 @@ public:
         {
           return 0;
         }
-        return client.write(reinterpret_cast<const uint8_t*>(message.data()),message.size()); 
+        int ret = client.write(reinterpret_cast<const uint8_t*>(message.data()),message.size());
+        return ret;
     }
 
     //block the thread until the socket receives [size] bytes
@@ -64,11 +66,11 @@ public:
     }
 
     //block the thread until single byte of data can be read from the socket
-    char readByte() override
+    int readByte() override
     {
        if (!isInitialized || socketMode != Mode::Client)
         {
-          return 0;
+          return -1;
         }
         
         return client.read();
