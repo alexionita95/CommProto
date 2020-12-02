@@ -2,4 +2,4 @@ project(App)
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC CommProtoLib)
+target_link_libraries(${PROJECT_NAME} PUBLIC CommProto)

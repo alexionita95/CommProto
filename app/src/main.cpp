@@ -70,22 +70,28 @@ int main(int argc, char*[])
 		bool toggle = true;
 		while (true) {
 			sockets::SocketHandle client = server->acceptNext();
+			Message msg;
+			uint8_t sizeOfPtr = sizeof(void*);
+			msg.emplace_back(sizeOfPtr);
+			client->sendBytes(msg);
+
+			messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
+			messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
+
+			variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>());
+
+			auto var = std::make_shared<variable::BoolVariable>(ctx, true);
+			ctx->registerOutVariable(var);
 
 			while (true) {
 				if (!client) {
 					printf("An error occurred while waiting for a connection.");
 					continue;
 				}
+				
+				*var = !var->get();
 
-				parser::ByteStream stream;
-				stream.write(toggle);
-				client->sendBytes(stream.getStream());
-				toggle = !toggle;
-				if(client->readByte() == 0)
-				{
-					LOG_WARNING("Resetting connection.");
-					break;
-				}
+				std::this_thread::sleep_for(std::chrono::seconds(5));
 			}
 				
 				/*
@@ -133,15 +139,6 @@ int main(int argc, char*[])
 		ctx->registerOutVariable(var);
 		*var = 3;
 
-		auto var2 = std::make_shared<variable::StringVariable>(ctx, "yooo");
-		ctx->registerOutVariable(var2);
-
-		*var2 = "sup";
-
-		auto var3 = std::make_shared<variable::BoolVariable>(ctx, true);
-		ctx->registerOutVariable(var3);
-
-		*var3 = false;
 
 	}
 	return 0;
