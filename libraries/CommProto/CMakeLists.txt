@@ -1,7 +1,8 @@
-project (CommProtoLib)
+project (CommProto)
 
 if (ARDUINO_BOARD)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/esp")
+    SET(ROOT_INCLUDE CommProto.h)
 elseif(UNIX)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
 elseif(WIN32)
@@ -25,7 +26,7 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 
 
-add_library(${PROJECT_NAME} STATIC ${PROJECT_SRC})
+add_library(${PROJECT_NAME} STATIC ${PROJECT_SRC} ${ROOT_INCLUDE})
 
 foreach(source IN LISTS PROJECT_SRC)
     get_filename_component(source_path "${source}" PATH)
@@ -37,8 +38,12 @@ if(WIN32)
    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
 endif()
 
-target_link_libraries(${PROJECT_NAME} Logging)
-    
+if (ARDUINO_BOARD)
+    target_link_arduino_libraries(${PROJECT_NAME} ESP8266WiFi Logging)
+else()
+    target_link_libraries(${PROJECT_NAME} Logging)
+endif()
+
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
 
