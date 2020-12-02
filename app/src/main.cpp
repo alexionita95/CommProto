@@ -67,25 +67,29 @@ int main(int argc, char*[])
 		}
 		LOG_INFO("Succesfully bound to port %d. Awaiting next connection...", port);
 
-		sockets::SocketHandle client = server->acceptNext();
 
-		if (!client) {
-			printf("An error occurred while waiting for a connection.");
-			return 0;
-		}
+		while (true) {
+			sockets::SocketHandle client = server->acceptNext();
 
-		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client);
+			if (!client) {
+				printf("An error occurred while waiting for a connection.");
+				continue;
+			}
 
-		variable::VariableCallback cb = &printValue;
-		ctx->subscribe(0, cb);
-		ctx->subscribe(1, cb);
-		ctx->subscribe(2, cb);
+			variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client);
 
-		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
-		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
-		while (true)
-		{
-			builder->pollAndRead();
+			variable::VariableCallback cb = &printValue;
+			ctx->subscribe(0, cb);
+			ctx->subscribe(1, cb);
+			ctx->subscribe(2, cb);
+
+			parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
+			parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
+			bool connected = true;
+			do
+			{
+				connected = builder->pollAndRead();
+			} while (connected);
 		}
 
 	}

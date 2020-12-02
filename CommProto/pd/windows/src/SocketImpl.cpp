@@ -153,7 +153,7 @@ namespace commproto {
 		{
 			if (socketMode != Mode::Server || !isInitialized)
 			{
-				return false;
+				return nullptr;
 			}
 			//listen for a connection
 			int iResult = listen(socketHandle, 1);

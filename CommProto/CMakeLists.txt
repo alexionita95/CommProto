@@ -1,6 +1,8 @@
 project (CommProtoLib)
 
-if(UNIX)
+if (ARDUINO_BOARD)
+    SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/esp")
+elseif(UNIX)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
 elseif(WIN32)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/windows")
@@ -40,4 +42,7 @@ target_link_libraries(${PROJECT_NAME} Logger)
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
 
+
+if(NOT ARDUINO_BOARD)
 add_subdirectory(test)
+endif()

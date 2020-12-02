@@ -16,7 +16,7 @@ namespace commproto
 		{
 		}
 
-		void MessageBuilder::pollAndRead()
+		bool MessageBuilder::pollAndRead()
 		{
 			switch (state)
 			{
@@ -43,7 +43,7 @@ namespace commproto
 					{
 						LOG_ERROR("Possible error: 0 bytes read expected.");
 						internal.clear();
-						return;
+						return false;
 					}
 					internal.clear();
 					state = State::ReadingPayload;
@@ -68,7 +68,7 @@ namespace commproto
 			}
 			break;
 			}
-
+			return true;
 		}
 
 	}

@@ -21,7 +21,7 @@ namespace commproto
 		public:
 			MessageBuilder(const sockets::SocketHandle& socket_, const ParserDelegatorHandle& delegator_);
 
-			void pollAndRead();
+			bool pollAndRead();
 			static uint8_t ptrSize;
 		private:
 			sockets::SocketHandle socket;
