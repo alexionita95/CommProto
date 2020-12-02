@@ -3,14 +3,22 @@
 
 #ifdef ESP32
     #include <WiFi.h>
-#elif defined ESP8266
+#elif defined(ESP8266)
     #include <ESP8266WiFi.h>
 #endif
+#include <commproto/sockets/Socket.h>
+#include <commproto/common/Common.h>
 
 namespace commproto
 {
     namespace sockets
     {
+
+    enum class Mode : uint8_t {
+        Unassigned,
+        Server,
+        Client
+    };
 
 class SocketImpl : public Socket {
 private:

@@ -1,7 +1,5 @@
 #include <commproto/variable/ContextImpl.h>
 
-
-
 namespace commproto
 {
 	namespace variable
