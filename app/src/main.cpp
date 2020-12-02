@@ -67,14 +67,29 @@ int main(int argc, char*[])
 		}
 		LOG_INFO("Succesfully bound to port %d. Awaiting next connection...", port);
 
-
+		bool toggle = true;
 		while (true) {
 			sockets::SocketHandle client = server->acceptNext();
 
-			if (!client) {
-				printf("An error occurred while waiting for a connection.");
-				continue;
+			while (true) {
+				if (!client) {
+					printf("An error occurred while waiting for a connection.");
+					continue;
+				}
+
+				parser::ByteStream stream;
+				stream.write(toggle);
+				client->sendBytes(stream.getStream());
+				toggle = !toggle;
+				if(client->readByte() == 0)
+				{
+					LOG_WARNING("Resetting connection.");
+					break;
+				}
 			}
+				
+				/*
+
 
 			variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client);
 
@@ -90,6 +105,7 @@ int main(int argc, char*[])
 			{
 				connected = builder->pollAndRead();
 			} while (connected);
+			*/
 		}
 
 	}
