@@ -1,8 +1,10 @@
-#pragma once
-#include <Socket.h>
+#ifndef COMMPROTO_UNIX_SOCKETIMPL_H
+#define COMMPROTO_UNIX_SOCKETIMPL_H
+
+#include <commproto/sockets/Socket.h>
 
 namespace commproto {
-namespace socketlib {
+namespace sockets {
 
     enum class Mode : uint8_t {
         Unassigned,
@@ -32,3 +34,4 @@ namespace socketlib {
     };
 } // namespace socket
 } // namespace commproto
+#endif

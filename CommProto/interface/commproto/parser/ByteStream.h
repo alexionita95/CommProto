@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <string.h>
 #include <commproto/common/Common.h>
 #include <commproto/messages/MessageBase.h>
 

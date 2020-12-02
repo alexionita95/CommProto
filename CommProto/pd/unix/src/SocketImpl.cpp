@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 namespace commproto {
-namespace socketlib {
+namespace sockets {
     SocketImpl::SocketImpl()
         : socketMode(Mode::Unassigned)
         , socketHandle(-1)
@@ -111,7 +111,7 @@ namespace socketlib {
         if (acceptedHandle < 0) {
             return nullptr;
         }
-        return new SocketImpl(acceptedHandle, Mode::Client, true);
+        return SocketHandle(new SocketImpl(acceptedHandle, Mode::Client, true));
     }
 
     uint32_t SocketImpl::pollSocket()

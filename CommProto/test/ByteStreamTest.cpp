@@ -35,7 +35,7 @@ namespace commproto
 
 			REGISTER_TYPED_TEST_SUITE_P(ByteStreamTest,CanReadAndWrite);
 
-			using WriteableTypes = ::testing::Types<uint8_t, int8_t,uint16_t,int16_t, uint32_t, uint64_t,int64_t,float_t,double_t>;
+            using WriteableTypes = ::testing::Types<uint8_t, int8_t,uint16_t,int16_t, uint32_t, uint64_t,int64_t,float,double,bool>;
 			INSTANTIATE_TYPED_TEST_SUITE_P(ByteStreamTestSuite, ByteStreamTest, WriteableTypes);
 
 
