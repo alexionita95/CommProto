@@ -31,7 +31,7 @@ namespace sockets {
         bool initServer(const uint32_t port) override;
         SocketHandle acceptNext() override; // blocking
         uint32_t pollSocket() override;
-        char readByte() override;
+        int readByte() override;
 
     private:
         //returns a ready socket from acceptNext()

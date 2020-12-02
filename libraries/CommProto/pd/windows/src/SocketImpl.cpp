@@ -52,11 +52,11 @@ namespace commproto {
 			return recv(socketHandle, message.data(), size, 0);
 		}
 
-		char SocketImpl::readByte()
+		int SocketImpl::readByte()
 		{
 			if (!isWsaStarted || !isInitialized)
 			{
-				return 0;
+				return -1;
 			}
 			char output=0;
 			recv(socketHandle, &output,1,0);

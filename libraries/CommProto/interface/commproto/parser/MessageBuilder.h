@@ -26,6 +26,7 @@ namespace commproto
 		private:
 			sockets::SocketHandle socket;
 			State state;
+			Message buffer;
 			Message internal;
 			uint32_t expectedReadSize;
 			ParserDelegatorHandle delegator;
