@@ -43,13 +43,13 @@ void setLED(variable::VariableBaseHandle & var)
     LOG_DEBUG("toggling led state to %s",led_state?"on":"off");
 
     if(led_state) {
-        for(int i=0;i<NUM_LEDS;++i){
-            leds[i] = CRGB::Blue;
-        }
+        FastLED.setBrightness(50);
+        leds[7]=CRGB::Blue;
+        FastLED.show();
     } else{
-        for(int i=0;i<NUM_LEDS;++i){
-            leds[i] = CRGB::Black;
-        }
+        FastLED.setBrightness(50);
+        leds[7]=CRGB::Black;
+        FastLED.show();
     }
     FastLED.show();
 }
@@ -60,6 +60,11 @@ void setup() {
      Serial.begin(115200);
      FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
 
+     for(int i=0;i<NUM_LEDS;++i){
+         leds[i]=CRGB::Black;
+     }
+     FastLED.show();
+
      // We start by connecting to a WiFi network
      WiFi.mode(WIFI_STA);
      WiFiMulti.addAP(ssid, password);
@@ -67,6 +72,8 @@ void setup() {
      Serial.println();
      Serial.println();
      Serial.print("Wait for WiFi... ");
+
+
 
      while (WiFiMulti.run() != WL_CONNECTED) {
        Serial.print(".");
@@ -85,9 +92,8 @@ void setup() {
      }
      else
      {
-         for(int i=0;i<NUM_LEDS;++i){
-             leds[i] = CRGB::Blue;
-         }
+         FastLED.setBrightness(50);
+         leds[0]=CRGB::Blue;
          FastLED.show();
          LOG_DEBUG("Making context...");
          ctx = std::make_shared<variable::ContextImpl>(client);
@@ -100,6 +106,9 @@ void setup() {
          parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
          LOG_DEBUG("Making builder...");
          builder = std::make_shared<parser::MessageBuilder>(client, delegator);
+         FastLED.setBrightness(50);
+         leds[1]=CRGB::Blue;
+         FastLED.show();
      }
 }
 

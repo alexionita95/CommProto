@@ -87,6 +87,7 @@ namespace commproto
 
 		void ContextImpl::moveCallbacksFromCache(const std::string& name, const uint32_t id)
 		{
+            LOG_DEBUG("Tryign to get cached callbacks for %s -> %d",name.c_str(),id);
 			auto it = nameCallbackCache.find(name);
 
 			if (it != nameCallbackCache.end())
@@ -94,6 +95,7 @@ namespace commproto
 				auto it2 = callbacks.find(id);
 				if (it2 != callbacks.end())
 				{
+                    LOG_DEBUG("All good for mapping %s -> %d",name.c_str(),id);
 					it2->second.insert(it2->second.end(), it->second.begin(), it->second.end());
 				}
 				else
@@ -160,10 +162,12 @@ namespace commproto
 
 		bool ContextImpl::registerMapping(const std::string& name, const uint32_t id)
 		{
-			if (inVariableMapping.find(name) == inVariableMapping.end()) {
+            LOG_DEBUG("Trying to register mapping for  %s -> %d",name.c_str(),id);
+            if (inVariableMapping.find(name) != inVariableMapping.end()) {
 				return false;
 			}
 			inVariableMapping.emplace(name, id);
+            moveCallbacksFromCache(name,id);
 			return true;
 		}
 
