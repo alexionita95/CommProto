@@ -123,13 +123,13 @@
 # set(ARDUINO_BOARD "Phoenix 1.0 [esp8266.phoenix_v1]") # Phoenix 1.0
 # set(ARDUINO_BOARD "Phoenix 2.0 [esp8266.phoenix_v2]") # Phoenix 2.0
 # set(ARDUINO_BOARD "NodeMCU 0.9 (ESP-12 Module) [esp8266.nodemcu]") # NodeMCU 0.9 (ESP-12 Module)
-set(ARDUINO_BOARD "NodeMCU 1.0 (ESP-12E Module) [esp8266.nodemcuv2]") # NodeMCU 1.0 (ESP-12E Module)
+# set(ARDUINO_BOARD "NodeMCU 1.0 (ESP-12E Module) [esp8266.nodemcuv2]") # NodeMCU 1.0 (ESP-12E Module)
 # set(ARDUINO_BOARD "Olimex MOD-WIFI-ESP8266(-DEV) [esp8266.modwifi]") # Olimex MOD-WIFI-ESP8266(-DEV)
 # set(ARDUINO_BOARD "SparkFun ESP8266 Thing [esp8266.thing]") # SparkFun ESP8266 Thing
 # set(ARDUINO_BOARD "SparkFun ESP8266 Thing Dev [esp8266.thingdev]") # SparkFun ESP8266 Thing Dev
 # set(ARDUINO_BOARD "SparkFun Blynk Board [esp8266.blynk]") # SparkFun Blynk Board
 # set(ARDUINO_BOARD "SweetPea ESP-210 [esp8266.esp210]") # SweetPea ESP-210
-# set(ARDUINO_BOARD "LOLIN(WEMOS) D1 R2 & mini [esp8266.d1_mini]") # LOLIN(WEMOS) D1 R2 & mini
+set(ARDUINO_BOARD "LOLIN(WEMOS) D1 R2 & mini [esp8266.d1_mini]") # LOLIN(WEMOS) D1 R2 & mini
 # set(ARDUINO_BOARD "LOLIN(WEMOS) D1 mini Pro [esp8266.d1_mini_pro]") # LOLIN(WEMOS) D1 mini Pro
 # set(ARDUINO_BOARD "LOLIN(WEMOS) D1 mini Lite [esp8266.d1_mini_lite]") # LOLIN(WEMOS) D1 mini Lite
 # set(ARDUINO_BOARD "WeMos D1 R1 [esp8266.d1]") # WeMos D1 R1

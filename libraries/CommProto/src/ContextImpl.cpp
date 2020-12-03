@@ -54,16 +54,17 @@ namespace commproto
 			if (it == inVariableMapping.end())
 			{
 				auto it2 = nameCallbackCache.find(name);
+
 				if (it2 == nameCallbackCache.end())
 				{
 					auto cbs = std::vector<VariableCallback>();
 					cbs.emplace_back(callback);
 					nameCallbackCache.emplace(name, cbs);
+                    return false;
 				}
 				it2->second.emplace_back(callback);
 				return false;
 			}
-
 			subscribe(it->second, callback);
 			return true;
 		}

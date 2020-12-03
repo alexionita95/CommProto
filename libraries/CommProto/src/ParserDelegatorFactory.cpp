@@ -61,7 +61,7 @@ namespace commproto
 			ParserHandle variableMappingParser = std::make_shared<variable::VariableMappingParser>(std::make_shared<variable::VariableMappingHandler>(context));
 
 			delegator->registerParser<variable::VariableMessage>(variableParser);
-
+            delegator->registerParser<variable::VariableMappingMessage>(variableMappingParser);
 			return delegator;
 
 		}

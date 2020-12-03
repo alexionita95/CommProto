@@ -3,6 +3,9 @@
 #include <ESP8266WiFiMulti.h>
 #include <Logging.h>
 #include <CommProto.h>
+#define ESP8266
+
+#include <FastLED.h>
 
 #ifndef STASSID
 #define STASSID "esti nebun?"
@@ -17,11 +20,15 @@ const char* password = STAPSK;
 const char* host = "192.168.1.2";
 const uint16_t port = 4242;
 ESP8266WiFiMulti WiFiMulti;
-Message okMsg;
+
 commproto::sockets::SocketHandle client = std::make_shared<sockets::SocketImpl>();
 variable::ContextHandle ctx;
 parser::MessageBuilderHandle builder;
-#define LED 14
+
+#define DATA_PIN 14
+#define NUM_LEDS 8
+
+CRGB leds[NUM_LEDS];
 
 void setLED(variable::VariableBaseHandle & var)
 {
@@ -36,45 +43,22 @@ void setLED(variable::VariableBaseHandle & var)
     LOG_DEBUG("toggling led state to %s",led_state?"on":"off");
 
     if(led_state) {
-        digitalWrite(LED, HIGH);
+        for(int i=0;i<NUM_LEDS;++i){
+            leds[i] = CRGB::Blue;
+        }
     } else{
-        digitalWrite(LED, LOW);
+        for(int i=0;i<NUM_LEDS;++i){
+            leds[i] = CRGB::Black;
+        }
     }
+    FastLED.show();
 }
 
 
 // the setup routine runs once when you press reset:
 void setup() {
      Serial.begin(115200);
-
-
-     Serial.println("Little bytestream test...");
-
-     std::string testIn = "Test";
-     parser::ByteStream stream1;
-     stream1.write(testIn);
-     stream1.write(100u);
-     stream1.write(true);
-
-     parser::ByteStream stream2(stream1.getStream());
-
-    std::string strTest;
-    uint32_t intTest = 0;
-    bool boolTest= false;
-
-    stream2.read(strTest);
-    stream2.read(intTest);
-    stream2.read(boolTest);
-
-    Serial.println("Did it work?");
-
-    Serial.print("String: ");
-    Serial.print(strTest.c_str());
-    Serial.print(" Int: ");
-    Serial.print(intTest);
-    Serial.print(" Bool: ");
-    Serial.print(boolTest);
-    Serial.println();
+     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
 
      // We start by connecting to a WiFi network
      WiFi.mode(WIFI_STA);
@@ -92,21 +76,31 @@ void setup() {
      Serial.println("");
      Serial.println("WiFi connected");
 
+
      delay(500);
      LOG_INFO("Attempting to connect a client socket to %s:%d...",host,port);
      bool init = client->initClient(host, port);
      if (!init) {
          LOG_ERROR("An error occurred while attempting to connect.");
      }
-     okMsg.push_back(1);
-     pinMode(LED,OUTPUT);
-     ctx = std::make_shared<variable::ContextImpl>(client);
+     else
+     {
+         for(int i=0;i<NUM_LEDS;++i){
+             leds[i] = CRGB::Blue;
+         }
+         FastLED.show();
+         LOG_DEBUG("Making context...");
+         ctx = std::make_shared<variable::ContextImpl>(client);
 
-     variable::VariableCallback cb = &setLED;
-     ctx->subscribe(0, cb);
+         LOG_DEBUG("Making callback and subscribing...");
+         variable::VariableCallback cb = &setLED;
+         ctx->subscribe("LED", cb);
 
-     parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
-     builder = std::make_shared<parser::MessageBuilder>(client, delegator);
+         LOG_DEBUG("Making parser delegator...");
+         parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
+         LOG_DEBUG("Making builder...");
+         builder = std::make_shared<parser::MessageBuilder>(client, delegator);
+     }
 }
 
 
@@ -120,7 +114,6 @@ void loop() {
     counter+=sleepDelay;
     builder->pollAndRead();
     delay(sleepDelay);
-    client->sendBytes(okMsg);
     if(counter == printDelay){
         counter = 0;
         LOG_DEBUG("Heap size: %d",ESP.getFreeHeap());
