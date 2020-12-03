@@ -31,7 +31,7 @@ namespace commproto
 			return mappingMessageId;
 		}
 
-		void ContextImpl::subscribe(const uint32_t variableId, VariableCallback& callback)
+		bool ContextImpl::subscribe(const uint32_t variableId, VariableCallback& callback)
 		{
 			auto it = callbacks.find(variableId);
 
@@ -40,21 +40,31 @@ namespace commproto
 				auto cbs = std::vector<VariableCallback>();
 				cbs.emplace_back(callback);
 				callbacks.emplace(variableId, cbs);
-				return;
+				return false;
 			}
 
 			it->second.emplace_back(callback);
+			return true;
 		}
 
-		void ContextImpl::subscribe(const std::string& name, VariableCallback& callback)
+		bool ContextImpl::subscribe(const std::string& name, VariableCallback& callback)
 		{
 			const auto it = inVariableMapping.find(name);
 			if (it == inVariableMapping.end())
 			{
-				return;
+				auto it2 = nameCallbackCache.find(name);
+				if (it2 == nameCallbackCache.end())
+				{
+					auto cbs = std::vector<VariableCallback>();
+					cbs.emplace_back(callback);
+					nameCallbackCache.emplace(name, cbs);
+				}
+				it2->second.emplace_back(callback);
+				return false;
 			}
 
 			subscribe(it->second, callback);
+			return true;
 		}
 
 		void ContextImpl::notifyIn(const uint32_t variableId)
@@ -69,6 +79,25 @@ namespace commproto
 			for (auto cb : it->second)
 			{
 				cb(inVariables[it->first]);
+			}
+		}
+
+		void ContextImpl::moveCallbacksFromCache(const std::string& name, const uint32_t id)
+		{
+			auto it = nameCallbackCache.find(name);
+
+			if (it != nameCallbackCache.end())
+			{
+				auto it2 = callbacks.find(id);
+				if (it2 != callbacks.end())
+				{
+					it2->second.insert(it2->second.end(), it->second.begin(), it->second.end());
+				}
+				else
+				{
+					callbacks.emplace(id, it->second);
+				}
+				nameCallbackCache.erase(it);
 			}
 		}
 
@@ -88,31 +117,36 @@ namespace commproto
 			notifyIn(index);
 		}
 
-		uint32_t ContextImpl::registerOutVariable(const VariableBaseHandle & variable, const std::string & name)
+		int32_t ContextImpl::registerOutVariable(const VariableBaseHandle& variable, const std::string& name)
 		{
-			std::string nameStr(name);
 
-			if (OutVariableMapping.find(nameStr) != OutVariableMapping.end())
+			uint32_t id = outVariables.size();
+			if (!name.empty())
 			{
-				return 0;
-			}
+				if (outVariableMapping.find(name) != outVariableMapping.end()) {
+					return -1;
+				}
+				outVariableMapping.emplace(name, id);
 
-			uint32_t id = registerOutVariable(variable);
-			OutVariableMapping.emplace(nameStr, id);
+			}
+			internalRegisterOut(variable);
 			return id;
 		}
 
-		uint32_t ContextImpl::registerInVariable(const VariableBaseHandle & variable, const std::string & name)
+		int32_t ContextImpl::registerInVariable(const VariableBaseHandle& variable, const std::string& name)
 		{
-			std::string nameStr(name);
-
-			if (inVariableMapping.find(nameStr) != inVariableMapping.end())
+			uint32_t id = inVariables.size();
+			if (!name.empty())
 			{
-				return 0;
-			}
+				if (inVariableMapping.find(name) != inVariableMapping.end()) {
+					return -1;
+				}
+				inVariableMapping.emplace(name, id);
 
-			uint32_t id = registerInVariable(variable);
-			inVariableMapping.emplace(nameStr, id);
+			}
+			internalRegisterIn(variable);
+			moveCallbacksFromCache(name, id);
+
 			return id;
 		}
 
@@ -134,6 +168,15 @@ namespace commproto
 				return VariableBaseHandle();
 			}
 			return inVariables[it->second];
+		}
+
+		int32_t ContextImpl::getVariableId(const std::string& name)
+		{
+			auto it = inVariableMapping.find(name);
+			if (it == inVariableMapping.end()) {
+				return -1;
+			}
+			return it->second;
 		}
 	}
 }
