@@ -1,5 +1,6 @@
 #include <commproto/variable/ContextImpl.h>
 #include <commproto/variable/VariableMappingMessage.h>
+#include "Logging.h"
 
 namespace commproto
 {
@@ -14,7 +15,7 @@ namespace commproto
 
 		void ContextImpl::notifyOut(const uint32_t variableId)
 		{
-
+			LOG_DEBUG("notifying variable %d", variableId);
 			if (variableId >= outVariables.size())
 			{
 				return;
@@ -103,7 +104,7 @@ namespace commproto
 			}
 		}
 
-		void ContextImpl::internalRegisterIn(const VariableBaseHandle& variable)
+		void ContextImpl::internalRegisterOut(const VariableBaseHandle& variable)
 		{
 			uint32_t index = outVariables.size();
 			outVariables.emplace_back(variable);
@@ -111,7 +112,7 @@ namespace commproto
 			notifyOut(index);
 		}
 
-		void ContextImpl::internalRegisterOut(const VariableBaseHandle& variable)
+		void ContextImpl::internalRegisterIn(const VariableBaseHandle& variable)
 		{
 			uint32_t index = inVariables.size();
 			inVariables.push_back(variable);
@@ -123,11 +124,15 @@ namespace commproto
 		{
 
 			uint32_t id = outVariables.size();
+			LOG_DEBUG("registering out variable...");
 			if (!name.empty())
 			{
+				
 				if (outVariableMapping.find(name) != outVariableMapping.end()) {
+					LOG_WARNING("already found a mapping to the name %s",name.c_str());
 					return -1;
 				}
+				LOG_DEBUG(	"registered a mapping %s -> %d", name.c_str(),id);
 				outVariableMapping.emplace(name, id);
 				socket->sendBytes(VariableMappingSerializer::serialize(std::move(VariableMappingMessage(mappingMessageId,name,id))));
 
