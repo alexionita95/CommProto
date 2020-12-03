@@ -90,7 +90,7 @@ namespace commproto
 		Message Variable<T, UnderlyingType>::serialize()
 		{
 			return serializer.serialize<T>(
-				std::move(VariableMessageTemplated<T>(context->getMessageType(), UnderlyingType, index, value)));
+				std::move(VariableMessageTemplated<T>(context->getVarTypeId(), UnderlyingType, index, value)));
 		}
 
 		using IntegerVariable = Variable<uint32_t, ValueType::integer32>;
