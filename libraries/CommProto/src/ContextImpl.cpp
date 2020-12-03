@@ -1,4 +1,5 @@
 #include <commproto/variable/ContextImpl.h>
+#include <commproto/variable/VariableMappingMessage.h>
 
 namespace commproto
 {
@@ -127,6 +128,7 @@ namespace commproto
 					return -1;
 				}
 				outVariableMapping.emplace(name, id);
+				socket->sendBytes(VariableMappingSerializer::serialize(std::move(VariableMappingMessage(mappingMessageId,name,id))));
 
 			}
 			internalRegisterOut(variable);
@@ -148,6 +150,15 @@ namespace commproto
 			moveCallbacksFromCache(name, id);
 
 			return id;
+		}
+
+		bool ContextImpl::registerMapping(const std::string& name, const uint32_t id)
+		{
+			if (inVariableMapping.find(name) == inVariableMapping.end()) {
+				return false;
+			}
+			inVariableMapping.emplace(name, id);
+			return true;
 		}
 
 		VariableBaseHandle ContextImpl::get(uint32_t variableId)

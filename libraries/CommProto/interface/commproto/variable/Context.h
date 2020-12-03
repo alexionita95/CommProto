@@ -39,6 +39,13 @@ namespace commproto
 			* \return Variable's assigned id. Note: If a name is provided and a local variable is also registered with this name, the method will return -1 and this variable will not be registered.
 			*/
 			virtual int32_t registerInVariable(const VariableBaseHandle& variable, const std::string& name = {}) = 0;
+
+
+			/**
+			 * \brief Register a mapping for an incoming variable
+			 * \return True if the variable could be registered, false if a variable with that name already exists.
+			 */
+			virtual bool registerMapping(const std::string & name, const uint32_t id) = 0;
 			/**
 			 * \brief Notify the external context that a local variable has changed
 			 */

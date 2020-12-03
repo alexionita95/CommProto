@@ -3,6 +3,8 @@
 #include <commproto/variable/Variable.h>
 #include <commproto/variable/VariableParser.h>
 #include <commproto/variable/VariableHandler.h>
+#include <commproto/variable/VariableMappingParser.h>
+#include <commproto/variable/VariableMappingHandler.h>
 
 namespace commproto
 {
@@ -55,6 +57,8 @@ namespace commproto
 			delegator->registerMapping(messages::MessageName<messages::MappingType>::name(), 0);
 
 			ParserHandle variableParser = std::make_shared<variable::VariableParser>(std::make_shared<variable::VariableHandler>(context));
+
+			ParserHandle variableMappingParser = std::make_shared<variable::VariableMappingParser>(std::make_shared<variable::VariableMappingHandler>(context));
 
 			delegator->registerParser<variable::VariableMessage>(variableParser);
 

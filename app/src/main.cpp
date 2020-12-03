@@ -9,6 +9,7 @@
 #include <commproto/variable/Variable.h>
 #include <commproto/variable/ContextImpl.h>
 #include <Logging.h>
+#include <commproto/variable/VariableMappingMessage.h>
 
 using namespace commproto;
 Message makeMessage(const std::string& msg)
@@ -44,7 +45,7 @@ void printValue(variable::VariableBaseHandle & var)
 		LOG_INFO("Got a real value: %f", std::static_pointer_cast<variable::RealVariable>(var)->get());
 		break;
 	case variable::ValueType::bool8:
-		LOG_INFO("Got a boolean value: %s", std::static_pointer_cast<variable::BoolVariable>(var)->get()?"True":"False");
+		LOG_INFO("Got a boolean value: %s", std::static_pointer_cast<variable::BoolVariable>(var)->get() ? "True" : "False");
 		break;
 	default:;
 	}
@@ -52,80 +53,20 @@ void printValue(variable::VariableBaseHandle & var)
 
 int main(int argc, char*[])
 {
-	std::string stopMsg = "Die!";
-	int port = 4242;
-	std::string addr = "127.0.0.1";
-	bool server = argc == 2;
-	if (server) {
 
-		sockets::SocketHandle server = std::make_shared<sockets::SocketImpl>();
-		LOG_INFO("Attempting to bind a socket to port %d...", port);
-		bool init = server->initServer(port);
-		if (!init) {
-			LOG_ERROR("An error occurred while attempting to bind to port %d.", port);
-			return 0;
-		}
-		LOG_INFO("Succesfully bound to port %d. Awaiting next connection...", port);
-
-		bool toggle = true;
-		while (true) {
-			sockets::SocketHandle client = server->acceptNext();
-			Message msg;
-			uint8_t sizeOfPtr = sizeof(void*);
-			msg.emplace_back(sizeOfPtr);
-			client->sendBytes(msg);
-
-			messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
-			messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
-
-			variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>());
-
-			auto var = std::make_shared<variable::BoolVariable>(ctx, true);
-			ctx->registerOutVariable(var);
-
-			while (true) {
-				if (!client) {
-					printf("An error occurred while waiting for a connection.");
-					continue;
-				}
-				
-				
-				*var = !var->get();
-				LOG_INFO("Toggling LED state to %s", var->get()?"on":"off");
-				std::this_thread::sleep_for(std::chrono::seconds(5));
-			}
-				
-				/*
-
-
-			variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client);
-
-			variable::VariableCallback cb = &printValue;
-			ctx->subscribe(0, cb);
-			ctx->subscribe(1, cb);
-			ctx->subscribe(2, cb);
-
-			parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
-			parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
-			bool connected = true;
-			do
-			{
-				connected = builder->pollAndRead();
-			} while (connected);
-			*/
-		}
-
+	uint32_t port = 4242;
+	sockets::SocketHandle server = std::make_shared<sockets::SocketImpl>();
+	LOG_INFO("Attempting to bind a socket to port %d...", port);
+	bool init = server->initServer(port);
+	if (!init) {
+		LOG_ERROR("An error occurred while attempting to bind to port %d.", port);
+		return 0;
 	}
-	else {
-		sockets::SocketHandle client = std::make_shared<sockets::SocketImpl>();
-		LOG_INFO("Attempting to connect a client socket to %s:%d...", addr.c_str(), port);
-		bool init = client->initClient(addr, port);
-		if (!init) {
-			LOG_ERROR("An error occurred while attempting to connect.");
-			return 0;
-		}
+	LOG_INFO("Succesfully bound to port %d. Awaiting next connection...", port);
 
-		//send ptr size
+	bool toggle = true;
+	while (true) {
+		sockets::SocketHandle client = server->acceptNext();
 		Message msg;
 		uint8_t sizeOfPtr = sizeof(void*);
 		msg.emplace_back(sizeOfPtr);
@@ -134,13 +75,23 @@ int main(int argc, char*[])
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
 
-		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>());
+		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());
 
-		auto var = std::make_shared<variable::IntegerVariable>(ctx, 42);
-		ctx->registerOutVariable(var);
-		*var = 3;
+		auto var = std::make_shared<variable::BoolVariable>(ctx, true);
+		ctx->registerOutVariable(var,"LED");
+
+		while (true) {
+			if (!client) {
+				printf("An error occurred while waiting for a connection.");
+				continue;
+			}
 
 
+			*var = !var->get();
+			LOG_INFO("Toggling LED state to %s", var->get() ? "on" : "off");
+			std::this_thread::sleep_for(std::chrono::seconds(5));
+		}
 	}
+
 	return 0;
 }

@@ -21,6 +21,7 @@ namespace commproto
 			void notifyIn(const uint32_t variableId) override;
 			int32_t registerOutVariable(const VariableBaseHandle& variable, const std::string& name = {}) override;
 			int32_t registerInVariable(const VariableBaseHandle& variable, const std::string& name = {}) override;
+			bool registerMapping(const std::string & name, const uint32_t id) override;
 			VariableBaseHandle get(uint32_t variableId) override;
 			VariableBaseHandle get(const std::string & name) override;			
 			int32_t getVariableId(const std::string & name) override;
