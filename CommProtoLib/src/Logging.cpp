@@ -1,4 +1,4 @@
-#include "Logging.h"
+#include <commproto/logger/Logging.h>
 #if defined(ESP32) || defined(ESP8266)
 #include "Arduino.h"
 #endif

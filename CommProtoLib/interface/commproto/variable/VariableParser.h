@@ -3,7 +3,7 @@
 
 #include <commproto/variable/Variable.h>
 #include <commproto/parser/Parser.h>
-#include <Logging.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {

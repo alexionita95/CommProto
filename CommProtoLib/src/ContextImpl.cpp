@@ -1,6 +1,6 @@
 #include <commproto/variable/ContextImpl.h>
 #include <commproto/variable/VariableMappingMessage.h>
-#include "Logging.h"
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <windows.h>
 #include <ws2tcpip.h>
-#include <Logging.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto {
 	namespace sockets {

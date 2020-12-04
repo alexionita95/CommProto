@@ -1,5 +1,5 @@
 #include <commproto/parser/ParserDelegator.h>
-#include <Logging.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {

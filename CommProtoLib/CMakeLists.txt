@@ -36,12 +36,8 @@ endforeach()
 
 if(WIN32)
    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
-endif()
-
-if (ARDUINO_BOARD)
-    target_link_arduino_libraries(${PROJECT_NAME} PRIVATE WiFi Logging)
-else()
-    target_link_libraries(${PROJECT_NAME} Logging)
+elseif (ARDUINO_BOARD)
+    target_link_arduino_libraries(${PROJECT_NAME} PRIVATE WiFi)
 endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})

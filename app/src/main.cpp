@@ -5,10 +5,10 @@
 #include <commproto/parser/ParserDelegatorFactory.h>
 #include <commproto/parser/MessageBuilder.h>
 #include <commproto/messages/MessageMapper.h>
-#include "../../CommProto/src/TypeMapperImpl.h"
+#include "../../CommProtoLib/src/TypeMapperImpl.h"
 #include <commproto/variable/Variable.h>
 #include <commproto/variable/ContextImpl.h>
-#include <Logging.h>
+#include <commproto/logger/Logging.h>
 #include <commproto/variable/VariableMappingMessage.h>
 
 using namespace commproto;
