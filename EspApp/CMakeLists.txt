@@ -3,10 +3,17 @@ project(EspApp CXX)
 list(APPEND ARDUINO_LIBRARIES_SEARCH_PATHS_EXTRA
         "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
-add_executable(${PROJECT_NAME} source.cpp)
+
+set(ESPAPP_SOURCE 
+SDKWrapper.h
+DeviceWrapper.h
+DeviceWrapper.cpp
+source.cpp)
+
+add_executable(${PROJECT_NAME} ${ESPAPP_SOURCE})
 
 # Arduino.h is included in hello_world.cpp, so link with Arduino core
-target_link_arduino_libraries(${PROJECT_NAME} PRIVATE core Logging CommProto ESP8266WiFi FastLED)
+target_link_arduino_libraries(${PROJECT_NAME} PRIVATE core Logging CommProto WiFi FastLED)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/CommProto/interface ${CMAKE_SOURCE_DIR}/libraries/CommProto/pd/esp/interface ${CMAKE_SOURCE_DIR}/libraries/CommProto)
 

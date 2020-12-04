@@ -39,7 +39,7 @@ if(WIN32)
 endif()
 
 if (ARDUINO_BOARD)
-    target_link_arduino_libraries(${PROJECT_NAME} ESP8266WiFi Logging)
+    target_link_arduino_libraries(${PROJECT_NAME} PRIVATE WiFi Logging)
 else()
     target_link_libraries(${PROJECT_NAME} Logging)
 endif()
