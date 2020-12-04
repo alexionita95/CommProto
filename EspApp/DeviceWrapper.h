@@ -4,7 +4,7 @@
 #include <commproto/variable/Context.h>
 #include <commproto/parser/MessageBuilder.h>
 #include <SocketImpl.h>
-#include "SDKWrapper.h"
+#include <SDKWrapper.h>
 
 
 enum class DeviceState
@@ -18,16 +18,18 @@ enum class DeviceState
 using namespace commproto;
 class DeviceWrapper {
 public:
-	DeviceWrapper(SDKWrapper & device,const char * host, uint32_t port);
+	DeviceWrapper(SDKWrapper * device,const char * host, uint32_t port);
 	void setup();
 	DeviceState loop();
+    void setTemp(float temp);
 private:
 	commproto::sockets::SocketHandle client;
 	variable::ContextHandle ctx;
 	parser::MessageBuilderHandle builder;
+    variable::RealVariableHandle temp;
 	std::string host;
 	uint32_t port;
-	SDKWrapper& device;
+	SDKWrapper* device;
 	DeviceState state;
 };
 #endif 

@@ -7,7 +7,7 @@ class SDKWrapper
 {
 public:
 	virtual ~SDKWrapper() = default;
-	virtual void delay(const int msec) = 0;
+	virtual void delayMs(const int msec) = 0;
 	virtual void setLED(commproto::variable::VariableBaseHandle & var) = 0;
 };
 

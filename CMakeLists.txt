@@ -10,9 +10,5 @@ if (NOT ARDUINO_BOARD)
 endif()
 
 add_subdirectory(CommProtoLib)
-
-if (ARDUINO_BOARD)
-    add_subdirectory(EspApp)
-else()
-    add_subdirectory(app)
-endif()
+add_subdirectory(EspApp)
+add_subdirectory(app)

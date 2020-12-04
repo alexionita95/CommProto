@@ -1,9 +1,6 @@
 project (CommProto)
 
-if (ARDUINO_BOARD)
-    SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/esp")
-    SET(ROOT_INCLUDE CommProto.h)
-elseif(UNIX)
+if(UNIX)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
 elseif(WIN32)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/windows")
@@ -34,16 +31,10 @@ foreach(source IN LISTS PROJECT_SRC)
     source_group("${source_path_msvc}" FILES "${source}")
 endforeach()  
 
-if(WIN32)
-   target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
-elseif (ARDUINO_BOARD)
-    target_link_arduino_libraries(${PROJECT_NAME} PRIVATE WiFi)
-endif()
+
+target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
 
-
-if(NOT ARDUINO_BOARD)
 add_subdirectory(test)
-endif()

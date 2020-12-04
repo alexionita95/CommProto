@@ -33,19 +33,12 @@ std::string makeString(const Message& msg)
 
 void printValue(variable::VariableBaseHandle & var)
 {
+
+	LOG_INFO("Trying to print value...");
 	switch (var->getType())
 	{
-	case variable::ValueType::integer32:
-		LOG_INFO("Got an integer value: %d", std::static_pointer_cast<variable::IntegerVariable>(var)->get());
-		break;
-	case variable::ValueType::string:
-		LOG_INFO("Got a string value: %s", std::static_pointer_cast<variable::StringVariable>(var)->get().c_str());
-		break;
 	case variable::ValueType::real32:
-		LOG_INFO("Got a real value: %f", std::static_pointer_cast<variable::RealVariable>(var)->get());
-		break;
-	case variable::ValueType::bool8:
-		LOG_INFO("Got a boolean value: %s", std::static_pointer_cast<variable::BoolVariable>(var)->get() ? "True" : "False");
+		LOG_INFO("Temperature: %f C", std::static_pointer_cast<variable::RealVariable>(var)->get());
 		break;
 	default:;
 	}
@@ -77,6 +70,13 @@ int main(int argc, char*[])
 
 		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());
 
+		variable::VariableCallback cb = &printValue;
+		ctx->subscribe("TempC", cb);
+
+
+		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
+		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
+
 		auto var = std::make_shared<variable::BoolVariable>(ctx, true);
 		ctx->registerOutVariable(var,"LED");
 
@@ -89,6 +89,7 @@ int main(int argc, char*[])
 
 			*var = !var->get();
 			LOG_INFO("Toggling LED state to %s", var->get() ? "on" : "off");
+			builder->pollAndRead();
 			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
 	}

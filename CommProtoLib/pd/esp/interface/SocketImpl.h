@@ -8,7 +8,7 @@
 #endif
 #include <commproto/sockets/Socket.h>
 #include <commproto/common/Common.h>
-#include <Logging.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {
@@ -98,7 +98,11 @@ public:
         }
 
         socketMode = Mode::Server;
+#ifdef ESP8266
         server.begin(static_cast<uint16_t>(port),1);
+#else
+        server.begin(static_cast<uint16_t>(port));
+#endif
         
         return isInitialized;
     }
