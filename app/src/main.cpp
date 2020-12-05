@@ -38,7 +38,7 @@ void printValue(variable::VariableBaseHandle & var)
 	switch (var->getType())
 	{
 	case variable::ValueType::real32:
-		LOG_INFO("Temperature: %f C", std::static_pointer_cast<variable::RealVariable>(var)->get());
+		LOG_INFO("Temperature: %.2f C", std::static_pointer_cast<variable::RealVariable>(var)->get());
 		break;
 	default:;
 	}
