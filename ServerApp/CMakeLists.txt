@@ -2,22 +2,25 @@ project(Serverapp)
 
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-
 set(CMAKE_PREFIX_PATH "C:/Qt/5.10.0/msvc2015_64")
+set (CMAKE_INCLUDE_CURRENT_DIR ON)
+set (CMAKE_AUTOMOC ON)
+set (CMAKE_AUTOUIC ON)
+set (CMAKE_AUTORCC ON)
+
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
-add_executable(${PROJECT_NAME} WIN32 
+add_executable(${PROJECT_NAME} WIN32
     mainwindow.ui
     mainwindow.cpp
+	mainwindow.h
     main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets CommProto)
+
+include_directories(.)
 
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 
