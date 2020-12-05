@@ -5,7 +5,7 @@
 
 void log(const char * format, ...);
 
-#define FORMAT "\n\t\t\t[%s() in %s(line %d)]\n"
+#define FORMAT "\t[%s() in %s(line %d)]\n"
 
 #if defined(ESP8266) || defined(ESP32)
     #define LOG_MACRO(format,...)  log(format,##__VA_ARGS__)
