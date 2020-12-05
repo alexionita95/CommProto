@@ -13,7 +13,11 @@ void log(const char * format, ...)
     va_start(args, format);
     printed = vsprintf(buf,format, args);
     va_end(args);
+#ifdef ESP32
+    Serial.write(reinterpret_cast<uint8_t*>(buf),printed);
+#else
     Serial.write(buf,printed);
+#endif
     Serial.println();
 #else
     va_list args;

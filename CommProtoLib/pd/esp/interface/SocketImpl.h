@@ -43,7 +43,7 @@ public:
         client.stop();
     }
     
-    uint32_t sendBytes(const Message& message) override
+    int32_t sendBytes(const Message& message) override
     {
         if (!isInitialized || socketMode == Mode::Unassigned)
         {
@@ -52,9 +52,20 @@ public:
         int ret = client.write(reinterpret_cast<const uint8_t*>(message.data()),message.size());
         return ret;
     }
+    
+    int32_t sendByte(const char byte) override
+    {
+        if (!isInitialized || socketMode == Mode::Unassigned)
+        {
+          return 0;
+        }
+        int ret = client.write(reinterpret_cast<const uint8_t*>(&byte),1);
+        return ret;
+    }
+        
 
     //block the thread until the socket receives [size] bytes
-    uint32_t receive(Message& message, const uint32_t size) override{
+    int32_t receive(Message& message, const uint32_t size) override{
         if (!isInitialized || socketMode != Mode::Client)
         {
           return 0;
@@ -65,7 +76,7 @@ public:
     }
 
     //poll the socket to see how many bytes are buffered
-    uint32_t pollSocket() override{
+    int32_t pollSocket() override{
         if (!isInitialized || socketMode != Mode::Client)
         {
           return 0;
@@ -74,7 +85,7 @@ public:
     }
 
     //block the thread until single byte of data can be read from the socket
-    int readByte() override
+    int32_t readByte() override
     {
        if (!isInitialized || socketMode != Mode::Client)
         {
