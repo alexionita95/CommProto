@@ -13,6 +13,7 @@ namespace commproto {
 			: socketMode(Mode::Unassigned)
 			, isInitialized(false)
 			, socketHandle(INVALID_SOCKET)
+			, isConnected(false)
 
 		{
 			startWsa();
@@ -24,10 +25,16 @@ namespace commproto {
 			socketHandle = INVALID_SOCKET;
 		}
 
+		void SocketImpl::close()
+		{
+			closesocket(socketHandle);
+		}
+
 		SocketImpl::SocketImpl(SOCKET handle, const Mode mode, const bool initialized)
 			: socketMode(mode)
 			, isInitialized(initialized)
 			, socketHandle(handle)
+			, isConnected(true)
 		{
 		}
 
@@ -36,9 +43,14 @@ namespace commproto {
 			if (!isWsaStarted || !isInitialized)
 			{
 				return 0;
+			}			
+			int sent = send(socketHandle, message.data(), message.size(), 0);
+			LOG_INFO("Sent %ld bytes...", sent);
+			if (sent != message.size())
+			{
+				isConnected = false;
 			}
-			LOG_INFO("Sent %ld bytes...",static_cast<uint32_t>(message.size()));
-			return send(socketHandle, message.data(), message.size(), 0);
+			return sent;
 		}
 
 		uint32_t SocketImpl::receive(Message& message, const uint32_t size)
@@ -49,7 +61,12 @@ namespace commproto {
 			}
 			message.reserve(size);
 			LOG_INFO("Read %ld bytes...", static_cast<uint32_t>(message.size()));
-			return recv(socketHandle, message.data(), size, 0);
+			int received = recv(socketHandle, message.data(), size, 0);
+			if (received != size)
+			{
+				isConnected = false;
+			}
+			return received;
 		}
 
 		int SocketImpl::readByte()
@@ -58,9 +75,18 @@ namespace commproto {
 			{
 				return -1;
 			}
-			char output=0;
-			recv(socketHandle, &output,1,0);
+			char output = 0;
+			int received = recv(socketHandle, &output, 1, 0);
+			if(received == 0)
+			{
+				isConnected = false;
+			}
 			return output;
+		}
+
+		bool SocketImpl::connected()
+		{
+			return isConnected;
 		}
 
 		bool SocketImpl::initClient(const std::string& addr, uint32_t port)
@@ -85,7 +111,7 @@ namespace commproto {
 			if (iResult != 0) {
 				return false;
 			}
-			
+
 			struct addrinfo outgoingAddr = result[0];
 			//initialize socket handle
 			socketHandle = socket(outgoingAddr.ai_family, outgoingAddr.ai_socktype, outgoingAddr.ai_protocol);
@@ -103,6 +129,7 @@ namespace commproto {
 
 			isInitialized = true;
 			freeaddrinfo(result);
+			isConnected = true;
 			return true;
 		}
 
@@ -176,8 +203,8 @@ namespace commproto {
 			if (socketHandle < 0 || !isInitialized) {
 				return 0;
 			}
-			unsigned long count,out;
-			WSAIoctl(socketHandle, FIONREAD,nullptr, 0, &count, sizeof(count),&out,nullptr,nullptr);
+			unsigned long count, out;
+			WSAIoctl(socketHandle, FIONREAD, nullptr, 0, &count, sizeof(count), &out, nullptr, nullptr);
 			return static_cast<uint32_t>(count);
 		}
 

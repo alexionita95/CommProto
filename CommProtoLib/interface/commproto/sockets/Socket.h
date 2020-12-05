@@ -34,6 +34,12 @@ namespace sockets {
 
         //block the thread until a connection is available, then accept it
         virtual SocketHandle acceptNext() = 0;
+
+		//check connection state
+		virtual bool connected() = 0;
+
+		//close the connection
+		virtual void close() = 0;
     };
 
 } // namespace core

@@ -32,6 +32,8 @@ namespace sockets {
         SocketHandle acceptNext() override; // blocking
         uint32_t pollSocket() override;
         int readByte() override;
+		bool connected() override;
+		void close() override;
 
     private:
         //returns a ready socket from acceptNext()
@@ -43,6 +45,8 @@ namespace sockets {
 	    static WsaStartupResult startWsa();
 	    static void stopWsa();
 		static bool isWsaStarted;
+
+		bool isConnected;
     };
 } // namespace socket
 } // namespace commproto

@@ -15,16 +15,6 @@ DeviceWrapper::DeviceWrapper(SDKWrapper* device_, const char* host_, uint32_t po
 {
 }
 
-
-class A
-{
-	
-};
-
-class B: public A
-{
-	
-};
 void DeviceWrapper::setTemp(float temp_)
 {
     if(temp){
@@ -57,12 +47,12 @@ DeviceState DeviceWrapper::loop()
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
         
-		ctx = std::make_shared<variable::ContextImpl>(client,mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());
-        
+		ctx = std::make_shared<variable::ContextImpl>(client,mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());        
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		builder = std::make_shared<parser::MessageBuilder>(client, delegator);
 		variable::VariableCallback cb = std::bind(&SDKWrapper::setLED,device,std::placeholders::_1);
 		ctx->subscribe("LED", cb);
+
         temp = std::make_shared<variable::RealVariable>(ctx,0.0f);
         ctx->registerOutVariable(temp,"TempC");
 		state = DeviceState::Connected;
@@ -77,6 +67,12 @@ DeviceState DeviceWrapper::loop()
 	break;
 
 	default:;
+	}
+
+	if(!client->connected())
+	{
+		state = DeviceState::Searching;
+		client->close();
 	}
 	return state;
 }

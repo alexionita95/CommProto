@@ -91,6 +91,13 @@ int main(int argc, char*[])
 			LOG_INFO("Toggling LED state to %s", var->get() ? "on" : "off");
 			builder->pollAndRead();
 			std::this_thread::sleep_for(std::chrono::seconds(5));
+			if(!client->connected())
+			{
+				LOG_WARNING("***********************************************");
+				LOG_WARNING("Disconnected from a connection, reinitializing.");
+				client->close();
+				break;
+			}
 		}
 	}
 

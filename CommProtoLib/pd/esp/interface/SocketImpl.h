@@ -35,6 +35,14 @@ public:
     {
     }
 
+    bool connected() override{
+        return client.connected();
+    }
+       
+    void close() override{
+        client.stop();
+    }
+    
     uint32_t sendBytes(const Message& message) override
     {
         if (!isInitialized || socketMode == Mode::Unassigned)
