@@ -4,11 +4,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 project(CommProtoProject)
 
+set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/../install")
 
-if (NOT ARDUINO_BOARD)
-    add_subdirectory(gtest)
-endif()
-
+add_subdirectory(gtest)
 add_subdirectory(CommProtoLib)
 add_subdirectory(EspApp)
 add_subdirectory(app)
+add_subdirectory(ServerApp)
