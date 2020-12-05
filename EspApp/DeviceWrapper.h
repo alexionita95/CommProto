@@ -22,11 +22,13 @@ public:
 	void setup();
 	DeviceState loop();
     void setTemp(float temp);
+	void setHumidity(float humidity);
 private:
 	commproto::sockets::SocketHandle client;
 	variable::ContextHandle ctx;
 	parser::MessageBuilderHandle builder;
     variable::RealVariableHandle temp;
+    variable::RealVariableHandle humidity;
 	std::string host;
 	uint32_t port;
 	SDKWrapper* device;

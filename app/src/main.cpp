@@ -31,17 +31,14 @@ std::string makeString(const Message& msg)
 }
 
 
-void printValue(variable::VariableBaseHandle & var)
+void printTemp(variable::VariableBaseHandle & var)
 {
+	LOG_INFO("Temperature: %.2f C", std::static_pointer_cast<variable::RealVariable>(var)->get());
+}
 
-	LOG_INFO("Trying to print value...");
-	switch (var->getType())
-	{
-	case variable::ValueType::real32:
-		LOG_INFO("Temperature: %.2f C", std::static_pointer_cast<variable::RealVariable>(var)->get());
-		break;
-	default:;
-	}
+void printHumidity(variable::VariableBaseHandle & var)
+{
+	LOG_INFO("Humidity: %.2f%%", std::static_pointer_cast<variable::RealVariable>(var)->get());
 }
 
 int main(int argc, char*[])
@@ -70,9 +67,11 @@ int main(int argc, char*[])
 
 		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());
 
-		variable::VariableCallback cb = &printValue;
-		ctx->subscribe("TempC", cb);
+		variable::VariableCallback tempCb = &printTemp;
+		ctx->subscribe("TempC", tempCb);
 
+		variable::VariableCallback humCb = &printHumidity;
+		ctx->subscribe("Humidity", humCb);
 
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);

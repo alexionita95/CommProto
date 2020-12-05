@@ -22,6 +22,14 @@ void DeviceWrapper::setTemp(float temp_)
     }
 }
 
+void DeviceWrapper::setHumidity(float humidity_)
+{
+	if(humidity)
+	{
+		*humidity = humidity_;
+	}
+}
+
 void DeviceWrapper::setup()
 {
 }
@@ -57,6 +65,9 @@ DeviceState DeviceWrapper::loop()
 
         temp = std::make_shared<variable::RealVariable>(ctx,0.0f);
         ctx->registerOutVariable(temp,"TempC");
+
+		humidity = std::make_shared<variable::RealVariable>(ctx, 0.0f);
+		ctx->registerOutVariable(humidity, "Humidity");
 
 		state = DeviceState::Connected;
 		LOG_INFO("Initialized all necessary thingies, beginning communication");
