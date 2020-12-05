@@ -44,6 +44,8 @@ DeviceState DeviceWrapper::loop()
 	case DeviceState::Initializing:
 	{
         
+		client->sendByte(static_cast<char>(sizeof(void*)));
+
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
         
@@ -55,11 +57,12 @@ DeviceState DeviceWrapper::loop()
 
         temp = std::make_shared<variable::RealVariable>(ctx,0.0f);
         ctx->registerOutVariable(temp,"TempC");
+
 		state = DeviceState::Connected;
 		LOG_INFO("Initialized all necessary thingies, beginning communication");
 	}
 	break;
-
+	 
 	case DeviceState::Connected:
 	{
 		builder->pollAndRead();

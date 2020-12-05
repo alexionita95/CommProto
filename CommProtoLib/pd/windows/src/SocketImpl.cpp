@@ -38,14 +38,14 @@ namespace commproto {
 		{
 		}
 
-		uint32_t SocketImpl::sendBytes(const Message& message)
+		int32_t SocketImpl::sendBytes(const Message& message)
 		{
 			if (!isWsaStarted || !isInitialized)
 			{
 				return 0;
 			}			
 			int sent = send(socketHandle, message.data(), message.size(), 0);
-			LOG_INFO("Sent %ld bytes...", sent);
+			LOG_DEBUG("Sent %ld bytes...", sent);
 			if (sent != message.size())
 			{
 				isConnected = false;
@@ -53,15 +53,15 @@ namespace commproto {
 			return sent;
 		}
 
-		uint32_t SocketImpl::receive(Message& message, const uint32_t size)
+		int32_t SocketImpl::receive(Message& message, const uint32_t size)
 		{
 			if (!isWsaStarted || !isInitialized)
 			{
 				return 0;
 			}
-			message.reserve(size);
-			LOG_INFO("Read %ld bytes...", static_cast<uint32_t>(message.size()));
+			message.reserve(size);		
 			int received = recv(socketHandle, message.data(), size, 0);
+			LOG_DEBUG("Read %ld bytes...", received);
 			if (received != size)
 			{
 				isConnected = false;
@@ -82,6 +82,22 @@ namespace commproto {
 				isConnected = false;
 			}
 			return output;
+		}
+
+		int SocketImpl::sendByte(const char byte) 
+		{
+			if (!isWsaStarted || !isInitialized)
+			{
+				return 0;
+			}
+			int sent = send(socketHandle, &byte, 1, 0);
+			LOG_DEBUG("Sent %ld bytes...", sent);
+			if (sent != 1)
+			{
+				isConnected = false;
+			}
+			return sent;
+
 		}
 
 		bool SocketImpl::connected()
@@ -198,7 +214,7 @@ namespace commproto {
 			return SocketHandle(new SocketImpl(newConnection, Mode::Client, true));
 		}
 
-		uint32_t SocketImpl::pollSocket()
+		int32_t SocketImpl::pollSocket()
 		{
 			if (socketHandle < 0 || !isInitialized) {
 				return 0;

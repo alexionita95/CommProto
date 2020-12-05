@@ -14,17 +14,21 @@ namespace sockets {
     using SocketHandle = std::shared_ptr<Socket>;
     class Socket {
     public:
-        //sendBytes a byte array, blocking
-        virtual uint32_t sendBytes(const Message& message) = 0;
+	    virtual ~Socket() = default;
+	    //sendBytes a byte array, blocking
+        virtual int32_t sendBytes(const Message& message) = 0;
 
         //block the thread until the socket receives [size] bytes
-        virtual uint32_t receive(Message& message, const uint32_t size) = 0;
+        virtual int32_t receive(Message& message, const uint32_t size) = 0;
 
         //poll the socket to see how many bytes are buffered
-        virtual uint32_t pollSocket() = 0;
+        virtual int32_t pollSocket() = 0;
 
         //block the thread until single byte of data can be read from the socket
         virtual int readByte() = 0;
+
+		//block the thread until single byte of data can be sent to the socket
+		virtual int sendByte(const char byte) = 0;
 
         //initialize the socket as a client and connect it to [addr]:[port]
         virtual bool initClient(const std::string& addr, const uint32_t port) = 0;

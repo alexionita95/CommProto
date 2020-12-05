@@ -20,7 +20,7 @@ public:
 			break;
 		default:;
 		}
-		LOG_DEBUG("toggling led state to %s", led_state ? "on" : "off");
+		LOG_INFO("toggling led state to %s", led_state ? "on" : "off");
 	}
 };
 

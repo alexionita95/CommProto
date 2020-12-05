@@ -25,13 +25,14 @@ namespace sockets {
         SocketImpl();
 		~SocketImpl();
 
-        uint32_t sendBytes(const Message& message) override;
-        uint32_t receive(Message& message, uint32_t size) override;
+	    int32_t sendBytes(const Message& message) override;
+	    int32_t receive(Message& message, uint32_t size) override;
         bool initClient(const std::string& addr, const uint32_t port) override;
         bool initServer(const uint32_t port) override;
         SocketHandle acceptNext() override; // blocking
-        uint32_t pollSocket() override;
+	    int32_t pollSocket() override;
         int readByte() override;
+        int sendByte(const char byte) override;
 		bool connected() override;
 		void close() override;
 

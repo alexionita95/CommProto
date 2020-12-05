@@ -18,7 +18,7 @@ namespace commproto
 
 		bool MessageBuilder::pollAndRead()
 		{
-            while(socket->pollSocket()){
+            while(socket->pollSocket() > 0){
 				char byte = socket->readByte();
 				switch (state)
 				{
@@ -27,7 +27,7 @@ namespace commproto
 					ptrSize = byte;
 					state = State::ReadingPacketSize;
 					expectedReadSize = sizeof(uint32_t);
-					LOG_INFO("Read pointer size on client system: %d.", ptrSize);
+					LOG_DEBUG("Read pointer size on client system: %d.", ptrSize);
 				}
 				break;
 				case State::ReadingPacketSize:
@@ -48,7 +48,7 @@ namespace commproto
 						}
 						internal.clear();
 						state = State::ReadingPayload;
-						LOG_INFO("Expecting a message containing %d bytes.", expectedReadSize);
+						LOG_DEBUG("Expecting a message containing %d bytes.", expectedReadSize);
 					}
 				}
 				break;
@@ -60,7 +60,7 @@ namespace commproto
 					}
 					if (internal.size() == expectedReadSize)
 					{
-						LOG_INFO("Finished reading a message containing %ld bytes.", internal.size());
+						LOG_DEBUG("Finished reading a message containing %ld bytes.", internal.size());
 						delegator->parse(internal);
 						internal.clear();
 						expectedReadSize = sizeof(uint32_t);

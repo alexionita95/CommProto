@@ -15,7 +15,6 @@ namespace commproto
 
 		void ContextImpl::notifyOut(const uint32_t variableId)
 		{
-			LOG_DEBUG("notifying variable %d", variableId);
 			if (variableId >= outVariables.size())
 			{
 				return;
@@ -51,6 +50,7 @@ namespace commproto
 
 		bool ContextImpl::subscribe(const std::string& name, VariableCallback& callback)
 		{
+			LOG_INFO("Subscribing to variable \"%s\"", name.c_str());
 			const auto it = inVariableMapping.find(name);
 			if (it == inVariableMapping.end())
 			{
@@ -61,12 +61,15 @@ namespace commproto
 					auto cbs = std::vector<VariableCallback>();
 					cbs.emplace_back(callback);
 					nameCallbackCache.emplace(name, cbs);
+					LOG_INFO("Subscribed succesfully, but varible does not exist locally yet.");
                     return false;
 				}
 				it2->second.emplace_back(callback);
+				LOG_INFO("Subscribed succesfully, but varible does not exist locally yet.");
 				return false;
 			}
 			subscribe(it->second, callback);
+			LOG_INFO("Subscribed succesfully");
 			return true;
 		}
 
@@ -87,7 +90,7 @@ namespace commproto
 
 		void ContextImpl::moveCallbacksFromCache(const std::string& name, const uint32_t id)
 		{
-            LOG_DEBUG("Tryign to get cached callbacks for %s -> %d",name.c_str(),id);
+            LOG_INFO("Trying to get cached callbacks for %s -> %d",name.c_str(),id);
 			auto it = nameCallbackCache.find(name);
 
 			if (it != nameCallbackCache.end())
@@ -95,7 +98,7 @@ namespace commproto
 				auto it2 = callbacks.find(id);
 				if (it2 != callbacks.end())
 				{
-                    LOG_DEBUG("All good for mapping %s -> %d",name.c_str(),id);
+					LOG_INFO("All good for mapping %s -> %d",name.c_str(),id);
 					it2->second.insert(it2->second.end(), it->second.begin(), it->second.end());
 				}
 				else
@@ -126,25 +129,24 @@ namespace commproto
 		{
 
 			uint32_t id = outVariables.size();
-			LOG_DEBUG("registering out variable...");
 			if (!name.empty())
 			{
 				
 				if (outVariableMapping.find(name) != outVariableMapping.end()) {
-					LOG_WARNING("already found a mapping to the name %s",name.c_str());
 					return -1;
 				}
-				LOG_DEBUG(	"registered a mapping %s -> %d", name.c_str(),id);
 				outVariableMapping.emplace(name, id);
 				socket->sendBytes(VariableMappingSerializer::serialize(std::move(VariableMappingMessage(mappingMessageId,name,id))));
 
 			}
 			internalRegisterOut(variable);
+			LOG_INFO("Registered out variable with mapping \"%s\" -> %d", name.c_str(), id);
 			return id;
 		}
 
 		int32_t ContextImpl::registerInVariable(const VariableBaseHandle& variable, const std::string& name)
 		{
+			
 			uint32_t id = inVariables.size();
 			if (!name.empty())
 			{
@@ -156,18 +158,18 @@ namespace commproto
 			}
 			internalRegisterIn(variable);
 			moveCallbacksFromCache(name, id);
-
+			LOG_INFO("Registered in variable with mapping \"%s\" -> %d", name.c_str(),id);
 			return id;
 		}
 
 		bool ContextImpl::registerMapping(const std::string& name, const uint32_t id)
 		{
-            LOG_DEBUG("Trying to register mapping for  %s -> %d",name.c_str(),id);
             if (inVariableMapping.find(name) != inVariableMapping.end()) {
 				return false;
 			}
 			inVariableMapping.emplace(name, id);
-            moveCallbacksFromCache(name,id);
+			LOG_INFO("Registered a mapping for an in variable  %s -> %d", name.c_str(), id);
+			moveCallbacksFromCache(name,id);
 			return true;
 		}
 
