@@ -2,6 +2,19 @@
 #define LOGGER_H
 #include <string.h>
 #include <stdarg.h>
+#include <string>
+
+
+class LoggableDestination
+{
+	public:
+	virtual ~LoggableDestination() = default;
+	virtual void addLog(const char * line, const uint32_t size) = 0;
+	};
+
+
+void setLoggable(LoggableDestination* loggable);
+
 
 void log(const char * format, ...);
 

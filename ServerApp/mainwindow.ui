@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>277</width>
-    <height>158</height>
+    <width>615</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,27 +23,116 @@
    <string>Plant Health</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetDefaultConstraint</enum>
-      </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLabel" name="tempDisplay">
-        <property name="text">
-         <string>Temperature:</string>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="humidityDisplay">
+          <property name="text">
+           <string>Ambiental humidity:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="tempDisplay">
+          <property name="text">
+           <string>Ambiental temperature:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lightDisplay">
+          <property name="text">
+           <string>Ambiental light:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="soilHumidityDisplay">
+          <property name="text">
+           <string>Soil humidity:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="humidityDisplay">
-        <property name="text">
-         <string>Humidity:</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="idealhumidityDisplay">
+          <property name="text">
+           <string>Ideal ambilental humidity:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="idealTemperature">
+          <property name="text">
+           <string>Ideal ambiental temperature:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="idealLight">
+          <property name="text">
+           <string>Ideal ambiental Light</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="idealSoilHumidity">
+          <property name="text">
+           <string>Ideal soil humidity:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="planDetails">
+      <property name="text">
+       <string>Plant details:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="plantHealth">
+      <property name="text">
+       <string>Plant health:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+       <string>Status:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="statusConsole">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -52,10 +141,19 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>277</width>
+     <width>615</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_configuration_file"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_console"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -65,6 +163,16 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <action name="actionLoad_configuration_file">
+   <property name="text">
+    <string>Load configuration file</string>
+   </property>
+  </action>
+  <action name="actionShow_console">
+   <property name="text">
+    <string>Show status console</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

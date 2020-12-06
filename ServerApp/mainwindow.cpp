@@ -73,10 +73,6 @@ void ServerWrapper::threadFunc()
 
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
-
-		auto var = std::make_shared<variable::BoolVariable>(ctx, true);
-		ctx->registerOutVariable(var, "LED");
-
 		while (running)
 		{
 			if (!client)
@@ -84,12 +80,8 @@ void ServerWrapper::threadFunc()
 				printf("An error occurred while waiting for a connection.");
 				continue;
 			}
-
-
-			*var = !var->get();
-			LOG_INFO("Toggling LED state to %s", var->get() ? "on" : "off");
 			builder->pollAndRead();
-			std::this_thread::sleep_for(std::chrono::seconds(5));
+			std::this_thread::sleep_for(std::chrono::seconds(2));
 			if (!client->connected())
 			{
 				LOG_WARNING("***********************************************");
@@ -101,24 +93,38 @@ void ServerWrapper::threadFunc()
 	}
 }
 
+void LoggingAccess::addLog(const char * line, const uint32_t size)
+{
+	QString linestr = QString::fromUtf8(line, size-1);
+	emit addLogText(linestr);
+}
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
+	ui->setupUi(this);
+	ui->statusConsole->setReadOnly(true);
+	
+	log = new LoggingAccess();
+	connect(log, &LoggingAccess::addLogText, this, &MainWindow::addLogLine, Qt::QueuedConnection);
+	setLoggable(log);
+
 	server = new ServerWrapper();
-	connect(server,&ServerWrapper::tempReady, this, &MainWindow::setTemperature);
-	connect(server,&ServerWrapper::humidityReady, this, &MainWindow::setHumidity);
+	connect(server, &ServerWrapper::tempReady, this, &MainWindow::setTemperature);
+	connect(server, &ServerWrapper::humidityReady, this, &MainWindow::setHumidity);
 	server->window = this;
 	server->running = true;
+	//log->moveToThread(server);
 	server->start();
-	ui->setupUi(this);
+	
 }
 
 MainWindow::~MainWindow()
 {
 	if (server)
 	{
-		server->running = true;
+		server->running = false;
 		server->quit();
 		server->wait();
 	}
@@ -127,6 +133,11 @@ MainWindow::~MainWindow()
 	{
 		delete server;
 		server = nullptr;
+	}
+	if(log)
+	{
+		delete log;
+		log = nullptr;
 	}
 	delete ui;
 }
@@ -143,5 +154,11 @@ void MainWindow::setHumidity(const float humidity)
 	QString tempStr;
 	tempStr.sprintf("Humidity: %.2f%%", humidity);
 	ui->humidityDisplay->setText(tempStr);
+}
+
+void MainWindow::addLogLine(QString str)
+{
+	
+	ui->statusConsole->append(str);
 }
 
