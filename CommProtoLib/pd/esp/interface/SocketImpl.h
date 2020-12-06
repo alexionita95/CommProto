@@ -105,9 +105,12 @@ public:
           return false;
         }
 
-        socketMode = Mode::Client;
-        isInitialized = client.connect(addr.c_str(),static_cast<uint16_t>(port));
-        return isInitialized;
+        bool result = client.connect(addr.c_str(),static_cast<uint16_t>(port));
+        if(result){
+            socketMode = Mode::Client;
+            isInitialized = true;
+        }
+        return result;
     }
 
     //initialize the socket as a server and bind it to [port]

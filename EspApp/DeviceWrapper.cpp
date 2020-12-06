@@ -44,8 +44,7 @@ DeviceState DeviceWrapper::loop()
 		bool connected = client->initClient(host, port);
 		if (!connected)
 		{
-			client->close();
-			device->delayMs(5000);
+			device->delayMs(100);
 
 			return DeviceState::Searching;
 		}
