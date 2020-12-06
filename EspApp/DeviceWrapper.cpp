@@ -44,7 +44,9 @@ DeviceState DeviceWrapper::loop()
 		bool connected = client->initClient(host, port);
 		if (!connected)
 		{
+			client->close();
 			device->delayMs(5000);
+
 			return DeviceState::Searching;
 		}
 		LOG_INFO("Connection established to %s:%d", host.c_str(), port);
@@ -85,6 +87,7 @@ DeviceState DeviceWrapper::loop()
 		{
 			state = DeviceState::Searching;
 			client->close();
+			LOG_INFO("Connection closed, resetting...");
 		}
 	}
 	break;
