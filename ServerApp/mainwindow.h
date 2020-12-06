@@ -53,6 +53,7 @@ public slots:
 	void setTemperature(const float temp);
 	void setHumidity(const float humidity);
 	void addLogLine(QString str);
+	void toggleStatusConsole(bool visible);
 
 private:
     Ui::MainWindow *ui;

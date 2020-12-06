@@ -116,6 +116,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	server->window = this;
 	server->running = true;
 	//log->moveToThread(server);
+
+	toggleStatusConsole(false);
+	connect(ui->actionShow_console, &QAction::toggled, this, &MainWindow::toggleStatusConsole);
+
 	server->start();
 	
 }
@@ -160,5 +164,12 @@ void MainWindow::addLogLine(QString str)
 {
 	
 	ui->statusConsole->append(str);
+}
+
+void MainWindow::toggleStatusConsole(bool visible)
+{
+	ui->statusConsole->setVisible(visible);
+	ui->statusLabel->setVisible(visible);
+
 }
 

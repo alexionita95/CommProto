@@ -39,14 +39,17 @@ DeviceState DeviceWrapper::loop()
 	{
 	case DeviceState::Searching:
 	{
+		device->setLed(1, 0, 10, 255, 50);
 		LOG_INFO("Attempting to connect to %s:%d", host.c_str(), port);
 		bool connected = client->initClient(host, port);
 		if (!connected)
 		{
 			device->delayMs(5000);
+			return DeviceState::Searching;
 		}
 		LOG_INFO("Connection established to %s:%d", host.c_str(), port);
 		state = DeviceState::Initializing;
+		
 	}
 	break;
 	case DeviceState::Initializing:
@@ -70,23 +73,23 @@ DeviceState DeviceWrapper::loop()
 		ctx->registerOutVariable(humidity, "Humidity");
 
 		state = DeviceState::Connected;
-		LOG_INFO("Initialized all necessary thingies, beginning communication");
+		LOG_INFO("Initialized all necessary things, beginning communication");
+		device->setLed(1, 100, 245, 66, 50);
 	}
 	break;
 	 
 	case DeviceState::Connected:
 	{
 		builder->pollAndRead();
+		if (!client->connected())
+		{
+			state = DeviceState::Searching;
+			client->close();
+		}
 	}
 	break;
 
 	default:;
-	}
-
-	if(!client->connected())
-	{
-		state = DeviceState::Searching;
-		client->close();
-	}
+	}	
 	return state;
 }

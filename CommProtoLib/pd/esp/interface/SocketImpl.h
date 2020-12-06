@@ -40,6 +40,8 @@ public:
     }
        
     void close() override{
+        isInitialized = false;
+        socketMode = Mode::Unassigned;
         client.stop();
     }
     
