@@ -10,10 +10,15 @@
 #include <commproto/parser/MessageBuilder.h>
 #include <commproto/messages/MessageMapper.h>
 #include "../../CommProtoLib/src/TypeMapperImpl.h"
-
 #include <commproto/variable/ContextImpl.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/variable/VariableMappingMessage.h>
+
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFileDialog>
 
 using namespace commproto;
 
@@ -27,7 +32,7 @@ void ServerWrapper::printTemp(variable::VariableBaseHandle& var)
 	float temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	emit tempReady(temp);
 
-	LOG_INFO("Temperature: %.2f C",temp);
+	LOG_INFO("Temperature: %.2f C", temp);
 }
 
 void ServerWrapper::printHumidity(variable::VariableBaseHandle& var)
@@ -93,19 +98,40 @@ void ServerWrapper::threadFunc()
 	}
 }
 
+const float RangeMeasure::tolerance = 0.5f;
+
+bool RangeMeasure::isIdeal(const float value) const
+{
+	return value >= min - tolerance && value <= max + tolerance;
+}
+
+bool RangeMeasure::getAdjustment(const float value) const
+{
+	if (value < min - tolerance)
+	{
+		return min - value;
+	}
+	if (value > max + tolerance)
+	{
+		return value - max;
+	}
+	return 0.0f;
+}
+
 void LoggingAccess::addLog(const char * line, const uint32_t size)
 {
-	QString linestr = QString::fromUtf8(line, size-1);
+	QString linestr = QString::fromUtf8(line, size - 1);
 	emit addLogText(linestr);
 }
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
-	ui(new Ui::MainWindow)
+	ui(new Ui::MainWindow),
+	settings("app.ini",QSettings::IniFormat)
 {
 	ui->setupUi(this);
 	ui->statusConsole->setReadOnly(true);
-	
+
 	log = new LoggingAccess();
 	connect(log, &LoggingAccess::addLogText, this, &MainWindow::addLogLine, Qt::QueuedConnection);
 	setLoggable(log);
@@ -115,12 +141,53 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(server, &ServerWrapper::humidityReady, this, &MainWindow::setHumidity);
 	server->window = this;
 	server->running = true;
-	//log->moveToThread(server);
 
 	toggleStatusConsole(false);
 	connect(ui->actionShow_console, &QAction::toggled, this, &MainWindow::toggleStatusConsole);
-
+	connect(ui->actionLoad_configuration_file, &QAction::triggered, this, &MainWindow::onLoadFromJson);
 	server->start();
+	onLoadSettings();
+
+}
+
+void MainWindow::updateUiValues()
+{
+	ui->idealTemperature->setText(QString("Ideal ambiental temperature: ") + data.temp.toString().c_str());
+	ui->idealLight->setText(QString("Ideal ambiental sunlight: ") + data.sunlightHours.toString().c_str());
+	ui->idealSoilHumidity->setText(QString("Ideal soil humidity: ") + data.soilHumidity.toString().c_str());
+	ui->idealhumidityDisplay->setText(QString("Ideal ambiental humidity: ") + data.humidity.toString().c_str());
+	ui->plantName->setText(QString("Name: ") + data.name.c_str());
+}
+
+void MainWindow::clearUiValues()
+{
+	ui->idealTemperature->setText(QString("Ideal ambiental temperature: "));
+	ui->idealLight->setText(QString("Ideal ambiental sunlight: "));
+	ui->idealSoilHumidity->setText(QString("Ideal soil humidity: "));
+	ui->idealhumidityDisplay->setText(QString("Ideal ambiental humidity: "));
+	ui->plantName->setText(QString("Name: "));
+}
+
+void MainWindow::onLoadSettings()
+{
+	if(!settings.contains("loaded_plant_file"))
+	{
+		settings.setValue("loaded_plant_file", false);
+	}
+	else
+	{
+		if(settings.value("loaded_plant_file",false).toBool())
+		{
+			if(settings.contains("plant_file"))
+			{
+				loadFromJson(settings.value("plant_file", "").toString());
+			}
+			else
+			{
+				settings.setValue("loaded_plant_file", false);
+			}
+		}
+	}
 	
 }
 
@@ -132,13 +199,13 @@ MainWindow::~MainWindow()
 		server->quit();
 		server->wait();
 	}
-		
-	if(server)
+
+	if (server)
 	{
 		delete server;
 		server = nullptr;
 	}
-	if(log)
+	if (log)
 	{
 		delete log;
 		log = nullptr;
@@ -149,7 +216,7 @@ MainWindow::~MainWindow()
 void MainWindow::setTemperature(const float temp)
 {
 	QString tempStr;
-	tempStr.sprintf("Temperature: %.2f *C",temp);
+	tempStr.sprintf("Temperature: %.2f *C", temp);
 	ui->tempDisplay->setText(tempStr);
 }
 
@@ -162,7 +229,7 @@ void MainWindow::setHumidity(const float humidity)
 
 void MainWindow::addLogLine(QString str)
 {
-	
+
 	ui->statusConsole->append(str);
 }
 
@@ -170,6 +237,107 @@ void MainWindow::toggleStatusConsole(bool visible)
 {
 	ui->statusConsole->setVisible(visible);
 	ui->statusLabel->setVisible(visible);
+}
 
+
+
+template <typename T>
+bool setIfExistsArray(QJsonObject obj, const char *key, const int32_t index, const QJsonValue::Type expected, T& dest)
+{
+	QJsonValue value = obj[key];
+
+	if (value.type() != QJsonValue::Array)
+	{
+		dest = T{};
+		return false;
+	}
+	QJsonArray arr = value.toArray();
+
+	if (arr.size() <= index)
+	{
+		dest = T{};
+		return false;
+	}
+
+	if (arr[index].type() != expected)
+	{
+		dest = T{};
+		return false;
+	}
+
+	switch (arr[index].type())
+	{
+	case QJsonValue::Double:
+		dest = arr[index].toDouble(0);
+		break;
+
+	default:;
+	}
+	return true;
+}
+
+
+bool setRangeFromJson(QJsonObject obj, const char *key, RangeMeasure & dest)
+{
+	return setIfExistsArray(obj, key, 0, QJsonValue::Double, dest.min) &&
+		setIfExistsArray(obj, key, 1, QJsonValue::Double, dest.max);
+}
+
+template <typename T>
+bool setIfExists(QJsonObject obj, const char * key, const QJsonValue::Type expected, T& dest)
+{
+	QJsonValue value = obj[key];
+	if (value.type() != expected)
+	{
+		return false;
+	}
+	switch (value.type()) {
+	case QJsonValue::Double:
+		dest = value.toDouble(0.0);
+		break;
+	case QJsonValue::String:
+		dest = std::string(value.toString("NoName").toUtf8());
+		break;
+	default:;
+	}
+	return true;
+}
+
+
+void MainWindow::onLoadFromJson()
+{
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Select Plant JSON File"),
+		"",
+		tr("JSON (*.json)"));
+	loadFromJson(filePath);
+
+}
+
+void MainWindow::loadFromJson(QString path)
+{
+
+	
+	QFile file;
+	file.setFileName(path);
+	file.open(QIODevice::ReadOnly | QIODevice::Text);
+	QString val = file.readAll();
+	file.close();
+	QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
+	QJsonObject jObject = doc.object();
+	bool res = setIfExists(jObject, "name", QJsonValue::String, data.name) &&
+		setRangeFromJson(jObject, "ideal_temperature", data.temp) &&
+		setRangeFromJson(jObject, "ideal_humidity", data.humidity) &&
+		setRangeFromJson(jObject, "ideal_soil_humidity", data.soilHumidity) &&
+		setRangeFromJson(jObject, "ideal_light_time", data.sunlightHours);
+	if (res) {
+		updateUiValues();
+		settings.setValue("plant_file", path);
+		settings.setValue("loaded_plant_file", true);
+	}
+	else
+	{
+		clearUiValues();
+		settings.setValue("loaded_plant_file", false);
+	}
 }
 

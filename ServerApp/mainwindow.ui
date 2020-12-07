@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>615</width>
-    <height>410</height>
+    <height>396</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -45,7 +45,7 @@
         <item>
          <widget class="QLabel" name="lightDisplay">
           <property name="text">
-           <string>Ambiental light:</string>
+           <string>Ambiental sunlight:</string>
           </property>
          </widget>
         </item>
@@ -68,9 +68,16 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
+         <widget class="QLabel" name="plantName">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="idealhumidityDisplay">
           <property name="text">
-           <string>Ideal ambilental humidity:</string>
+           <string>Ideal ambiental humidity:</string>
           </property>
          </widget>
         </item>
@@ -84,7 +91,7 @@
         <item>
          <widget class="QLabel" name="idealLight">
           <property name="text">
-           <string>Ideal ambiental Light</string>
+           <string>Ideal ambiental sunlight:</string>
           </property>
          </widget>
         </item>
