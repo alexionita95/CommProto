@@ -107,16 +107,12 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="planDetails">
-      <property name="text">
-       <string>Plant details:</string>
-      </property>
-     </widget>
-    </item>
-    <item>
      <widget class="QLabel" name="plantHealth">
+      <property name="contextMenuPolicy">
+       <enum>Qt::PreventContextMenu</enum>
+      </property>
       <property name="text">
-       <string>Plant health:</string>
+       <string>Plant health:???</string>
       </property>
      </widget>
     </item>

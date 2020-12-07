@@ -131,10 +131,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->statusConsole->setReadOnly(true);
+	ui->horizontalLayout->setAlignment(Qt::AlignLeft);
+	ui->verticalLayout_2->setAlignment(Qt::AlignTop);
 
-	log = new LoggingAccess();
-	connect(log, &LoggingAccess::addLogText, this, &MainWindow::addLogLine, Qt::QueuedConnection);
-	setLoggable(log);
+
+	logAccess = new LoggingAccess();
+	connect(logAccess, &LoggingAccess::addLogText, this, &MainWindow::addLogLine, Qt::QueuedConnection);
+	setLoggable(logAccess);
 
 	server = new ServerWrapper();
 	connect(server, &ServerWrapper::tempReady, this, &MainWindow::setTemperature);
@@ -205,10 +208,10 @@ MainWindow::~MainWindow()
 		delete server;
 		server = nullptr;
 	}
-	if (log)
+	if (logAccess)
 	{
-		delete log;
-		log = nullptr;
+		delete logAccess;
+		logAccess = nullptr;
 	}
 	delete ui;
 }
@@ -296,7 +299,7 @@ bool setIfExists(QJsonObject obj, const char * key, const QJsonValue::Type expec
 		dest = value.toDouble(0.0);
 		break;
 	case QJsonValue::String:
-		dest = std::string(value.toString("NoName").toUtf8());
+		dest = std::string(value.toString("NoName").toUtf8().data());
 		break;
 	default:;
 	}
@@ -333,11 +336,13 @@ void MainWindow::loadFromJson(QString path)
 		updateUiValues();
 		settings.setValue("plant_file", path);
 		settings.setValue("loaded_plant_file", true);
+		LOG_INFO("Loaded plant data file \"%s\"", path.toUtf8().data());
 	}
 	else
 	{
 		clearUiValues();
 		settings.setValue("loaded_plant_file", false);
+		LOG_ERROR("An error occurred while parsing plant data file \"%s\"", path.toUtf8().data());
 	}
 }
 

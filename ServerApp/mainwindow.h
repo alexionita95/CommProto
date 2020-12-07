@@ -98,7 +98,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
 	ServerWrapper *server;
-	LoggingAccess *log;
+	LoggingAccess *logAccess;
 	PlantData data;
 	QSettings settings;
 };
