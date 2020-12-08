@@ -36,8 +36,22 @@ void setup(){
 
 }
 
+
+int counter = 0;
+int delay = 500;
+int counterTarget = 2000;
+
 void loop(){
 	wrapper.loop();
+	counter += delay;
+	if(counter == counterTarget)
+	{
+		counter = 0;
+		wrapper.setTemp(100.0f);
+		wrapper.setHumidity(50.0f);
+	}
+
+	desk.delayMs(delay);
 }
 
 int main(int argc, const char * argv[])

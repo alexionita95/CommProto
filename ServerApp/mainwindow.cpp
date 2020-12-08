@@ -43,6 +43,22 @@ void ServerWrapper::printHumidity(variable::VariableBaseHandle& var)
 	LOG_INFO("Humidity: %.2f%%", humidity);
 }
 
+void ServerWrapper::printLight(variable::VariableBaseHandle& var)
+{
+	float temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
+	emit lightReady(temp);
+
+	LOG_INFO("Light Percentage: %.2f C", temp);
+}
+
+void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
+{
+	float humidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
+	emit soilHumidityReady(humidity);
+
+	LOG_INFO("Soil Humidity: %.2f%%", humidity);
+}
+
 void ServerWrapper::threadFunc()
 {
 	uint32_t port = 4242;
@@ -75,6 +91,12 @@ void ServerWrapper::threadFunc()
 
 		variable::VariableCallback humCb = std::bind(&ServerWrapper::printHumidity, this, std::placeholders::_1);
 		ctx->subscribe("Humidity", humCb);
+
+		variable::VariableCallback lightCb = std::bind(&ServerWrapper::printLight, this, std::placeholders::_1);
+		ctx->subscribe("Light", lightCb);
+
+		variable::VariableCallback soilHumCb = std::bind(&ServerWrapper::printSoilHumidity, this, std::placeholders::_1);
+		ctx->subscribe("SoilHumidity", soilHumCb);
 
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
@@ -142,6 +164,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	server = new ServerWrapper();
 	connect(server, &ServerWrapper::tempReady, this, &MainWindow::setTemperature);
 	connect(server, &ServerWrapper::humidityReady, this, &MainWindow::setHumidity);
+	connect(server, &ServerWrapper::lightReady, this, &MainWindow::setLightExposure);
+	connect(server, &ServerWrapper::soilHumidityReady, this, &MainWindow::setSoilHumidity);
 	server->window = this;
 	server->running = true;
 
@@ -228,6 +252,20 @@ void MainWindow::setHumidity(const float humidity)
 	QString tempStr;
 	tempStr.sprintf("Humidity: %.2f%%", humidity);
 	ui->humidityDisplay->setText(tempStr);
+}
+
+void MainWindow::setLightExposure(const float light)
+{
+	QString tempStr;
+	tempStr.sprintf("Ambiental light: %.2f%%", light);
+	ui->lightDisplay->setText(tempStr);
+}
+
+void MainWindow::setSoilHumidity(const float humidity)
+{
+	QString tempStr;
+	tempStr.sprintf("Soil humidty: %.2f%%", humidity);
+	ui->soilHumidityDisplay->setText(tempStr);
 }
 
 void MainWindow::addLogLine(QString str)

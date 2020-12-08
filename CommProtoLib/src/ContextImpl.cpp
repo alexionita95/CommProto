@@ -50,7 +50,6 @@ namespace commproto
 
 		bool ContextImpl::subscribe(const std::string& name, VariableCallback& callback)
 		{
-			LOG_INFO("Subscribing to variable \"%s\"", name.c_str());
 			const auto it = inVariableMapping.find(name);
 			if (it == inVariableMapping.end())
 			{
@@ -61,15 +60,12 @@ namespace commproto
 					auto cbs = std::vector<VariableCallback>();
 					cbs.emplace_back(callback);
 					nameCallbackCache.emplace(name, cbs);
-					LOG_INFO("Subscribed succesfully, but varible does not exist locally yet.");
                     return false;
 				}
 				it2->second.emplace_back(callback);
-				LOG_INFO("Subscribed succesfully, but varible does not exist locally yet.");
 				return false;
 			}
 			subscribe(it->second, callback);
-			LOG_INFO("Subscribed succesfully");
 			return true;
 		}
 
@@ -81,6 +77,7 @@ namespace commproto
 			{
 				return;
 			}
+			LOG_INFO("Callback count for variable %d : %d", variableId, it->second.size());
 
 			for (auto cb : it->second)
 			{
@@ -90,21 +87,22 @@ namespace commproto
 
 		void ContextImpl::moveCallbacksFromCache(const std::string& name, const uint32_t id)
 		{
-            LOG_INFO("Trying to get cached callbacks for %s -> %d",name.c_str(),id);
 			auto it = nameCallbackCache.find(name);
 
 			if (it != nameCallbackCache.end())
 			{
+				LOG_INFO("Cached callbacks for %s count : %d", name.c_str(), it->second.size());
 				auto it2 = callbacks.find(id);
+						
 				if (it2 != callbacks.end())
 				{
-					LOG_INFO("All good for mapping %s -> %d",name.c_str(),id);
 					it2->second.insert(it2->second.end(), it->second.begin(), it->second.end());
 				}
 				else
 				{
 					callbacks.emplace(id, it->second);
 				}
+				LOG_INFO("Internal Callbacks for %s count : %d", name.c_str(),callbacks[id].size());
 				nameCallbackCache.erase(it);
 			}
 		}
@@ -140,7 +138,6 @@ namespace commproto
 
 			}
 			internalRegisterOut(variable);
-			LOG_INFO("Registered out variable with mapping \"%s\" -> %d", name.c_str(), id);
 			return id;
 		}
 
@@ -158,7 +155,6 @@ namespace commproto
 			}
 			internalRegisterIn(variable);
 			moveCallbacksFromCache(name, id);
-			LOG_INFO("Registered in variable with mapping \"%s\" -> %d", name.c_str(),id);
 			return id;
 		}
 
@@ -168,7 +164,6 @@ namespace commproto
 				return false;
 			}
 			inVariableMapping.emplace(name, id);
-			LOG_INFO("Registered a mapping for an in variable  %s -> %d", name.c_str(), id);
 			moveCallbacksFromCache(name,id);
 			return true;
 		}

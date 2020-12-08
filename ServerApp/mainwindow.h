@@ -22,8 +22,9 @@ public:
 
 	void run() override;
 	void printTemp(commproto::variable::VariableBaseHandle& var);
-
 	void printHumidity(commproto::variable::VariableBaseHandle& var);
+	void printLight(commproto::variable::VariableBaseHandle& var);
+	void printSoilHumidity(commproto::variable::VariableBaseHandle& var);
 
 	void threadFunc();
 
@@ -31,6 +32,8 @@ public:
 signals:
 	void tempReady(const float);
 	void humidityReady(const float);
+	void lightReady(const float);
+	void soilHumidityReady(const float);
 };
 
 
@@ -91,6 +94,8 @@ public:
 public slots:
 	void setTemperature(const float temp);
 	void setHumidity(const float humidity);
+	void setLightExposure(const float light);
+	void setSoilHumidity(const float humidity);
 	void addLogLine(QString str);
 	void toggleStatusConsole(bool visible);
 	void loadFromJson(QString path);

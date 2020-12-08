@@ -30,6 +30,22 @@ void DeviceWrapper::setHumidity(float humidity_)
 	}
 }
 
+void DeviceWrapper::setLight(float lightPercentage_)
+{
+	if(lightPercentage)
+	{
+		*lightPercentage = lightPercentage_;
+	}
+}
+
+void DeviceWrapper::setSoilHumidity(float humidityPercentage)
+{
+	if(soilHumidity)
+	{
+		*soilHumidity = humidityPercentage;
+	}
+}
+
 void DeviceWrapper::setup()
 {
 }
@@ -72,6 +88,12 @@ DeviceState DeviceWrapper::loop()
 
 		humidity = std::make_shared<variable::RealVariable>(ctx, 0.0f);
 		ctx->registerOutVariable(humidity, "Humidity");
+
+		lightPercentage = std::make_shared<variable::RealVariable>(ctx, 0.0f);
+		ctx->registerOutVariable(lightPercentage, "Light");
+
+		soilHumidity = std::make_shared<variable::RealVariable>(ctx, 0.0f);
+		ctx->registerOutVariable(soilHumidity, "SoilHumidity");
 
 		state = DeviceState::Connected;
 		LOG_INFO("Initialized all necessary things, beginning communication");
