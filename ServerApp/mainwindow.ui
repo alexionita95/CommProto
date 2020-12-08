@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>615</width>
-    <height>396</height>
+    <height>521</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,119 +23,123 @@
    <string>Plant Health</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
     <item>
-     <layout class="QHBoxLayout" name="readingsLayout">
+     <layout class="QVBoxLayout" name="centralLayout">
       <item>
-       <layout class="QVBoxLayout" name="readingsLeft">
-        <item>
-         <widget class="QLabel" name="humidityDisplay">
-          <property name="text">
-           <string>Ambiental humidity:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="tempDisplay">
-          <property name="text">
-           <string>Ambiental temperature:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lightDisplay">
-          <property name="text">
-           <string>Ambiental sunlight:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="soilHumidityDisplay">
-          <property name="text">
-           <string>Soil humidity:</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="Line" name="line_2">
+       <widget class="Line" name="line_7">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="readingsRight">
+       <widget class="QLabel" name="plantName">
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="readingsLayout">
         <item>
-         <widget class="QLabel" name="idealhumidityDisplay">
-          <property name="text">
-           <string>Ideal ambiental humidity:</string>
+         <layout class="QVBoxLayout" name="readingsLeft">
+          <item>
+           <widget class="QLabel" name="measurementsLabel">
+            <property name="text">
+             <string>Measurements</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="idealTemperature">
-          <property name="text">
-           <string>Ideal ambiental temperature:</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="readingsRight">
+          <item>
+           <widget class="QLabel" name="idealValuesLabel">
+            <property name="text">
+             <string>Ideal values</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="plantHealthLabel">
+        <property name="text">
+         <string>Plant Health</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="plantHealthLayout">
         <item>
-         <widget class="QLabel" name="idealLight">
-          <property name="text">
-           <string>Ideal ambiental sunlight:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="idealSoilHumidity">
-          <property name="text">
-           <string>Ideal soil humidity:</string>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
        </layout>
       </item>
+      <item>
+       <widget class="QLabel" name="statusLabel">
+        <property name="text">
+         <string>Status Console</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="statusConsole">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
-    </item>
-    <item>
-     <widget class="QLabel" name="plantName">
-      <property name="text">
-       <string>Name:</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="plantHealth">
-      <property name="contextMenuPolicy">
-       <enum>Qt::PreventContextMenu</enum>
-      </property>
-      <property name="text">
-       <string>Plant health:???</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="statusLabel">
-      <property name="text">
-       <string>Status:</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QTextEdit" name="statusConsole">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>

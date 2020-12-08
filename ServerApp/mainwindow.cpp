@@ -29,34 +29,39 @@ void ServerWrapper::run()
 
 void ServerWrapper::printTemp(variable::VariableBaseHandle& var)
 {
-	float temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	emit tempReady(temp);
-
+	temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
+	bool isIdeal = data.temp.isIdeal(temp);
+	emit tempReady(temp, isIdeal);
+	calculatePlantHealth();
 	LOG_INFO("Temperature: %.2f C", temp);
 }
 
 void ServerWrapper::printHumidity(variable::VariableBaseHandle& var)
 {
-	float humidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	emit humidityReady(humidity);
-
+	humidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
+	bool isIdeal = data.humidity.isIdeal(humidity);
+	emit humidityReady(humidity, isIdeal);
+	calculatePlantHealth();
 	LOG_INFO("Humidity: %.2f%%", humidity);
 }
 
 void ServerWrapper::printLight(variable::VariableBaseHandle& var)
 {
-	float temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	emit lightReady(temp);
-
-	LOG_INFO("Light: %.2f luxes", temp);
+	lightLuxes = std::static_pointer_cast<variable::RealVariable>(var)->get();
+	bool isIdeal = data.sunlightHours.isIdeal(lightLuxes);
+	emit lightReady(lightLuxes, isIdeal);
+	calculatePlantHealth();
+	LOG_INFO("Light: %.2f luxes", lightLuxes);
 }
 
 void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
 {
-	float humidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	emit soilHumidityReady(humidity);
+	soilHumidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
+	bool isIdeal = data.soilHumidity.isIdeal(soilHumidity);
+	emit soilHumidityReady(soilHumidity, isIdeal);
 
-	LOG_INFO("Soil Humidity: %.2f%%", humidity);
+	LOG_INFO("Soil Humidity: %.2f%%", soilHumidity);
+	calculatePlantHealth();
 }
 
 void ServerWrapper::threadFunc()
@@ -120,6 +125,12 @@ void ServerWrapper::threadFunc()
 	}
 }
 
+void ServerWrapper::setPlantData(PlantData data_)
+{
+	data = data_;
+	LOG_INFO("Server received plant data for plant \"%s\"", data.name.c_str());
+}
+
 const float RangeMeasure::tolerance = 0.5f;
 
 bool RangeMeasure::isIdeal(const float value) const
@@ -127,7 +138,7 @@ bool RangeMeasure::isIdeal(const float value) const
 	return value >= min - tolerance && value <= max + tolerance;
 }
 
-bool RangeMeasure::getAdjustment(const float value) const
+float RangeMeasure::getAdjustment(const float value) const
 {
 	if (value < min - tolerance)
 	{
@@ -140,6 +151,39 @@ bool RangeMeasure::getAdjustment(const float value) const
 	return 0.0f;
 }
 
+float RangeMeasure::getPercentage(const float value) const
+{
+
+	if (value < criticalMin)
+	{
+		return 0.0f;
+	}
+
+	if (value < min - tolerance)
+	{
+		float distance = min - value;
+		return (1.f - distance / (min - criticalMin)) * 100.0f;
+	}
+
+	if (value > criticalMax)
+	{
+		return 0.0f;
+	}
+
+	if (value > max + tolerance)
+	{
+		float distance = value - max;
+		return (1.f - distance / (criticalMax - max)) * 100.0f;
+	}
+
+	return 100.0f;
+}
+
+void ServerWrapper::calculatePlantHealth()
+{
+	emit healthReady(data.temp.getPercentage(temp), data.humidity.getPercentage(humidity), data.soilHumidity.getPercentage(soilHumidity), data.sunlightHours.getPercentage(lightLuxes));
+}
+
 void LoggingAccess::addLog(const char * line, const uint32_t size)
 {
 	QString linestr = QString::fromUtf8(line, size - 1);
@@ -149,14 +193,65 @@ void LoggingAccess::addLog(const char * line, const uint32_t size)
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	settings("app.ini",QSettings::IniFormat)
+	settings("app.ini", QSettings::IniFormat),
+	tempIcon("icons/temperature.png"),
+	humIcon("icons/humidity.png"),
+	soilHumIcon("icons/soil.png"),
+	lightIcon("icons/light.png"),
+	plantIcon("icons/plant.png"),
+	tempLabel(tempIcon),
+	humLabel(humIcon),
+	soilHumLabel(soilHumIcon),
+	lightLabel(lightIcon),
+	idealTempLabel(tempIcon),
+	idealHumLabel(humIcon),
+	idealSoilHumLabel(soilHumIcon),
+	idealLightLabel(lightIcon),
+	tempHealthLabel(tempIcon),
+	humHealthLabel(humIcon),
+	soilHumHealthLabel(soilHumIcon),
+	lightHealthLabel(lightIcon),
+	overallHealthLabel(plantIcon)
+
 {
 	ui->setupUi(this);
+	resize(10, 10);
 	ui->statusConsole->setReadOnly(true);
-	ui->readingsLeft->setAlignment(Qt::AlignLeft);
-	ui->readingsRight->setAlignment(Qt::AlignLeft);
-	ui->readingsLayout->setAlignment(Qt::AlignTop);
 
+	ui->readingsLeft->setAlignment(Qt::AlignTop);
+
+	setTemperature(0.f, false);
+	setHumidity(0.f, false);
+	setSoilHumidity(0.f, false);
+	setLightExposure(0.f, false);
+	ui->readingsLeft->addLayout(&tempLabel);
+	ui->readingsLeft->addLayout(&humLabel);
+	ui->readingsLeft->addLayout(&soilHumLabel);
+	ui->readingsLeft->addLayout(&lightLabel);
+
+	clearUiValues();
+	ui->readingsRight->setAlignment(Qt::AlignTop);
+	ui->readingsRight->addLayout(&idealTempLabel);
+	ui->readingsRight->addLayout(&idealHumLabel);
+	ui->readingsRight->addLayout(&idealSoilHumLabel);
+	ui->readingsRight->addLayout(&idealLightLabel);
+
+	setPlantHealth(0.f, 0.f, 0.f, 0.f);
+
+	ui->plantHealthLayout->setAlignment(Qt::AlignTop);
+	ui->plantHealthLayout->addLayout(&tempHealthLabel);
+	ui->plantHealthLayout->addLayout(&humHealthLabel);
+	ui->plantHealthLayout->addLayout(&soilHumHealthLabel);
+	ui->plantHealthLayout->addLayout(&lightHealthLabel);
+	ui->plantHealthLayout->addLayout(&overallHealthLabel);
+
+
+
+	ui->readingsLayout->setAlignment(Qt::AlignLeft);
+	ui->centralLayout->setAlignment(Qt::AlignTop);
+
+	ui->measurementsLabel->setAlignment(Qt::AlignCenter);
+	ui->idealValuesLabel->setAlignment(Qt::AlignCenter);
 
 	logAccess = new LoggingAccess();
 	connect(logAccess, &LoggingAccess::addLogText, this, &MainWindow::addLogLine, Qt::QueuedConnection);
@@ -166,7 +261,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(server, &ServerWrapper::tempReady, this, &MainWindow::setTemperature);
 	connect(server, &ServerWrapper::humidityReady, this, &MainWindow::setHumidity);
 	connect(server, &ServerWrapper::lightReady, this, &MainWindow::setLightExposure);
+	connect(server, &ServerWrapper::healthReady, this, &MainWindow::setPlantHealth);
 	connect(server, &ServerWrapper::soilHumidityReady, this, &MainWindow::setSoilHumidity);
+	connect(this, &MainWindow::plantDataReady, server, &ServerWrapper::setPlantData);
+
 	server->window = this;
 	server->running = true;
 
@@ -180,33 +278,33 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::updateUiValues()
 {
-	ui->idealTemperature->setText(QString("Ideal ambiental temperature: ") + data.temp.toString().c_str());
-	ui->idealLight->setText(QString("Ideal ambiental sunlight: ") + data.sunlightHours.toString().c_str());
-	ui->idealSoilHumidity->setText(QString("Ideal soil humidity: ") + data.soilHumidity.toString().c_str());
-	ui->idealhumidityDisplay->setText(QString("Ideal ambiental humidity: ") + data.humidity.toString().c_str());
-	ui->plantName->setText(QString("Name: ") + data.name.c_str());
+	idealTempLabel.text->setText(QString("Ideal ambiental temperature: ") + data.temp.toString().c_str());
+	idealLightLabel.text->setText(QString("Ideal ambiental sunlight: ") + data.sunlightHours.toString().c_str());
+	idealSoilHumLabel.text->setText(QString("Ideal soil humidity: ") + data.soilHumidity.toString().c_str());
+	idealHumLabel.text->setText(QString("Ideal ambiental humidity: ") + data.humidity.toString().c_str());
+	ui->plantName->setText(QString("Plant name: ") + data.name.c_str());
 }
 
 void MainWindow::clearUiValues()
 {
-	ui->idealTemperature->setText(QString("Ideal ambiental temperature: "));
-	ui->idealLight->setText(QString("Ideal ambiental sunlight: "));
-	ui->idealSoilHumidity->setText(QString("Ideal soil humidity: "));
-	ui->idealhumidityDisplay->setText(QString("Ideal ambiental humidity: "));
-	ui->plantName->setText(QString("Name: "));
+	idealTempLabel.text->setText(QString("Ideal ambiental temperature: "));
+	idealLightLabel.text->setText(QString("Ideal ambiental sunlight: "));
+	idealSoilHumLabel.text->setText(QString("Ideal soil humidity: "));
+	idealHumLabel.text->setText(QString("Ideal ambiental humidity: "));
+	ui->plantName->setText(QString("Plant name: "));
 }
 
 void MainWindow::onLoadSettings()
 {
-	if(!settings.contains("loaded_plant_file"))
+	if (!settings.contains("loaded_plant_file"))
 	{
 		settings.setValue("loaded_plant_file", false);
 	}
 	else
 	{
-		if(settings.value("loaded_plant_file",false).toBool())
+		if (settings.value("loaded_plant_file", false).toBool())
 		{
-			if(settings.contains("plant_file"))
+			if (settings.contains("plant_file"))
 			{
 				loadFromJson(settings.value("plant_file", "").toString());
 			}
@@ -216,7 +314,7 @@ void MainWindow::onLoadSettings()
 			}
 		}
 	}
-	
+
 }
 
 MainWindow::~MainWindow()
@@ -241,32 +339,65 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::setTemperature(const float temp)
+
+QString measureMentText(QString left, QString measurement, bool ideal)
 {
-	QString tempStr;
-	tempStr.sprintf("Temperature: %.2f *C", temp);
-	ui->tempDisplay->setText(tempStr);
+	QString color = ideal ? "green" : "red";
+	QString output;
+	output.sprintf("%s: <font color=\"%s\">%s</font>", left.toUtf8().data(), color.toUtf8().data(), measurement.toUtf8().data());
+	return output;
 }
 
-void MainWindow::setHumidity(const float humidity)
+void MainWindow::setTemperature(const float temp, const bool good)
 {
 	QString tempStr;
-	tempStr.sprintf("Humidity: %.2f%%", humidity);
-	ui->humidityDisplay->setText(tempStr);
+	tempStr.sprintf("%2.2f *C", temp);
+	tempLabel.text->setText(measureMentText("Ambiental temperature", tempStr, good));
 }
 
-void MainWindow::setLightExposure(const float light)
+void MainWindow::setHumidity(const float humidity, const bool good)
 {
 	QString tempStr;
-	tempStr.sprintf("Ambiental light: %.2f luxes", light);
-	ui->lightDisplay->setText(tempStr);
+	tempStr.sprintf("%3.2f%%", humidity);
+	humLabel.text->setText(measureMentText("Ambiental humidity", tempStr, good));
 }
 
-void MainWindow::setSoilHumidity(const float humidity)
+
+void MainWindow::setLightExposure(const float light, const bool good)
 {
 	QString tempStr;
-	tempStr.sprintf("Soil humidty: %.2f%%", humidity);
-	ui->soilHumidityDisplay->setText(tempStr);
+	tempStr.sprintf("%4.2f luxes", light);
+	lightLabel.text->setText(measureMentText("Ambiental light", tempStr, good));
+}
+
+void MainWindow::setSoilHumidity(const float humidity, const bool good)
+{
+	QString tempStr;
+	tempStr.sprintf("%3.2f%%", humidity);
+	soilHumLabel.text->setText(measureMentText("Soil humidity", tempStr, good));
+}
+
+void MainWindow::setPlantHealth(const float temp_, const float hum_, const float soilHum_, const float light_)
+{
+	QString tempStr;
+	tempStr.sprintf("%3.2f%%", temp_);
+	QString humStr;
+	humStr.sprintf("%3.2f%%", hum_);
+	QString soilHumStr;
+	soilHumStr.sprintf("%3.2f%%", soilHum_);
+	QString lightStr;
+	lightStr.sprintf("%3.2f%%", light_);
+
+	float overall = (soilHum_ * 8.f + temp_ * 5.f + light_ * 5.f + hum_ * 2.f) / 20.f;
+
+	QString overallStr;
+	overallStr.sprintf("%3.2f%%", overall);
+
+	tempHealthLabel.text->setText(measureMentText("Temperature", tempStr, temp_ > 70.0f));
+	humHealthLabel.text->setText(measureMentText(" Humidity", humStr, hum_ > 70.0f));
+	soilHumHealthLabel.text->setText(measureMentText(" Soil Humidity", soilHumStr, soilHum_ > 70.0f));
+	lightHealthLabel.text->setText(measureMentText(" Light", lightStr, light_ > 70.0f));
+	overallHealthLabel.text->setText(measureMentText(" Overall", overallStr, overall > 70.0f));
 }
 
 void MainWindow::addLogLine(QString str)
@@ -279,8 +410,16 @@ void MainWindow::toggleStatusConsole(bool visible)
 {
 	ui->statusConsole->setVisible(visible);
 	ui->statusLabel->setVisible(visible);
+	if (visible)
+	{
+		showMaximized();
+	}
+	else
+	{
+		showNormal();
+		resize(10, 10);
+	}
 }
-
 
 
 template <typename T>
@@ -322,7 +461,9 @@ bool setIfExistsArray(QJsonObject obj, const char *key, const int32_t index, con
 bool setRangeFromJson(QJsonObject obj, const char *key, RangeMeasure & dest)
 {
 	return setIfExistsArray(obj, key, 0, QJsonValue::Double, dest.min) &&
-		setIfExistsArray(obj, key, 1, QJsonValue::Double, dest.max);
+		setIfExistsArray(obj, key, 1, QJsonValue::Double, dest.max) &&
+		setIfExistsArray(obj, key, 2, QJsonValue::Double, dest.criticalMin) &&
+		setIfExistsArray(obj, key, 3, QJsonValue::Double, dest.criticalMax);
 }
 
 template <typename T>
@@ -357,8 +498,6 @@ void MainWindow::onLoadFromJson()
 
 void MainWindow::loadFromJson(QString path)
 {
-
-	
 	QFile file;
 	file.setFileName(path);
 	file.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -375,6 +514,7 @@ void MainWindow::loadFromJson(QString path)
 		updateUiValues();
 		settings.setValue("plant_file", path);
 		settings.setValue("loaded_plant_file", true);
+		emit plantDataReady(data);
 		LOG_INFO("Loaded plant data file \"%s\"", path.toUtf8().data());
 	}
 	else
