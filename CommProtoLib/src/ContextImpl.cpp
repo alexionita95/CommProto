@@ -77,7 +77,6 @@ namespace commproto
 			{
 				return;
 			}
-			LOG_INFO("Callback count for variable %d : %d", variableId, it->second.size());
 
 			for (auto cb : it->second)
 			{
@@ -91,7 +90,6 @@ namespace commproto
 
 			if (it != nameCallbackCache.end())
 			{
-				LOG_INFO("Cached callbacks for %s count : %d", name.c_str(), it->second.size());
 				auto it2 = callbacks.find(id);
 						
 				if (it2 != callbacks.end())
@@ -102,7 +100,6 @@ namespace commproto
 				{
 					callbacks.emplace(id, it->second);
 				}
-				LOG_INFO("Internal Callbacks for %s count : %d", name.c_str(),callbacks[id].size());
 				nameCallbackCache.erase(it);
 			}
 		}

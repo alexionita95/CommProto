@@ -25,6 +25,9 @@ public:
 	void setHumidity(float humidity);
 	void setLight(float lightPercentage);
 	void setSoilHumidity(float humidityPercentage);
+
+	void uvCallback(commproto::variable::VariableBaseHandle & var);
+	void irrigationCallback(commproto::variable::VariableBaseHandle & var);
 private:
 	commproto::sockets::SocketHandle client;
 	variable::ContextHandle ctx;

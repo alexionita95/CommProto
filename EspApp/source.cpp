@@ -22,8 +22,12 @@ public:
 		}
 		LOG_INFO("toggling led state to %s", led_state ? "on" : "off");
 	}
-	void setLed(const uint32_t pos, char red, char green, char blue, char brightness) override
+	void setLed(const uint32_t pos, char red, char green, char blue) override
 	{
+	}
+	void toggleIrrigation(const bool) override{
+	}
+	void toggleUVLight(const bool) override {
 	}
 };
 

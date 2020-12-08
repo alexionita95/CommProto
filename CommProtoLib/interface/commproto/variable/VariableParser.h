@@ -30,7 +30,6 @@ namespace commproto
 			msg.read(valueType);
 			msg.read(index);
 			ValueType type = static_cast<ValueType>(valueType);
-            LOG_DEBUG("Parsing a variable with type: %d ",valueType);
 			switch (type)
 			{
 			case ValueType::integer32:

@@ -31,29 +31,24 @@ namespace commproto
 		{
 			
 			auto& var = static_cast<VariableMessage&>(data);
-			LOG_DEBUG("Handling a variable with index %d",var.index);
 			switch (var.valueType)
 			{
 			case ValueType::integer32:
 			{
-				LOG_DEBUG("Index %d is an integer", var.index);
 				handle<uint32_t, ValueType::integer32>(static_cast<VariableMessageTemplated<uint32_t>&>(var));
 			}
 			break;
 			case ValueType::string:
 			{
-				LOG_DEBUG("Index %d is a string", var.index);
 				handle<std::string, ValueType::string>(static_cast<VariableMessageTemplated<std::string>&>(var));
 			}
 			break;
 			case ValueType::real32:
 			{
-				LOG_DEBUG("Index %d is a real value", var.index);
 				handle<float, ValueType::real32>(static_cast<VariableMessageTemplated<float>&>(var));
 			}
 			break;
 			case ValueType::bool8:
-				LOG_DEBUG("Index %d is a boolean", var.index);
 				handle<bool, ValueType::bool8>(static_cast<VariableMessageTemplated<bool>&>(var));
 			break;
 			}
@@ -62,8 +57,6 @@ namespace commproto
 		template <typename T, ValueType U>
 		void VariableHandler::handle(VariableMessageTemplated<T>& msg)
 		{
-
-			LOG_DEBUG("Internal handling a variable with index %d", msg.index);
 			VariableBaseHandle var = context->get(msg.index); // try to get the variable from the context
 			if (!var)
 			{

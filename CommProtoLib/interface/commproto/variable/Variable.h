@@ -54,7 +54,6 @@ namespace commproto
 			//used to set the value externally by a handler, notifying the context that an update of the value occured
 			void set(const T& value_)
 			{
-				LOG_INFO(" variable %d got set to a new value",index);
 				value = value_;
 				context->notifyIn(index);
 			}
