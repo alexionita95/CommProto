@@ -40,7 +40,7 @@ namespace commproto
 			//used to set the value by the owner, notifying the context that something has changed
 			Variable& operator=(const T& value_);
 
-            std::string toString() override;
+			std::string toString() override;
 
 			Message serialize() override;
 
@@ -54,6 +54,10 @@ namespace commproto
 			//used to set the value externally by a handler, notifying the context that an update of the value occured
 			void set(const T& value_)
 			{
+				if (value == value_)
+				{
+					return;
+				}
 				value = value_;
 				context->notifyIn(index);
 			}
@@ -74,17 +78,29 @@ namespace commproto
 		template <typename T, ValueType UnderlyingType>
 		Variable<T, UnderlyingType>& Variable<T, UnderlyingType>::operator=(const T& value_)
 		{
+			if (value == value_)
+			{
+				return *this;
+			}
 			value = value_;
 			context->notifyOut(index);
 			return *this;
 		}
 
 		template <typename T, ValueType UnderlyingType>
-        std::string Variable<T, UnderlyingType>::toString()
+		std::string Variable<T, UnderlyingType>::toString()
 		{
-            std::stringstream ss;
-            ss << value;
-            return ss.str();
+			std::stringstream ss;
+			ss << value << "(id:" << index << ")";
+			return ss.str();
+		}
+
+		template <>
+		inline std::string Variable<bool, ValueType::bool8>::toString()
+		{
+			std::stringstream ss;
+			ss << (value?"True":"False") << "(id:" << index << ")";
+			return ss.str();
 		}
 
 		template <typename T, ValueType UnderlyingType>

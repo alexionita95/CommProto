@@ -49,6 +49,12 @@ void ServerWrapper::printLight(variable::VariableBaseHandle& var)
 {
 	lightLuxes = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	bool isIdeal = data.sunlightHours.isIdeal(lightLuxes);
+	if (uv)
+	{
+		
+		*uv = data.sunlightHours.getAdjustment(lightLuxes) < 0;
+		LOG_INFO("Light difference = %3.2lf(%s)", data.sunlightHours.getAdjustment(lightLuxes),uv->get()?"True":"False");
+	}
 	emit lightReady(lightLuxes, isIdeal);
 	calculatePlantHealth();
 	LOG_INFO("Light: %.2f luxes", lightLuxes);
@@ -58,6 +64,12 @@ void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
 {
 	soilHumidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	bool isIdeal = data.soilHumidity.isIdeal(soilHumidity);
+	if (irrigate)
+	{
+		
+		*irrigate = data.soilHumidity.getAdjustment(soilHumidity) < 0;
+		LOG_INFO("Irrigation difference = %3.2lf(%s)", data.soilHumidity.getAdjustment(soilHumidity),irrigate->get()?"True":"False");
+	}
 	emit soilHumidityReady(soilHumidity, isIdeal);
 
 	LOG_INFO("Soil Humidity: %.2f%%", soilHumidity);
@@ -103,6 +115,13 @@ void ServerWrapper::threadFunc()
 		variable::VariableCallback soilHumCb = std::bind(&ServerWrapper::printSoilHumidity, this, std::placeholders::_1);
 		ctx->subscribe("SoilHumidity", soilHumCb);
 
+
+		irrigate = std::make_shared<variable::BoolVariable>(ctx, false);
+		ctx->registerOutVariable(irrigate, "Irrigation");
+
+		uv = std::make_shared<variable::BoolVariable>(ctx, false);
+		ctx->registerOutVariable(uv, "UV");
+
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
 		while (running)
@@ -142,7 +161,7 @@ float RangeMeasure::getAdjustment(const float value) const
 {
 	if (value < min - tolerance)
 	{
-		return min - value;
+		return value - min;
 	}
 	if (value > max + tolerance)
 	{

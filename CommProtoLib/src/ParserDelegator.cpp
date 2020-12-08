@@ -27,14 +27,12 @@ namespace commproto
 			uint32_t msgId = 0;
 
 			stream.read(msgId);
-            LOG_DEBUG("Trying to parse a message with id %d",msgId);
 			auto it = idToParser.find(msgId);
 			if (it == idToParser.end())
 			{
-                LOG_DEBUG("Could not find a parser");
+                LOG_WARNING("Could not find a parser for message id %d",msgId);
 				return;
 			}
-            LOG_DEBUG("Parsing a message with id %d",msgId);
 			it->second->parse(std::move(stream));
 
 		}

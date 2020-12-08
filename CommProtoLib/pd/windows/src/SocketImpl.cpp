@@ -45,7 +45,6 @@ namespace commproto {
 				return 0;
 			}			
 			int sent = send(socketHandle, message.data(), message.size(), 0);
-			LOG_DEBUG("Sent %ld bytes...", sent);
 			if (sent != message.size())
 			{
 				isConnected = false;
@@ -61,7 +60,6 @@ namespace commproto {
 			}
 			message.reserve(size);		
 			int received = recv(socketHandle, message.data(), size, 0);
-			LOG_DEBUG("Read %ld bytes...", received);
 			if (received != size)
 			{
 				isConnected = false;
@@ -91,7 +89,6 @@ namespace commproto {
 				return 0;
 			}
 			int sent = send(socketHandle, &byte, 1, 0);
-			LOG_DEBUG("Sent %ld bytes...", sent);
 			if (sent != 1)
 			{
 				isConnected = false;

@@ -112,6 +112,8 @@ DeviceState DeviceWrapper::loop()
 		{
 			state = DeviceState::Searching;
 			client->close();
+			device->toggleIrrigation(false);
+			device->toggleUVLight(false);
 			LOG_INFO("Connection closed, resetting...");
 		}
 	}
@@ -124,10 +126,11 @@ DeviceState DeviceWrapper::loop()
 
 void DeviceWrapper::uvCallback(commproto::variable::VariableBaseHandle& var)
 {
+	LOG_INFO("Got UV callback");
 	switch(var->getType())
 	{
 	case variable::ValueType::bool8:
-		device->toggleUVLight(std::static_pointer_cast<commproto::variable::BoolVariable>(var).get());
+		device->toggleUVLight(std::static_pointer_cast<commproto::variable::BoolVariable>(var)->get());
 		break;
 	default: ;
 	}
@@ -135,10 +138,11 @@ void DeviceWrapper::uvCallback(commproto::variable::VariableBaseHandle& var)
 
 void DeviceWrapper::irrigationCallback(commproto::variable::VariableBaseHandle& var)
 {
+	LOG_INFO("Got Irrigation callback");
 	switch (var->getType())
 	{
 	case variable::ValueType::bool8:
-		device->toggleIrrigation(std::static_pointer_cast<commproto::variable::BoolVariable>(var).get());
+		device->toggleIrrigation(std::static_pointer_cast<commproto::variable::BoolVariable>(var)->get());
 		break;
 	default:;
 	}

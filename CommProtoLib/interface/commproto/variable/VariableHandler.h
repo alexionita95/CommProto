@@ -57,6 +57,7 @@ namespace commproto
 		template <typename T, ValueType U>
 		void VariableHandler::handle(VariableMessageTemplated<T>& msg)
 		{
+			
 			VariableBaseHandle var = context->get(msg.index); // try to get the variable from the context
 			if (!var)
 			{

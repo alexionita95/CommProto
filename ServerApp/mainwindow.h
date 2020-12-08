@@ -84,6 +84,8 @@ private:
 	float humidity;
 	float soilHumidity;
 	float lightLuxes;
+	commproto::variable::BoolVariableHandle irrigate;
+	commproto::variable::BoolVariableHandle uv;
 
 
 	void calculatePlantHealth();
