@@ -25,9 +25,9 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="readingsLayout">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <layout class="QVBoxLayout" name="readingsLeft">
         <item>
          <widget class="QLabel" name="humidityDisplay">
           <property name="text">
@@ -66,14 +66,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QLabel" name="plantName">
-          <property name="text">
-           <string>Name:</string>
-          </property>
-         </widget>
-        </item>
+       <layout class="QVBoxLayout" name="readingsRight">
         <item>
          <widget class="QLabel" name="idealhumidityDisplay">
           <property name="text">
@@ -105,6 +98,13 @@
        </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="plantName">
+      <property name="text">
+       <string>Name:</string>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QLabel" name="plantHealth">

@@ -48,7 +48,7 @@ void ServerWrapper::printLight(variable::VariableBaseHandle& var)
 	float temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	emit lightReady(temp);
 
-	LOG_INFO("Light Percentage: %.2f C", temp);
+	LOG_INFO("Light: %.2f luxes", temp);
 }
 
 void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
@@ -153,8 +153,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 	ui->statusConsole->setReadOnly(true);
-	ui->horizontalLayout->setAlignment(Qt::AlignLeft);
-	ui->verticalLayout_2->setAlignment(Qt::AlignTop);
+	ui->readingsLeft->setAlignment(Qt::AlignLeft);
+	ui->readingsRight->setAlignment(Qt::AlignLeft);
+	ui->readingsLayout->setAlignment(Qt::AlignTop);
 
 
 	logAccess = new LoggingAccess();
@@ -257,7 +258,7 @@ void MainWindow::setHumidity(const float humidity)
 void MainWindow::setLightExposure(const float light)
 {
 	QString tempStr;
-	tempStr.sprintf("Ambiental light: %.2f%%", light);
+	tempStr.sprintf("Ambiental light: %.2f luxes", light);
 	ui->lightDisplay->setText(tempStr);
 }
 
