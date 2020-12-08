@@ -215,6 +215,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
 	ui->setupUi(this);
+	setWindowIcon(plantIcon);
 	resize(10, 10);
 	ui->statusConsole->setReadOnly(true);
 
