@@ -1,106 +1,19 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <QMainWindow>
-#include <QThread>
 #include <QSettings>
 #include <commproto/variable/Variable.h>
 #include <commproto/logger/Logging.h>
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QTime>
-#include <QNetworkAccessManager>
+#include "ServerWrapper.h"
+
+struct PlantData;
 
 namespace Ui {
 	class MainWindow;
 }
 
-
-struct RangeMeasure
-{
-	static const float tolerance;
-	float min, max;
-	float criticalMin, criticalMax;
-	std::string unitOfMeasure;
-
-	bool isIdeal(const float value) const;
-
-	float getAdjustment(const float value) const;
-
-	float getPercentage(const float value) const;
-
-
-	std::string toString() const
-	{
-		char buf[255] = { 0 };
-		sprintf(buf, "%.1f - %.1f %s", min, max, unitOfMeasure.c_str());
-		return buf;
-
-	}
-};
-
-struct PlantData
-{
-	std::string name;
-	RangeMeasure temp;
-	RangeMeasure humidity;
-	RangeMeasure soilHumidity;
-	RangeMeasure sunlightHours;
-	PlantData()
-	{
-		temp.unitOfMeasure = "*C";
-		humidity.unitOfMeasure = "%";
-		soilHumidity.unitOfMeasure = "%";
-		sunlightHours.unitOfMeasure = "luxes";
-	}
-};
-
-Q_DECLARE_METATYPE(PlantData);
-
-class MainWindow;
-
-class ServerWrapper : public QThread
-{
-	Q_OBJECT
-public:
-	ServerWrapper();
-	~ServerWrapper();
-	MainWindow *window;
-	bool running;
-
-	void run() override;
-	void printTemp(commproto::variable::VariableBaseHandle& var);
-	void printHumidity(commproto::variable::VariableBaseHandle& var);
-	void printLight(commproto::variable::VariableBaseHandle& var);
-	void printSoilHumidity(commproto::variable::VariableBaseHandle& var);
-	void threadFunc();
-	void getSunRiseSunSet();
-	bool isDayTime();
-
-public slots:
-	void setPlantData(PlantData data_, const bool correct);
-	void receivedSunriseSunsetResponse(QNetworkReply *reply);
-
-signals:
-	void tempReady(const float, const bool);
-	void humidityReady(const float, const bool);
-	void lightReady(const float, const bool,const bool,const bool);
-	void soilHumidityReady(const float, const bool, const bool);
-	void healthReady(const float, const float, const float, const float);
-	void onConnection(const bool);
-private:
-	PlantData data;
-	bool hasPlantData;
-	float temp;
-	float humidity;
-	float soilHumidity;
-	float lightLuxes;
-	commproto::variable::BoolVariableHandle irrigate;
-	commproto::variable::BoolVariableHandle uv;
-	QTime sunrise;
-	QTime sunset;
-	QNetworkAccessManager  *manager;
-	void calculatePlantHealth();
-};
 
 
 class LabelWithIcon : public QHBoxLayout

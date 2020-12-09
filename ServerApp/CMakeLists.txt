@@ -14,6 +14,10 @@ find_package(Qt5 COMPONENTS Widgets Network  REQUIRED)
 add_executable(${PROJECT_NAME} WIN32
     mainwindow.ui
     mainwindow.cpp
+    ServerWrapper.cpp
+    ServerWrapper.h
+    PlantData.cpp
+    PlantData.h
 	mainwindow.h
     main.cpp
 )
