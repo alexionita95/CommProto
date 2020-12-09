@@ -30,6 +30,13 @@ namespace commproto {
 			closesocket(socketHandle);
 		}
 
+		void SocketImpl::setTimeout(const uint32_t msec)
+		{
+			DWORD timeOut = msec;
+			int res = setsockopt(socketHandle, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<char*>(&timeOut), sizeof timeOut);
+			res = setsockopt(socketHandle, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char*>(&timeOut), sizeof timeOut);
+		}
+
 		SocketImpl::SocketImpl(SOCKET handle, const Mode mode, const bool initialized)
 			: socketMode(mode)
 			, isInitialized(initialized)
@@ -49,6 +56,7 @@ namespace commproto {
 			{
 				isConnected = false;
 			}
+
 			return sent;
 		}
 

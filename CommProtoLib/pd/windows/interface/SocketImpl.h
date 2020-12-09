@@ -35,6 +35,7 @@ namespace sockets {
         int sendByte(const char byte) override;
 		bool connected() override;
 		void close() override;
+		void setTimeout(const uint32_t msec) override;
 
     private:
         //returns a ready socket from acceptNext()

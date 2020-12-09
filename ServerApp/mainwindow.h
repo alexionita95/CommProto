@@ -70,12 +70,16 @@ public:
 	void printLight(commproto::variable::VariableBaseHandle& var);
 	void printSoilHumidity(commproto::variable::VariableBaseHandle& var);
 	void threadFunc();
-	public slots:
+	void getSunRiseSunSet();
+	bool isDayTime();
+
+public slots:
 	void setPlantData(PlantData data_);
+
 signals:
 	void tempReady(const float, const bool);
 	void humidityReady(const float, const bool);
-	void lightReady(const float, const bool,const bool);
+	void lightReady(const float, const bool,const bool,const bool);
 	void soilHumidityReady(const float, const bool, const bool);
 	void healthReady(const float, const float, const float, const float);
 	void onConnection(const bool);
@@ -146,11 +150,12 @@ public:
 	void clearUiValues();
 	void onLoadSettings();
 	void onExistSaveSettings();
+	void resetValues();
 	~MainWindow();
 	public slots:
 	void setTemperature(const float temp, const bool good);
 	void setHumidity(const float humidity, const bool good);
-	void setLightExposure(const float light, const bool good, const bool uvOn);
+	void setLightExposure(const float light, const bool good, const bool uvOn, const bool isDayTime);
 	void setSoilHumidity(const float humidity, const bool good, const bool irrOn);
 	void setPlantHealth(const float temp_, const float hum_, const float soilHum_, const float light_);
 	void addLogLine(QString str);

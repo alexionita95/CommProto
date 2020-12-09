@@ -47,14 +47,16 @@ void ServerWrapper::printLight(variable::VariableBaseHandle& var)
 {
 	lightLuxes = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	bool isIdeal = data.sunlightHours.isIdeal(lightLuxes);
-	bool turnOn = data.sunlightHours.getAdjustment(lightLuxes) < 0;;
+	bool isDay = isDayTime();
+	bool turnOn = isDay && data.sunlightHours.getAdjustment(lightLuxes) < 0;;
+	
 	if (uv)
 	{
 
 		*uv = turnOn;
 		LOG_INFO("Light difference = %3.2lf(%s)", data.sunlightHours.getAdjustment(lightLuxes), uv->get() ? "True" : "False");
 	}
-	emit lightReady(lightLuxes, isIdeal, turnOn);
+	emit lightReady(lightLuxes, isIdeal, turnOn, isDay);
 	calculatePlantHealth();
 	LOG_INFO("Light: %.2f luxes", lightLuxes);
 }
@@ -75,6 +77,25 @@ void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
 	LOG_INFO("Soil Humidity: %.2f%%", soilHumidity);
 	calculatePlantHealth();
 }
+
+
+class KeepAliveMsg : commproto::messages::MessageBase
+{
+public:
+	KeepAliveMsg(const uint32_t id) : MessageBase{ id } {}
+	uint32_t getSize() const override
+	{
+		return MessageBase::getSize();
+	}
+	static Message serialize(const uint32_t id)
+	{
+		KeepAliveMsg msg(id);
+		parser::ByteStream stream;
+		stream.writeHeader(msg);
+		return stream.getStream();
+	}
+};
+
 
 void ServerWrapper::threadFunc()
 {
@@ -98,6 +119,7 @@ void ServerWrapper::threadFunc()
 			printf("An error occurred while waiting for a connection.");
 			continue;
 		}
+		client->setTimeout(1000);
 		emit onConnection(true);
 		Message msg;
 		uint8_t sizeOfPtr = sizeof(void*);
@@ -105,7 +127,10 @@ void ServerWrapper::threadFunc()
 		client->sendBytes(msg);
 
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
+		
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
+		uint32_t keepAliveId = mapper->registerType<KeepAliveMsg>();
+
 
 		variable::ContextHandle ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());
 
@@ -130,11 +155,19 @@ void ServerWrapper::threadFunc()
 
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
+		uint32_t counter = 0;
+		const uint32_t checkConnection = 5000;
+		uint32_t sleepMsec = 1000;
 		while (running)
 		{
 			
 			builder->pollAndRead();
-			std::this_thread::sleep_for(std::chrono::seconds(2));
+			std::this_thread::sleep_for(std::chrono::milliseconds(sleepMsec));
+			counter += sleepMsec;
+			if (counter == checkConnection) {
+				counter = 0;
+				client->sendBytes(KeepAliveMsg::serialize(keepAliveId));
+			}
 			if (!client->connected())
 			{
 				LOG_WARNING("***********************************************");
@@ -151,6 +184,15 @@ void ServerWrapper::setPlantData(PlantData data_)
 {
 	data = data_;
 	LOG_INFO("Server received plant data for plant \"%s\"", data.name.c_str());
+}
+
+void ServerWrapper::getSunRiseSunSet()
+{
+}
+
+bool ServerWrapper::isDayTime()
+{
+	return false;
 }
 
 const float RangeMeasure::tolerance = 0.5f;
@@ -258,7 +300,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	setTemperature(0.f, false);
 	setHumidity(0.f, false);
 	setSoilHumidity(0.f, false, false);
-	setLightExposure(0.f, false, false);
+	setLightExposure(0.f, false, false,false);
+	setPlantHealth(0.f, 0.f, 0.f, 0.f);
+
 	ui->readingsLeft->addLayout(&tempLabel);
 	ui->readingsLeft->addLayout(&humLabel);
 	ui->readingsLeft->addLayout(&soilHumLabel);
@@ -271,7 +315,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->readingsRight->addLayout(&idealSoilHumLabel);
 	ui->readingsRight->addLayout(&idealLightLabel);
 
-	setPlantHealth(0.f, 0.f, 0.f, 0.f);
+
 
 	ui->plantHealthLayout->setAlignment(Qt::AlignTop);
 	ui->plantHealthLayout->addLayout(&tempHealthLabel);
@@ -353,6 +397,15 @@ void MainWindow::onLoadSettings()
 
 }
 
+void MainWindow::resetValues()
+{
+	setTemperature(0.f, false);
+	setHumidity(0.f, false);
+	setSoilHumidity(0.f, false, false);
+	setLightExposure(0.f, false, false, false);
+	setPlantHealth(0.f, 0.f, 0.f, 0.f);
+}
+
 MainWindow::~MainWindow()
 {
 	if (server)
@@ -399,18 +452,24 @@ void MainWindow::setHumidity(const float humidity, const bool good)
 }
 
 
-void MainWindow::setLightExposure(const float light, const bool good, const bool uvOn)
+void MainWindow::setLightExposure(const float light, const bool good, const bool uvOn, const bool isDayTime)
 {
 	QString tempStr;
 	tempStr.sprintf("%4.2f luxes", light);
 	lightLabel.text->setText(measureMentText("Ambiental light", tempStr, good));
-	if (uvOn)
-	{
-		lightLabel.setIcon(lightOnIcon);
+	if (isDayTime) {
+		if (uvOn)
+		{
+			lightLabel.setIcon(lightOnIcon);
+		}
+		else
+		{
+			lightLabel.setIcon(lightIcon);
+		}
 	}
 	else
 	{
-		lightLabel.setIcon(lightIcon);
+		lightLabel.setIcon(noLightIcon);
 	}
 }
 
@@ -569,6 +628,7 @@ void MainWindow::onConnectionStatus(const bool connected)
 	else
 	{
 		connectionStatusLabel.setIcon(notConnectIcon);
+		resetValues();
 	}
 }
 

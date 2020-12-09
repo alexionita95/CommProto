@@ -44,6 +44,9 @@ namespace sockets {
 
 		//close the connection
 		virtual void close() = 0;
+
+		//set the timeout for socket operation
+		virtual void setTimeout(const uint32_t msec) = 0;
     };
 
 } // namespace core
