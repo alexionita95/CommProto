@@ -35,7 +35,7 @@ namespace commproto
 		class Variable : public VariableBase
 		{
 		public:
-			Variable(const ContextHandle& ctx, const T& value_ = T{});
+			Variable(const ContextHandle& ctx, const T& value_ = T{}, const bool sendUniqueOnly = true);
 
 			//used to set the value by the owner, notifying the context that something has changed
 			Variable& operator=(const T& value_);
@@ -63,14 +63,15 @@ namespace commproto
 			}
 
 		private:
-
+			bool uniqueOnly;
 			T value;
 			VariableSerializer serializer;
 		};
 
 		template <typename T, ValueType UnderlyingType>
-		Variable<T, UnderlyingType>::Variable(const ContextHandle& ctx, const T& value_)
+		Variable<T, UnderlyingType>::Variable(const ContextHandle& ctx, const T& value_, const bool sendUniqueOnly)
 			: VariableBase{ UnderlyingType, ctx }
+			, uniqueOnly(sendUniqueOnly)
 			, value{ value_ }
 		{
 		}
@@ -78,7 +79,7 @@ namespace commproto
 		template <typename T, ValueType UnderlyingType>
 		Variable<T, UnderlyingType>& Variable<T, UnderlyingType>::operator=(const T& value_)
 		{
-			if (value == value_)
+			if (uniqueOnly && value == value_)
 			{
 				return *this;
 			}

@@ -77,7 +77,7 @@ public:
 	bool isDayTime();
 
 public slots:
-	void setPlantData(PlantData data_);
+	void setPlantData(PlantData data_, const bool correct);
 	void receivedSunriseSunsetResponse(QNetworkReply *reply);
 
 signals:
@@ -89,6 +89,7 @@ signals:
 	void onConnection(const bool);
 private:
 	PlantData data;
+	bool hasPlantData;
 	float temp;
 	float humidity;
 	float soilHumidity;
@@ -169,7 +170,7 @@ public:
 	void onLoadFromJson();
 	void onConnectionStatus(const bool connected);
 signals:
-	void plantDataReady(PlantData data);
+	void plantDataReady(PlantData data,const bool);
 private:
 	Ui::MainWindow *ui;
 	ServerWrapper *server;

@@ -21,15 +21,15 @@
 
 using namespace commproto;
 
-ServerWrapper::ServerWrapper(): manager(new QNetworkAccessManager)
+ServerWrapper::ServerWrapper() : hasPlantData(false), manager(new QNetworkAccessManager)
 {
-	connect(manager, &QNetworkAccessManager::finished,this,&ServerWrapper::receivedSunriseSunsetResponse);
+	connect(manager, &QNetworkAccessManager::finished, this, &ServerWrapper::receivedSunriseSunsetResponse);
 	getSunRiseSunSet();
 }
 
 ServerWrapper::~ServerWrapper()
 {
-	if(manager)
+	if (manager)
 	{
 		delete manager;
 		manager = nullptr;
@@ -44,54 +44,79 @@ void ServerWrapper::run()
 void ServerWrapper::printTemp(variable::VariableBaseHandle& var)
 {
 	temp = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	bool isIdeal = data.temp.isIdeal(temp);
-	emit tempReady(temp, isIdeal);
-	calculatePlantHealth();
+	if (hasPlantData) {
+		bool isIdeal = data.temp.isIdeal(temp);
+		emit tempReady(temp, isIdeal);
+		calculatePlantHealth();
+	}
+	else
+	{
+		emit tempReady(temp, false);
+	}
 	LOG_INFO("Temperature: %.2f C", temp);
 }
 
 void ServerWrapper::printHumidity(variable::VariableBaseHandle& var)
 {
 	humidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	bool isIdeal = data.humidity.isIdeal(humidity);
-	emit humidityReady(humidity, isIdeal);
-	calculatePlantHealth();
+	if (hasPlantData) {
+		bool isIdeal = data.humidity.isIdeal(humidity);
+		emit humidityReady(humidity, isIdeal);
+		calculatePlantHealth();
+
+	}
+	else
+	{
+		emit humidityReady(humidity, false);
+	}
 	LOG_INFO("Humidity: %.2f%%", humidity);
 }
 
 void ServerWrapper::printLight(variable::VariableBaseHandle& var)
 {
 	lightLuxes = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	bool isIdeal = data.sunlightHours.isIdeal(lightLuxes);
 	bool isDay = isDayTime();
-	bool turnOn = isDay && data.sunlightHours.getAdjustment(lightLuxes) < 0;;
-	
-	if (uv)
-	{
+	if (hasPlantData) {
+		bool isIdeal = data.sunlightHours.isIdeal(lightLuxes);
+		bool turnOn = isDay && data.sunlightHours.getAdjustment(lightLuxes) < 0;;
 
-		*uv = turnOn;
-		LOG_INFO("Light difference = %3.2lf(%s)", data.sunlightHours.getAdjustment(lightLuxes), uv->get() ? "True" : "False");
+		if (uv)
+		{
+
+			*uv = turnOn;
+			LOG_INFO("Light difference = %3.2lf(%s)", data.sunlightHours.getAdjustment(lightLuxes), uv->get() ? "True" : "False");
+		}
+		emit lightReady(lightLuxes, isIdeal, turnOn, isDay);
+		calculatePlantHealth();
 	}
-	emit lightReady(lightLuxes, isIdeal, turnOn, isDay);
-	calculatePlantHealth();
+	else
+	{
+		emit lightReady(lightLuxes, false, false, isDay);
+	}
 	LOG_INFO("Light: %.2f luxes", lightLuxes);
 }
 
 void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
 {
 	soilHumidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
-	bool isIdeal = data.soilHumidity.isIdeal(soilHumidity);
-	bool turnOn = data.soilHumidity.getAdjustment(soilHumidity) < 0;
-	if (irrigate)
-	{
+	if (hasPlantData) {
+		bool isIdeal = data.soilHumidity.isIdeal(soilHumidity);
+		bool turnOn = data.soilHumidity.getAdjustment(soilHumidity) < 0;
+		if (irrigate)
+		{
 
-		*irrigate = turnOn;
-		LOG_INFO("Irrigation difference = %3.2lf(%s)", data.soilHumidity.getAdjustment(soilHumidity), irrigate->get() ? "True" : "False");
+			*irrigate = turnOn;
+			LOG_INFO("Irrigation difference = %3.2lf(%s)", data.soilHumidity.getAdjustment(soilHumidity), irrigate->get() ? "True" : "False");
+		}
+		emit soilHumidityReady(soilHumidity, isIdeal, turnOn);
+		calculatePlantHealth();
 	}
-	emit soilHumidityReady(soilHumidity, isIdeal, turnOn);
-
+	else
+	{
+		emit soilHumidityReady(soilHumidity, false, false);
+	}
 	LOG_INFO("Soil Humidity: %.2f%%", soilHumidity);
-	calculatePlantHealth();
+
 }
 
 
@@ -143,7 +168,7 @@ void ServerWrapper::threadFunc()
 		client->sendBytes(msg);
 
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
-		
+
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
 		uint32_t keepAliveId = mapper->registerType<KeepAliveMsg>();
 
@@ -176,7 +201,7 @@ void ServerWrapper::threadFunc()
 		uint32_t sleepMsec = 1000;
 		while (running)
 		{
-			
+
 			builder->pollAndRead();
 			std::this_thread::sleep_for(std::chrono::milliseconds(sleepMsec));
 			counter += sleepMsec;
@@ -196,9 +221,15 @@ void ServerWrapper::threadFunc()
 	}
 }
 
-void ServerWrapper::setPlantData(PlantData data_)
+void ServerWrapper::setPlantData(PlantData data_, const bool correct)
 {
+	if (!correct)
+	{
+		hasPlantData = false;
+		return;
+	}
 	data = data_;
+	hasPlantData = true;
 	LOG_INFO("Server received plant data for plant \"%s\"", data.name.c_str());
 }
 
@@ -213,13 +244,13 @@ void ServerWrapper::receivedSunriseSunsetResponse(QNetworkReply* reply)
 	QJsonDocument doc = QJsonDocument::fromJson(answer.toUtf8());
 	QJsonObject obj = doc.object();
 
-	if(!obj.contains("results"))
+	if (!obj.contains("results"))
 	{
 		return;
 	}
 	QJsonObject results = obj.find("results").value().toObject();
 
-	if(!results.contains("sunrise") || !results.contains("sunset"))
+	if (!results.contains("sunrise") || !results.contains("sunset"))
 	{
 		return;
 	}
@@ -232,7 +263,7 @@ void ServerWrapper::receivedSunriseSunsetResponse(QNetworkReply* reply)
 	QDateTime dt(UTC.date(), UTC.time(), Qt::LocalTime);
 	int64_t diff = dt.secsTo(local);
 
-	QTime responseSunrise = QTime::fromString(sunriseStr,"h:mm:ss A");
+	QTime responseSunrise = QTime::fromString(sunriseStr, "h:mm:ss A");
 	QTime responseSunset = QTime::fromString(sunsetStr, "h:mm:ss A");
 	sunrise = responseSunrise.addSecs(diff);
 	sunset = responseSunset.addSecs(diff);
@@ -362,7 +393,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	setTemperature(0.f, false);
 	setHumidity(0.f, false);
 	setSoilHumidity(0.f, false, false);
-	setLightExposure(0.f, false, false,false);
+	setLightExposure(0.f, false, false, false);
 	setPlantHealth(0.f, 0.f, 0.f, 0.f);
 
 	ui->readingsLeft->addLayout(&tempLabel);
@@ -571,14 +602,14 @@ void MainWindow::setPlantHealth(const float temp_, const float hum_, const float
 	soilHumHealthLabel.text->setText(measureMentText(" Soil Humidity", soilHumStr, soilHum_ > 70.0f));
 	lightHealthLabel.text->setText(measureMentText(" Light", lightStr, light_ > 70.0f));
 	overallHealthLabel.text->setText(measureMentText(" Overall", overallStr, overall > 70.0f));
-	if(overall > 70.f)
+	if (overall > 70.f)
 	{
 		overallHealthLabel.setIcon(plantIcon);
-	} 
-	else if(overall > 30.f)
+	}
+	else if (overall > 30.f)
 	{
 		overallHealthLabel.setIcon(plantYellowIcon);
-	} 
+	}
 	else
 	{
 		overallHealthLabel.setIcon(plantRedIcon);
@@ -683,7 +714,7 @@ void MainWindow::onLoadFromJson()
 
 void MainWindow::onConnectionStatus(const bool connected)
 {
-	if(connected)
+	if (connected)
 	{
 		connectionStatusLabel.setIcon(connectedIcon);
 	}
@@ -712,12 +743,13 @@ void MainWindow::loadFromJson(QString path)
 		updateUiValues();
 		settings.setValue("plant_file", path);
 		settings.setValue("loaded_plant_file", true);
-		emit plantDataReady(data);
+		emit plantDataReady(data, true);
 		LOG_INFO("Loaded plant data file \"%s\"", path.toUtf8().data());
 	}
 	else
 	{
 		clearUiValues();
+		emit plantDataReady(data, false);
 		settings.setValue("loaded_plant_file", false);
 		LOG_ERROR("An error occurred while parsing plant data file \"%s\"", path.toUtf8().data());
 	}

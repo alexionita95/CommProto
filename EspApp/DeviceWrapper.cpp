@@ -17,14 +17,14 @@ DeviceWrapper::DeviceWrapper(SDKWrapper* device_, const char* host_, uint32_t po
 
 void DeviceWrapper::setTemp(float temp_)
 {
-    if(temp){
-       *temp = temp_;
-    }
+	if (temp) {
+		*temp = temp_;
+	}
 }
 
 void DeviceWrapper::setHumidity(float humidity_)
 {
-	if(humidity)
+	if (humidity)
 	{
 		*humidity = humidity_;
 	}
@@ -32,7 +32,7 @@ void DeviceWrapper::setHumidity(float humidity_)
 
 void DeviceWrapper::setLight(float lightPercentage_)
 {
-	if(lightPercentage)
+	if (lightPercentage)
 	{
 		*lightPercentage = lightPercentage_;
 	}
@@ -40,7 +40,7 @@ void DeviceWrapper::setLight(float lightPercentage_)
 
 void DeviceWrapper::setSoilHumidity(float humidityPercentage)
 {
-	if(soilHumidity)
+	if (soilHumidity)
 	{
 		*soilHumidity = humidityPercentage;
 	}
@@ -66,37 +66,37 @@ DeviceState DeviceWrapper::loop()
 		}
 		LOG_INFO("Connection established to %s:%d", host.c_str(), port);
 		state = DeviceState::Initializing;
-		
+
 	}
 	break;
 	case DeviceState::Initializing:
 	{
-        
+
 		client->sendByte(static_cast<char>(sizeof(void*)));
 
 		messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(client);
 		messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
-        
-		ctx = std::make_shared<variable::ContextImpl>(client,mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());        
+
+		ctx = std::make_shared<variable::ContextImpl>(client, mapper->registerType<variable::VariableMessage>(), mapper->registerType<variable::VariableMappingMessage>());
 		parser::ParserDelegatorHandle delegator = parser::ParserDelegatorFactory::build(ctx);
 		builder = std::make_shared<parser::MessageBuilder>(client, delegator);
-		
-		variable::VariableCallback cb = std::bind(&DeviceWrapper::irrigationCallback,this,std::placeholders::_1);
+
+		variable::VariableCallback cb = std::bind(&DeviceWrapper::irrigationCallback, this, std::placeholders::_1);
 		ctx->subscribe("Irrigation", cb);
 
 		variable::VariableCallback cb2 = std::bind(&DeviceWrapper::uvCallback, this, std::placeholders::_1);
 		ctx->subscribe("UV", cb2);
 
-        temp = std::make_shared<variable::RealVariable>(ctx,0.0f);
-        ctx->registerOutVariable(temp,"TempC");
+		temp = std::make_shared<variable::RealVariable>(ctx, 0.0f, false);
+		ctx->registerOutVariable(temp, "TempC");
 
-		humidity = std::make_shared<variable::RealVariable>(ctx, 0.0f);
+		humidity = std::make_shared<variable::RealVariable>(ctx, 0.0f, false);
 		ctx->registerOutVariable(humidity, "Humidity");
 
-		lightPercentage = std::make_shared<variable::RealVariable>(ctx, 0.0f);
+		lightPercentage = std::make_shared<variable::RealVariable>(ctx, 0.0f, false);
 		ctx->registerOutVariable(lightPercentage, "Light");
 
-		soilHumidity = std::make_shared<variable::RealVariable>(ctx, 0.0f);
+		soilHumidity = std::make_shared<variable::RealVariable>(ctx, 0.0f, false);
 		ctx->registerOutVariable(soilHumidity, "SoilHumidity");
 
 		state = DeviceState::Connected;
@@ -104,7 +104,7 @@ DeviceState DeviceWrapper::loop()
 		device->setLed(1, 100, 245, 66);
 	}
 	break;
-	 
+
 	case DeviceState::Connected:
 	{
 		builder->pollAndRead();
@@ -120,19 +120,19 @@ DeviceState DeviceWrapper::loop()
 	break;
 
 	default:;
-	}	
+	}
 	return state;
 }
 
 void DeviceWrapper::uvCallback(commproto::variable::VariableBaseHandle& var)
 {
 	LOG_INFO("Got UV callback");
-	switch(var->getType())
+	switch (var->getType())
 	{
 	case variable::ValueType::bool8:
 		device->toggleUVLight(std::static_pointer_cast<commproto::variable::BoolVariable>(var)->get());
 		break;
-	default: ;
+	default:;
 	}
 }
 

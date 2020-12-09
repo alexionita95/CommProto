@@ -35,6 +35,10 @@ public:
     {
     }
 
+    void setTimeout(const uint32_t msec) override
+    {
+    }
+
     bool connected() override{
         return client.connected();
     }
