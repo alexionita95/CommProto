@@ -13,8 +13,6 @@
 #include <commproto/variable/ContextImpl.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/variable/VariableMappingMessage.h>
-
-#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -49,13 +47,14 @@ void ServerWrapper::printLight(variable::VariableBaseHandle& var)
 {
 	lightLuxes = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	bool isIdeal = data.sunlightHours.isIdeal(lightLuxes);
+	bool turnOn = data.sunlightHours.getAdjustment(lightLuxes) < 0;;
 	if (uv)
 	{
-		
-		*uv = data.sunlightHours.getAdjustment(lightLuxes) < 0;
-		LOG_INFO("Light difference = %3.2lf(%s)", data.sunlightHours.getAdjustment(lightLuxes),uv->get()?"True":"False");
+
+		*uv = turnOn;
+		LOG_INFO("Light difference = %3.2lf(%s)", data.sunlightHours.getAdjustment(lightLuxes), uv->get() ? "True" : "False");
 	}
-	emit lightReady(lightLuxes, isIdeal);
+	emit lightReady(lightLuxes, isIdeal, turnOn);
 	calculatePlantHealth();
 	LOG_INFO("Light: %.2f luxes", lightLuxes);
 }
@@ -64,13 +63,14 @@ void ServerWrapper::printSoilHumidity(variable::VariableBaseHandle& var)
 {
 	soilHumidity = std::static_pointer_cast<variable::RealVariable>(var)->get();
 	bool isIdeal = data.soilHumidity.isIdeal(soilHumidity);
+	bool turnOn = data.soilHumidity.getAdjustment(soilHumidity) < 0;
 	if (irrigate)
 	{
-		
-		*irrigate = data.soilHumidity.getAdjustment(soilHumidity) < 0;
-		LOG_INFO("Irrigation difference = %3.2lf(%s)", data.soilHumidity.getAdjustment(soilHumidity),irrigate->get()?"True":"False");
+
+		*irrigate = turnOn;
+		LOG_INFO("Irrigation difference = %3.2lf(%s)", data.soilHumidity.getAdjustment(soilHumidity), irrigate->get() ? "True" : "False");
 	}
-	emit soilHumidityReady(soilHumidity, isIdeal);
+	emit soilHumidityReady(soilHumidity, isIdeal, turnOn);
 
 	LOG_INFO("Soil Humidity: %.2f%%", soilHumidity);
 	calculatePlantHealth();
@@ -93,6 +93,12 @@ void ServerWrapper::threadFunc()
 	while (running)
 	{
 		sockets::SocketHandle client = server->acceptNext();
+		if (!client)
+		{
+			printf("An error occurred while waiting for a connection.");
+			continue;
+		}
+		emit onConnection(true);
 		Message msg;
 		uint8_t sizeOfPtr = sizeof(void*);
 		msg.emplace_back(sizeOfPtr);
@@ -126,17 +132,14 @@ void ServerWrapper::threadFunc()
 		parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(client, delegator);
 		while (running)
 		{
-			if (!client)
-			{
-				printf("An error occurred while waiting for a connection.");
-				continue;
-			}
+			
 			builder->pollAndRead();
 			std::this_thread::sleep_for(std::chrono::seconds(2));
 			if (!client->connected())
 			{
 				LOG_WARNING("***********************************************");
 				LOG_WARNING("Disconnected from a connection, reinitializing.");
+				emit onConnection(false);
 				client->close();
 				break;
 			}
@@ -218,6 +221,13 @@ MainWindow::MainWindow(QWidget *parent) :
 	soilHumIcon("icons/soil.png"),
 	lightIcon("icons/light.png"),
 	plantIcon("icons/plant.png"),
+	soilHumOnIcon("icons/soil_on.png"),
+	lightOnIcon("icons/light_on.png"),
+	plantYellowIcon("icons/plant_yellow.png"),
+	plantRedIcon("icons/plant_red.png"),
+	noLightIcon("icons/no_light.png"),
+	connectedIcon("icons/connected.png"),
+	notConnectIcon("icons/not_connected.png"),
 	tempLabel(tempIcon),
 	humLabel(humIcon),
 	soilHumLabel(soilHumIcon),
@@ -230,20 +240,25 @@ MainWindow::MainWindow(QWidget *parent) :
 	humHealthLabel(humIcon),
 	soilHumHealthLabel(soilHumIcon),
 	lightHealthLabel(lightIcon),
-	overallHealthLabel(plantIcon)
+	overallHealthLabel(plantIcon),
+	connectionStatusLabel(notConnectIcon)
 
 {
 	ui->setupUi(this);
 	setWindowIcon(plantIcon);
 	resize(10, 10);
+
+	ui->statusLayout->insertLayout(0, &connectionStatusLabel);
+	ui->statusLayout->setAlignment(Qt::AlignLeft);
+
 	ui->statusConsole->setReadOnly(true);
 
 	ui->readingsLeft->setAlignment(Qt::AlignTop);
 
 	setTemperature(0.f, false);
 	setHumidity(0.f, false);
-	setSoilHumidity(0.f, false);
-	setLightExposure(0.f, false);
+	setSoilHumidity(0.f, false, false);
+	setLightExposure(0.f, false, false);
 	ui->readingsLeft->addLayout(&tempLabel);
 	ui->readingsLeft->addLayout(&humLabel);
 	ui->readingsLeft->addLayout(&soilHumLabel);
@@ -284,6 +299,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(server, &ServerWrapper::healthReady, this, &MainWindow::setPlantHealth);
 	connect(server, &ServerWrapper::soilHumidityReady, this, &MainWindow::setSoilHumidity);
 	connect(this, &MainWindow::plantDataReady, server, &ServerWrapper::setPlantData);
+	connect(server, &ServerWrapper::onConnection, this, &MainWindow::onConnectionStatus);
 
 	server->window = this;
 	server->running = true;
@@ -383,18 +399,34 @@ void MainWindow::setHumidity(const float humidity, const bool good)
 }
 
 
-void MainWindow::setLightExposure(const float light, const bool good)
+void MainWindow::setLightExposure(const float light, const bool good, const bool uvOn)
 {
 	QString tempStr;
 	tempStr.sprintf("%4.2f luxes", light);
 	lightLabel.text->setText(measureMentText("Ambiental light", tempStr, good));
+	if (uvOn)
+	{
+		lightLabel.setIcon(lightOnIcon);
+	}
+	else
+	{
+		lightLabel.setIcon(lightIcon);
+	}
 }
 
-void MainWindow::setSoilHumidity(const float humidity, const bool good)
+void MainWindow::setSoilHumidity(const float humidity, const bool good, const bool irrOn)
 {
 	QString tempStr;
 	tempStr.sprintf("%3.2f%%", humidity);
 	soilHumLabel.text->setText(measureMentText("Soil humidity", tempStr, good));
+	if (irrOn)
+	{
+		soilHumLabel.setIcon(soilHumOnIcon);
+	}
+	else
+	{
+		soilHumLabel.setIcon(soilHumIcon);
+	}
 }
 
 void MainWindow::setPlantHealth(const float temp_, const float hum_, const float soilHum_, const float light_)
@@ -418,6 +450,18 @@ void MainWindow::setPlantHealth(const float temp_, const float hum_, const float
 	soilHumHealthLabel.text->setText(measureMentText(" Soil Humidity", soilHumStr, soilHum_ > 70.0f));
 	lightHealthLabel.text->setText(measureMentText(" Light", lightStr, light_ > 70.0f));
 	overallHealthLabel.text->setText(measureMentText(" Overall", overallStr, overall > 70.0f));
+	if(overall > 70.f)
+	{
+		overallHealthLabel.setIcon(plantIcon);
+	} 
+	else if(overall > 30.f)
+	{
+		overallHealthLabel.setIcon(plantYellowIcon);
+	} 
+	else
+	{
+		overallHealthLabel.setIcon(plantRedIcon);
+	}
 }
 
 void MainWindow::addLogLine(QString str)
@@ -514,6 +558,18 @@ void MainWindow::onLoadFromJson()
 		tr("JSON (*.json)"));
 	loadFromJson(filePath);
 
+}
+
+void MainWindow::onConnectionStatus(const bool connected)
+{
+	if(connected)
+	{
+		connectionStatusLabel.setIcon(connectedIcon);
+	}
+	else
+	{
+		connectionStatusLabel.setIcon(notConnectIcon);
+	}
 }
 
 void MainWindow::loadFromJson(QString path)

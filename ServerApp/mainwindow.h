@@ -75,9 +75,10 @@ public:
 signals:
 	void tempReady(const float, const bool);
 	void humidityReady(const float, const bool);
-	void lightReady(const float, const bool);
-	void soilHumidityReady(const float, const bool);
+	void lightReady(const float, const bool,const bool);
+	void soilHumidityReady(const float, const bool, const bool);
 	void healthReady(const float, const float, const float, const float);
+	void onConnection(const bool);
 private:
 	PlantData data;
 	float temp;
@@ -101,10 +102,15 @@ public:
 		: icon(new QLabel())
 		, text(new QLabel())
 	{
-		icon->setPixmap(icon_.pixmap(20,20));
+		icon->setPixmap(icon_.pixmap(30,30));
 		addWidget(icon);
 		addWidget(text);
 		setAlignment(Qt::AlignLeft);
+	}
+
+	void setIcon(const QIcon & icon_)
+	{
+		icon->setPixmap(icon_.pixmap(30, 30));
 	}
 
 	~LabelWithIcon()
@@ -144,13 +150,14 @@ public:
 	public slots:
 	void setTemperature(const float temp, const bool good);
 	void setHumidity(const float humidity, const bool good);
-	void setLightExposure(const float light, const bool good);
-	void setSoilHumidity(const float humidity, const bool good);
+	void setLightExposure(const float light, const bool good, const bool uvOn);
+	void setSoilHumidity(const float humidity, const bool good, const bool irrOn);
 	void setPlantHealth(const float temp_, const float hum_, const float soilHum_, const float light_);
 	void addLogLine(QString str);
 	void toggleStatusConsole(bool visible);
 	void loadFromJson(QString path);
 	void onLoadFromJson();
+	void onConnectionStatus(const bool connected);
 signals:
 	void plantDataReady(PlantData data);
 private:
@@ -159,7 +166,8 @@ private:
 	LoggingAccess *logAccess;
 	PlantData data;
 	QSettings settings;
-	QIcon tempIcon, humIcon, soilHumIcon, lightIcon, plantIcon;
+	QIcon tempIcon, humIcon, soilHumIcon, lightIcon, plantIcon,soilHumOnIcon,lightOnIcon,plantYellowIcon,plantRedIcon,noLightIcon;
+	QIcon connectedIcon, notConnectIcon;
 	LabelWithIcon tempLabel,
 		humLabel,
 		soilHumLabel,
@@ -172,7 +180,8 @@ private:
 		humHealthLabel,
 		soilHumHealthLabel,
 		lightHealthLabel,
-		overallHealthLabel;
+		overallHealthLabel,
+		connectionStatusLabel;
 };
 
 #endif // MAINWINDOW_H
