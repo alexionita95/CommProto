@@ -9,7 +9,7 @@ set (CMAKE_AUTOUIC ON)
 set (CMAKE_AUTORCC ON)
 
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Network  REQUIRED)
 
 add_executable(${PROJECT_NAME} WIN32
     mainwindow.ui
@@ -18,7 +18,7 @@ add_executable(${PROJECT_NAME} WIN32
     main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets CommProto)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network CommProto)
 
 include_directories(.)
 

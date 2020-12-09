@@ -17,8 +17,24 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFileDialog>
+#include <QNetworkReply>
 
 using namespace commproto;
+
+ServerWrapper::ServerWrapper(): manager(new QNetworkAccessManager)
+{
+	connect(manager, &QNetworkAccessManager::finished,this,&ServerWrapper::receivedSunriseSunsetResponse);
+	getSunRiseSunSet();
+}
+
+ServerWrapper::~ServerWrapper()
+{
+	if(manager)
+	{
+		delete manager;
+		manager = nullptr;
+	}
+}
 
 void ServerWrapper::run()
 {
@@ -164,7 +180,7 @@ void ServerWrapper::threadFunc()
 			builder->pollAndRead();
 			std::this_thread::sleep_for(std::chrono::milliseconds(sleepMsec));
 			counter += sleepMsec;
-			if (counter == checkConnection) {
+			if (counter >= checkConnection) {
 				counter = 0;
 				client->sendBytes(KeepAliveMsg::serialize(keepAliveId));
 			}
@@ -186,13 +202,58 @@ void ServerWrapper::setPlantData(PlantData data_)
 	LOG_INFO("Server received plant data for plant \"%s\"", data.name.c_str());
 }
 
+void ServerWrapper::receivedSunriseSunsetResponse(QNetworkReply* reply)
+{
+
+	if (reply->error()) {
+		return;
+	}
+
+	QString answer = reply->readAll();
+	QJsonDocument doc = QJsonDocument::fromJson(answer.toUtf8());
+	QJsonObject obj = doc.object();
+
+	if(!obj.contains("results"))
+	{
+		return;
+	}
+	QJsonObject results = obj.find("results").value().toObject();
+
+	if(!results.contains("sunrise") || !results.contains("sunset"))
+	{
+		return;
+	}
+
+	QString sunriseStr = results.find("sunrise").value().toString();
+	QString sunsetStr = results.find("sunset").value().toString();
+
+	QDateTime local(QDateTime::currentDateTime());
+	QDateTime UTC(local.toUTC());
+	QDateTime dt(UTC.date(), UTC.time(), Qt::LocalTime);
+	int64_t diff = dt.secsTo(local);
+
+	QTime responseSunrise = QTime::fromString(sunriseStr,"h:mm:ss A");
+	QTime responseSunset = QTime::fromString(sunsetStr, "h:mm:ss A");
+	sunrise = responseSunrise.addSecs(diff);
+	sunset = responseSunset.addSecs(diff);
+}
+
 void ServerWrapper::getSunRiseSunSet()
 {
+	static const float lat = 45.64861f;
+	static const float lng = 25.60613f;
+
+	QString req;
+	req.sprintf("%slat=%lf&lng=%lf&formatted=1", "https://api.sunrise-sunset.org/json?", lat, lng);
+	QNetworkRequest request(req);
+	manager->get(request);
+
 }
 
 bool ServerWrapper::isDayTime()
 {
-	return false;
+	QTime now = QTime::currentTime();
+	return sunrise < now && now < sunset;
 }
 
 const float RangeMeasure::tolerance = 0.5f;
@@ -245,7 +306,8 @@ float RangeMeasure::getPercentage(const float value) const
 
 void ServerWrapper::calculatePlantHealth()
 {
-	emit healthReady(data.temp.getPercentage(temp), data.humidity.getPercentage(humidity), data.soilHumidity.getPercentage(soilHumidity), data.sunlightHours.getPercentage(lightLuxes));
+	float lightHealth = isDayTime() ? data.sunlightHours.getPercentage(lightLuxes) : 100.0f;
+	emit healthReady(data.temp.getPercentage(temp), data.humidity.getPercentage(humidity), data.soilHumidity.getPercentage(soilHumidity), lightHealth);
 }
 
 void LoggingAccess::addLog(const char * line, const uint32_t size)

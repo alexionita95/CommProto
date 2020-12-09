@@ -7,7 +7,8 @@
 #include <commproto/logger/Logging.h>
 #include <QLabel>
 #include <QHBoxLayout>
-
+#include <QTime>
+#include <QNetworkAccessManager>
 
 namespace Ui {
 	class MainWindow;
@@ -61,6 +62,8 @@ class ServerWrapper : public QThread
 {
 	Q_OBJECT
 public:
+	ServerWrapper();
+	~ServerWrapper();
 	MainWindow *window;
 	bool running;
 
@@ -75,6 +78,7 @@ public:
 
 public slots:
 	void setPlantData(PlantData data_);
+	void receivedSunriseSunsetResponse(QNetworkReply *reply);
 
 signals:
 	void tempReady(const float, const bool);
@@ -91,8 +95,9 @@ private:
 	float lightLuxes;
 	commproto::variable::BoolVariableHandle irrigate;
 	commproto::variable::BoolVariableHandle uv;
-
-
+	QTime sunrise;
+	QTime sunset;
+	QNetworkAccessManager  *manager;
 	void calculatePlantHealth();
 };
 
