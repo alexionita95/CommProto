@@ -32,7 +32,7 @@ foreach(source IN LISTS PROJECT_SRC)
 endforeach()  
 
 
-target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
+target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue)
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
@@ -42,7 +42,6 @@ message("DEPLOY LOCATION == ${ARDUINO_LIB_DEPLOY_LOCATION}")
 
 add_custom_target(DEPLOY DEPENDS ${PROJECT_NAME} EspApp
 	COMMAND python "${CMAKE_SOURCE_DIR}/makelib/makelib.py" "${CMAKE_SOURCE_DIR}" "${ARDUINO_LIB_DEPLOY_LOCATION}\\DeviceWrapper")
-
 
 
 add_subdirectory(test)
