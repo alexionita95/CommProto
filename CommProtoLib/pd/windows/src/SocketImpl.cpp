@@ -66,7 +66,7 @@ namespace commproto {
 			{
 				return 0;
 			}
-			message.reserve(size);		
+			message.resize(size);		
 			int received = recv(socketHandle, message.data(), size, 0);
 			if (received != size)
 			{
