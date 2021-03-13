@@ -55,7 +55,7 @@ DeviceState DeviceWrapper::loop()
 	{
 	case DeviceState::Searching:
 	{
-		device->setLed(1, 0, 10, 255);
+		device->setLed(2, 0, 10, 255);
 		LOG_INFO("Attempting to connect to %s:%d", host.c_str(), port);
 		bool connected = client->initClient(host, port);
 		if (!connected)
@@ -101,7 +101,7 @@ DeviceState DeviceWrapper::loop()
 
 		state = DeviceState::Connected;
 		LOG_INFO("Initialized all necessary things, beginning communication");
-		device->setLed(1, 100, 245, 66);
+		device->setLed(2, 100, 245, 66);
 	}
 	break;
 
