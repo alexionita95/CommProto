@@ -46,24 +46,32 @@ namespace commproto
 		};
 
 
-		ParserDelegatorHandle ParserDelegatorFactory::build(const variable::ContextHandle& context)
+		void buildBase(const ParserDelegatorHandle & delegator)
 		{
-
-			ParserDelegatorHandle delegator = std::make_shared<ParserDelegator>();
 
 			ParserHandle mappingParser = std::make_shared<MappingTypeParser>(std::make_shared<MappingTypeHandler>(delegator));
 
 			delegator->registerParser<messages::MappingType>(mappingParser);
 			delegator->registerMapping(messages::MessageName<messages::MappingType>::name(), 0);
+		}
+
+		ParserDelegatorHandle ParserDelegatorFactory::build(const variable::ContextHandle& context)
+		{
+
+			ParserDelegatorHandle delegator = std::make_shared<ParserDelegator>();
+			buildBase(delegator);
 
 			ParserHandle variableParser = std::make_shared<variable::VariableParser>(std::make_shared<variable::VariableHandler>(context));
 
 			ParserHandle variableMappingParser = std::make_shared<variable::VariableMappingParser>(std::make_shared<variable::VariableMappingHandler>(context));
 
 			delegator->registerParser<variable::VariableMessage>(variableParser);
-            delegator->registerParser<variable::VariableMappingMessage>(variableMappingParser);
+			delegator->registerParser<variable::VariableMappingMessage>(variableMappingParser);
 			return delegator;
 
 		}
+
 	}
+
+
 }

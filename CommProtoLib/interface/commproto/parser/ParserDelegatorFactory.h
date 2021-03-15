@@ -7,11 +7,14 @@ namespace commproto
 {
     namespace parser
 	{
+		void buildBase(const ParserDelegatorHandle & delegator);
+
 		class ParserDelegatorFactory
 		{
 		public:
 			static ParserDelegatorHandle build(const variable::ContextHandle& context);
 		};
     }
+
 }
 #endif // COMMPROTO_PARSER_DELEGATOR_BUILDER_H

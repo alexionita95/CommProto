@@ -14,12 +14,13 @@ namespace commproto
 		class ParserDelegator
 		{
 		public:
+			virtual ~ParserDelegator() = default;
 			template <class T>
 			void registerParser(const ParserHandle & parser);
 
 			void registerMapping(const std::string & name, uint32_t id);
 
-			void parse(Message & msg);
+			virtual bool parse(Message & msg);
 
 		private:
 

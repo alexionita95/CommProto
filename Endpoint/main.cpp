@@ -9,7 +9,10 @@ commproto::Message generateMessage(int32_t attempt)
 	std::stringstream writer;
 	commproto::parser::ByteStream stream;
 	writer << "This is attempt #" << attempt << "!";
-	LOG_INFO("Built message: \"%s\"", writer.str().c_str());
+	uint32_t size = writer.str().size() + sizeof(uint32_t) + sizeof(uint32_t);
+	LOG_INFO("Built message  \"%s\"(%d)", writer.str().c_str(),size);
+	stream.write(size);
+	stream.write((uint32_t)42);
 	stream.write(writer.str());
 	return stream.getStream();
 }
@@ -34,8 +37,7 @@ int main(int argc, const char * argv[])
 	LOG_INFO("Msg size : %d =? %d", writer.getStream().size(), sent);
 	uint8_t attempt = 0;
 	uint8_t maxAttempt = 10;
-
-
+	socket->sendByte(sizeof(void*));
 
 	for (uint32_t index = 0; index < maxAttempt; ++index)
 	{
@@ -52,6 +54,10 @@ int main(int argc, const char * argv[])
 		socket->receive(msg, poll);
 		commproto::parser::ByteStream reader(msg);
 		std::string message;
+		uint32_t placeholder;
+		reader.read(placeholder);
+		LOG_INFO("Got size = %d =? %d", sent, placeholder);
+		reader.read(placeholder);
 		reader.read(message);
 
 		LOG_INFO("Got mesage: \"%s\"", message.c_str());

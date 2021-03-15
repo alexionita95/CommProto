@@ -1,6 +1,7 @@
 #include <commproto/service/Dispatch.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/service/Dispatch.h>
+#include <commproto/service/ParserDelegatorFactory.h>
 
 namespace commproto {
 	namespace service {
@@ -11,6 +12,7 @@ namespace commproto {
 			, running{ false }
 			, sleepTime{ sleepTime_ }
 			, dispatch{ dispatch_ }
+			, builder{std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this))}
 		{
 		}
 
@@ -46,32 +48,21 @@ namespace commproto {
 			messagesOut.enqueue(msg);
 		}
 
+		void Connection::receive(const Message& msg)
+		{
+			//messagesIn.enqueue(msg);
+			dispatch->sendAll(msg);
+		}
+
 		void Connection::loop()
 		{
 			LOG_INFO("Starting receive loop for connection \"%s\"", name.c_str());
 			while (running && socket)
 			{
 				//recv part
-				uint32_t poll = socket->pollSocket();
-				if (poll > 0)
-				{
-					LOG_INFO("Got a message from connection \"%s\"", name.c_str());
-					commproto::Message msg;
-					int recv = socket->receive(msg, poll);
-					if (recv != poll)
-					{
-						LOG_WARNING("Connection \"%s\" interrupted.", name.c_str());
-						stop();
-					}
-					if (dispatch)
-					{
-						dispatch->sendAll(msg);
-					}
-
-					//messagesIn.push(msg);
-				}
+				builder->pollAndRead();
 				//send part
-				Message msg;
+				Message msg; 
 				while (messagesOut.try_dequeue(msg))
 				{
 					LOG_INFO("Sent a message to connection \"%s\"", name.c_str());

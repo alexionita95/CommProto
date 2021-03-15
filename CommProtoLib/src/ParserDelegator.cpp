@@ -21,7 +21,7 @@ namespace commproto
 			idToParser.emplace(id, it->second);
 		}
 
-		void ParserDelegator::parse(Message& msg)
+		bool ParserDelegator::parse(Message& msg)
 		{
 			ByteStream stream(msg);
 			uint32_t msgId = 0;
@@ -31,9 +31,10 @@ namespace commproto
 			if (it == idToParser.end())
 			{
                 LOG_WARNING("Could not find a parser for message id %d",msgId);
-				return;
+				return false;
 			}
 			it->second->parse(std::move(stream));
+			return true;
 
 		}
 

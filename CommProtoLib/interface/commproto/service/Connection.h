@@ -2,6 +2,7 @@
 #define COMMPROTO_SERVICE_CONNECTION_H
 #include <thread>
 #include <commproto/sockets/Socket.h>
+#include <commproto/parser/MessageBuilder.h>
 #include <atomic>
 #include <concurrentqueue.h>
 
@@ -25,6 +26,7 @@ namespace commproto
 			void stop();
 			void loop();
 			void send(const Message& msg);
+			void receive(const Message& msg);
 
 		private:
 
@@ -36,6 +38,7 @@ namespace commproto
 			std::atomic_bool running;
 			const uint32_t sleepTime;
 			DispatchHandle dispatch;
+			parser::MessageBuilderHandle builder;
 		};
 
 
