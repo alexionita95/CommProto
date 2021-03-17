@@ -11,13 +11,22 @@ namespace commproto {
 		class Dispatch
 		{
 		public:
+			Dispatch();
 			void sentTo(const std::string& name, const commproto::Message& msg);
 			void sendAll(const commproto::Message& msg);
 			void addConnection(const std::string& name, const commproto::sockets::SocketHandle& connection);
 			void removeConnection(const std::string& name);
+			ConnectionHandle getConnection(const std::string& name) const;
+			ConnectionHandle getConnection(const uint32_t id) const;
+
 			~Dispatch();
 		private:
-			std::map<std::string, ConnectionHandle> connections;
+
+			uint32_t getId(const std::string & name) const;
+
+			std::map<uint32_t, ConnectionHandle> connections;
+			std::map<std::string, uint32_t> connectionMapping;
+			uint32_t idCounter;
 		};
 	}
 }

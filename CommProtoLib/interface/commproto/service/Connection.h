@@ -5,6 +5,7 @@
 #include <commproto/parser/MessageBuilder.h>
 #include <atomic>
 #include <concurrentqueue.h>
+#include <mutex>
 
 
 namespace commproto
@@ -14,13 +15,16 @@ namespace commproto
 
 		class Dispatch;
 		using DispatchHandle = Dispatch *;
+		class Connection;
+		using ConnectionHandle = std::shared_ptr<Connection>;
+		using Subscribers = std::vector<ConnectionHandle>;
 
 
-		class Connection
+		class Connection : public std::enable_shared_from_this<Connection>
 		{
 		public:
 
-			Connection(const std::string& name_, const sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTime_ = 10);
+			Connection(uint32_t id, const std::string& name_, const sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTimeMicro_ = 10);
 			~Connection();
 			void start();
 			void stop();
@@ -28,21 +32,33 @@ namespace commproto
 			void send(const Message& msg);
 			void receive(const Message& msg);
 
+			void subscribe(const std::string & channelName);
+			void unsubscribe(const std::string & channelName);
+
+			void registerSubscription(const ConnectionHandle& subscriber);
+			void unregisterSubscription(const ConnectionHandle& subscriber);
+		
+			void clearSubscriptions();
+			friend bool operator==(const Connection& lhs, const Connection& rhs);
 		private:
 
 			sockets::SocketHandle socket;
 			std::string name;
+			const uint32_t id;
 			std::unique_ptr<std::thread> worker;
 			moodycamel::ConcurrentQueue<Message> messagesOut;
-			moodycamel::ConcurrentQueue<Message> messagesIn;
 			std::atomic_bool running;
-			const uint32_t sleepTime;
+			const uint32_t sleepMicro;
 			DispatchHandle dispatch;
 			parser::MessageBuilderHandle builder;
+			Subscribers subs;
+			std::mutex subscriberMutex;
 		};
 
-
-		using ConnectionHandle = std::shared_ptr<Connection>;
+		inline bool operator==(const Connection& lhs, const Connection& rhs)
+		{
+			return lhs.id == rhs.id && lhs.name.compare(rhs.name) == 0;
+		}
 	}
 }
 
