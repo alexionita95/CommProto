@@ -5,7 +5,6 @@
 #include <commproto/variable/VariableHandler.h>
 #include <commproto/variable/VariableMappingParser.h>
 #include <commproto/variable/VariableMappingHandler.h>
-
 namespace commproto
 {
 	namespace parser

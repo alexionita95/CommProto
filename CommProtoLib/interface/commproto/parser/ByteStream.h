@@ -33,6 +33,8 @@ namespace commproto
 			template <typename T>
 			void write(const std::vector<T>& vec);
 
+			bool skip(uint32_t bytes);
+				
 			const Message & getStream() const
 			{
 				return stream;
@@ -121,6 +123,15 @@ namespace commproto
 			const uint8_t* bufPtr = reinterpret_cast<const uint8_t*>(buf);
 			stream.insert(stream.end(), bufPtr, bufPtr + size);
 			position += size;
+			return true;
+		}
+
+		inline bool ByteStream::skip(uint32_t bytes)
+		{
+			if (position + bytes >= stream.size()) {
+				return false;
+			}
+			position += bytes;
 			return true;
 		}
 

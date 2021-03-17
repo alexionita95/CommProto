@@ -16,6 +16,7 @@ namespace commproto {
 			void sendAll(const commproto::Message& msg);
 			void addConnection(const commproto::sockets::SocketHandle& connection);
 			void removeConnection(const std::string& name);
+			void registerChannel(const uint32_t id, const std::string & name);
 			ConnectionHandle getConnection(const std::string& name) const;
 			ConnectionHandle getConnection(const uint32_t id) const;
 

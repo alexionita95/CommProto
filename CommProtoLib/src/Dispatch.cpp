@@ -29,7 +29,7 @@ namespace commproto {
 		{
 			const uint32_t connectionId = idCounter++;
 			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, connection, this);
-			connections.insert({ idCounter,  newCon });
+			connections.insert({ connectionId,  newCon });
 			
 			newCon->registerSubscription(newCon);
 			newCon->start();
@@ -50,6 +50,18 @@ namespace commproto {
 			}
 
 			connections.erase(it);
+		}
+
+		void Dispatch::registerChannel(const uint32_t id, const std::string& name)
+		{
+			auto connection = connections.find(id);
+			if(connectionMapping.find(name) != connectionMapping.end() || connection == connections.end())
+			{
+				return;
+			}
+
+			connectionMapping.insert({ name,id });
+			connection->second->setName(name);
 		}
 
 		ConnectionHandle Dispatch::getConnection(const std::string& name) const

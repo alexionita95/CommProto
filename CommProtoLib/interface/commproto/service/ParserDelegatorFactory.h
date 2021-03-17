@@ -7,11 +7,12 @@ namespace commproto
 {
 	namespace service
 	{
+		class Dispatch;
 		class Connection;
 		class ParserDelegatorFactory
 		{
 		public:
-			static parser::ParserDelegatorHandle build(Connection& connection);
+			static parser::ParserDelegatorHandle build(Connection& connection, Dispatch * );
 		};
 
 	}

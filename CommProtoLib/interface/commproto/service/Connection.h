@@ -33,6 +33,8 @@ namespace commproto
 			void receive(const Message& msg);
 			void setName(const std::string & name);
 
+			uint32_t getId() const;
+
 			void subscribe(const std::string & channelName);
 			void unsubscribe(const std::string & channelName);
 
@@ -56,10 +58,7 @@ namespace commproto
 			std::mutex subscriberMutex;
 		};
 
-		inline bool operator==(const Connection& lhs, const Connection& rhs)
-		{
-			return lhs.id == rhs.id && lhs.name.compare(rhs.name) == 0;
-		}
+
 	}
 }
 

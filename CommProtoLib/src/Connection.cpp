@@ -12,7 +12,7 @@ namespace commproto {
 			, running{ false }
 			, sleepMicro{ sleepTime_ }
 			, dispatch{ dispatch_ }
-			, builder{std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this))}
+			, builder{std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this,dispatch_))}
 		{
 		}
 
@@ -140,6 +140,16 @@ namespace commproto {
 				std::this_thread::sleep_for(std::chrono::microseconds(sleepMicro));
 			}
 			LOG_INFO("Stopping receive loop for connection \"%s\"", name.c_str());
+		}
+
+		uint32_t Connection::getId() const
+		{
+			return id;
+		}
+
+		bool operator==(const Connection& lhs, const Connection& rhs)
+		{
+			return lhs.id == rhs.id && lhs.name.compare(rhs.name) == 0;
 		}
 
 	}
