@@ -25,11 +25,10 @@ namespace commproto {
 			}
 		}
 
-		void Dispatch::addConnection(const std::string& name, const sockets::SocketHandle& connection)
+		void Dispatch::addConnection(const sockets::SocketHandle& connection)
 		{
 			const uint32_t connectionId = idCounter++;
-			connectionMapping.insert({ name,connectionId });
-			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, name, connection, this);
+			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, connection, this);
 			connections.insert({ idCounter,  newCon });
 			
 			newCon->registerSubscription(newCon);

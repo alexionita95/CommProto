@@ -6,9 +6,8 @@
 namespace commproto {
 	namespace service {
 
-		Connection::Connection(uint32_t id_, const std::string& name_, const commproto::sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTime_)
+		Connection::Connection(uint32_t id_, const commproto::sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTime_)
 			: socket{ socket_ }
-			, name{ name_ }
 			, id{id_}
 			, running{ false }
 			, sleepMicro{ sleepTime_ }
@@ -57,6 +56,11 @@ namespace commproto {
 			{
 				con->send(msg);
 			}
+		}
+
+		void Connection::setName(const std::string& name_)
+		{
+			name = name_;
 		}
 
 		void Connection::subscribe(const std::string& channelName)

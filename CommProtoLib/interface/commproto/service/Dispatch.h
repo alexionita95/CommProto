@@ -14,7 +14,7 @@ namespace commproto {
 			Dispatch();
 			void sentTo(const std::string& name, const commproto::Message& msg);
 			void sendAll(const commproto::Message& msg);
-			void addConnection(const std::string& name, const commproto::sockets::SocketHandle& connection);
+			void addConnection(const commproto::sockets::SocketHandle& connection);
 			void removeConnection(const std::string& name);
 			ConnectionHandle getConnection(const std::string& name) const;
 			ConnectionHandle getConnection(const uint32_t id) const;

@@ -2,6 +2,8 @@
 #include <commproto/parser/ByteStream.h>
 #include <SocketImpl.h>
 #include <commproto/logger/Logging.h>
+#include <commproto/service/Connection.h>
+
 
 int main(int argc, const char * argv[])
 {
@@ -19,19 +21,8 @@ int main(int argc, const char * argv[])
 
 	while (true) {
 		commproto::sockets::SocketHandle newCon = socket->acceptNext();
-
 		int poll = 0;
-
-		do {
-			poll = newCon->pollSocket();
-		} while (poll == 0);
-		
-		commproto::Message nameMSg;
-		newCon->receive(nameMSg, poll);
-		commproto::parser::ByteStream stream(nameMSg);
-		stream.read(name);
-
-		dsp.addConnection(name, newCon);
+		dsp.addConnection(newCon);
 		LOG_INFO("A new connection has been added: \"%s\"", name.c_str());
 	}
 	return 0;

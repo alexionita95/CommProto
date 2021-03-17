@@ -24,13 +24,14 @@ namespace commproto
 		{
 		public:
 
-			Connection(uint32_t id, const std::string& name_, const sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTimeMicro_ = 10);
+			Connection(uint32_t id, const sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTimeMicro_ = 10);
 			~Connection();
 			void start();
 			void stop();
 			void loop();
 			void send(const Message& msg);
 			void receive(const Message& msg);
+			void setName(const std::string & name);
 
 			void subscribe(const std::string & channelName);
 			void unsubscribe(const std::string & channelName);
