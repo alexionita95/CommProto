@@ -42,6 +42,7 @@ namespace commproto
 			{
 				write(data.getSize());
 				write(data.type);
+				write(data.senderId);
 			}
 
 		private:

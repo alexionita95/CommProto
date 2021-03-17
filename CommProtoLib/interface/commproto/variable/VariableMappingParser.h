@@ -24,6 +24,8 @@ namespace commproto
 		{
 			std::string name;
 			uint32_t index = 0;
+			uint32_t sender = 0;
+			msg.read(sender);
 			msg.read(name);
 			msg.read(index);
 			handler->handle(variable::VariableMappingMessage(0, name, index));

@@ -4,6 +4,8 @@
 #include <commproto/logger/Logging.h>
 #include <sstream>
 #include <conio.h>
+#include <commproto/messages/SenderMaping.h>
+
 commproto::Message generateMessage(int32_t attempt)
 {
 	std::stringstream writer;
@@ -19,6 +21,7 @@ commproto::Message generateMessage(int32_t attempt)
 
 int main(int argc, const char * argv[])
 {
+	commproto::SenderMapping::InitializeName("Endpoint::Simulator");
 	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
 	if (!socket->initClient("localhost", 25565))
 	{

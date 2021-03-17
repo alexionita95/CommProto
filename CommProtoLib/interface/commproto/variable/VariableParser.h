@@ -27,6 +27,8 @@ namespace commproto
 		{
 			uint8_t valueType = 0;
 			uint32_t index = 0;
+			uint32_t sender = 0;
+			msg.read(sender);
 			msg.read(valueType);
 			msg.read(index);
 			ValueType type = static_cast<ValueType>(valueType);

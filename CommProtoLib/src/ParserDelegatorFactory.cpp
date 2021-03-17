@@ -19,6 +19,8 @@ namespace commproto
 			{
 				std::string name;
 				uint32_t typeId;
+				uint32_t sender = 0;
+				reader.read(sender);
 				reader.read(name);
 				reader.read(typeId);
 				handler->handle(std::move(messages::MappingType(name, typeId)));

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <commproto/messages/SenderMaping.h>
 
 
 //used to define boilerplate rule of 5 since we want to use std::move with types derived from TypeBase
@@ -46,14 +47,15 @@ namespace commproto
 		class MessageBase
 		{
 		public:
-			MessageBase(const uint32_t type_) : type{ type_ } {};
+			MessageBase(const uint32_t type_) : type{ type_ }, senderId{ SenderMapping::getId() } {};
 
 			BP_TYPE_DEFAULTS(MessageBase);
 
 			uint32_t type;
+			uint32_t senderId;
 			virtual uint32_t getSize() const
 			{
-				return sizeof(type);
+				return sizeof(type) + sizeof(senderId);
 			}
 
 		};
