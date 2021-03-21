@@ -17,6 +17,13 @@ namespace commproto
 			Dispatch* dispatch;
 			const uint32_t id;
 		};
+
+
+		class RegisterIdHandler : public parser::Handler
+		{
+		public:
+			void handle(messages::MessageBase&& data) override;
+		};
 	}
 }
 

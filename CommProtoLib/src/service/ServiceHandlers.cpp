@@ -20,5 +20,11 @@ namespace commproto
 			RegisterChannelMessage& message = static_cast<RegisterChannelMessage&>(data);
 			dispatch->registerChannel(id, message.prop);
 		}
+
+		void RegisterIdHandler::handle(messages::MessageBase&& data)
+		{
+			RegisterIdMessage& message = static_cast<RegisterIdMessage&>(data);
+			SenderMapping::InitializeId(message.prop);
+		}
 	}
 }

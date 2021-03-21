@@ -20,4 +20,17 @@ namespace commproto {
 			return delegator;
 		}
 	}
+
+	parser::ParserDelegatorHandle endpoint::ParserDelegatorFactory::build()
+	{
+		std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
+		parser::buildBase(delegator);
+
+		parser::HandlerHandle registerIdHandler = std::make_shared<service::RegisterIdHandler>();
+		parser::ParserHandle registerIdParser = std::make_shared<service::RegisterIdParser>(registerIdHandler);
+	
+		delegator->registerParser<service::RegisterIdMessage>(registerIdParser);
+
+		return delegator;
+	}
 }

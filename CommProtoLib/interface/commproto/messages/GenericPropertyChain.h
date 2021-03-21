@@ -84,12 +84,11 @@ namespace commproto
 		{
 
 			parser::ByteStream stream(msg);
-			uint32_t  type = 0, sender = 0;
+			uint32_t sender = 0;
 			T prop;
-			stream.read<uint32_t>(type);
 			stream.read < uint32_t>(sender);
 			stream.read<T>(prop);
-			SinglePropertyMessage<T> realMessage(type, prop);
+			SinglePropertyMessage<T> realMessage(0, prop);
 			realMessage.senderId = sender;
 			handler->handle(std::move(realMessage));
 		}
@@ -112,14 +111,13 @@ namespace commproto
 		{
 
 			parser::ByteStream stream(msg);
-			uint32_t  type = 0, sender = 0;
+			uint32_t sender = 0;
 			T prop;
 			U prop2;
-			stream.read<uint32_t>(type);
 			stream.read < uint32_t>(sender);
 			stream.read<T>(prop);
 			stream.read<U>(prop2);
-			DoublePropertyMessage<T, U> realMessage(type, prop, prop2);
+			DoublePropertyMessage<T, U> realMessage(0, prop, prop2);
 			realMessage.senderId = sender;
 			handler->handle(std::move(realMessage));
 		}
@@ -141,16 +139,15 @@ namespace commproto
 		{
 
 			parser::ByteStream stream(msg);
-			uint32_t  type = 0, sender = 0;
+			uint32_t sender = 0;
 			T prop;
 			U prop2;
 			V prop3;
-			stream.read<uint32_t>(type);
 			stream.read < uint32_t>(sender);
 			stream.read<T>(prop);
 			stream.read<U>(prop2);
 			stream.read<V>(prop3);
-			TriplePropertyMessage<T, U, V> realMessage(type, prop, prop2, prop3);
+			TriplePropertyMessage<T, U, V> realMessage(0, prop, prop2, prop3);
 			realMessage.senderId = sender;
 			handler->handle(std::move(realMessage));
 		}

@@ -6,6 +6,7 @@
 #include <atomic>
 #include <concurrentqueue.h>
 #include <mutex>
+#include <commproto/messages/MessageMapper.h>
 
 
 namespace commproto
@@ -56,6 +57,7 @@ namespace commproto
 			parser::MessageBuilderHandle builder;
 			Subscribers subs;
 			std::mutex subscriberMutex;
+			messages::TypeMapperHandle mapper;
 		};
 
 

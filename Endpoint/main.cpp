@@ -9,21 +9,44 @@
 #include <commproto/messages/MessageMapper.h>
 #include "../CommProtoLib/src/TypeMapperObserver.h"
 #include "../CommProtoLib/src/TypeMapperImpl.h"
+#include "commproto/service/ParserDelegatorFactory.h"
 
 using namespace commproto;
 using namespace service;
 
-Message generateMessage(int32_t attempt)
+MAKE_SINGLE_PROP_MESSAGE(StringMessage,std::string);
+
+using StringParser = messages::SinglePropertyParser<std::string>;
+using StringSerialize = messages::SinglePropetySerializer<std::string>;
+
+
+namespace commproto
+{
+	namespace messages
+	{
+		DEFINE_DATA_TYPE(StringMessage);
+	}
+}
+
+class StringHandler : public parser::Handler
+{
+public:
+	void handle(messages::MessageBase&& data) override;
+};
+
+void StringHandler::handle(messages::MessageBase&& data)
+{
+	StringMessage& message = static_cast<StringMessage&>(data);
+	LOG_INFO("%s [sender:%d]",message.prop.c_str(),message.senderId);
+}
+
+Message generateMessage(uint32_t id,int32_t attempt)
 {
 	std::stringstream writer;
-	parser::ByteStream stream;
 	writer << "This is attempt #" << attempt << "!";
 	uint32_t size = writer.str().size() + sizeof(uint32_t) + sizeof(uint32_t);
-	LOG_INFO("Built message  \"%s\"(%d)", writer.str().c_str(), size);
-	stream.write(size);
-	stream.write((uint32_t)42);
-	stream.write(writer.str());
-	return stream.getStream();
+	StringMessage msg(id,writer.str());
+	return StringSerialize::serialize(std::move(msg));
 }
 
 int main(int argc, const char * argv[])
@@ -49,28 +72,26 @@ int main(int argc, const char * argv[])
 	Message nameSerialized = RegisterChannelSerializer::serialize(std::move(nameMsg));
 	socket->sendBytes(nameSerialized);
 
+	uint32_t stringId = mapper->registerType<StringMessage>();
+	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build();
+	parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
+	parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
+	delegator->registerParser<StringMessage>(stringParser);
+	delegator->registerMapping(messages::MessageName<StringMessage>::name(), stringId);
+	
+	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, delegator);
+
 	for (uint32_t index = 0; index < maxAttempt; ++index)
 	{
 		int poll = 0;
 		LOG_INFO("Sending attempt #%d", attempt);
-		const int sent = socket->sendBytes(generateMessage(attempt++));
+		const int sent = socket->sendBytes(generateMessage(stringId,attempt++));
 		LOG_INFO("Sent %d bytes", sent);
 		do {
 			poll = socket->pollSocket();
 		} while (poll == 0);
 
-		LOG_INFO("Got %d bytes back", sent);
-		Message msg;
-		socket->receive(msg, poll);
-		parser::ByteStream reader(msg);
-		std::string message;
-		uint32_t placeholder;
-		reader.read(placeholder);
-		LOG_INFO("Got size = %d =? %d", sent, placeholder);
-		reader.read(placeholder);
-		reader.read(message);
-
-		LOG_INFO("Got mesage: \"%s\"", message.c_str());
+		builder->pollAndRead();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 

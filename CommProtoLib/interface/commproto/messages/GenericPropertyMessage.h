@@ -11,15 +11,15 @@ namespace commproto
 
 		/**
 		 * \brief Implements a generic message type with a single property. In order to be used, DEFINE_DATA_TYPE with a using alias of this must be used for parser mapping.
-		 * \tparam T 
+		 * \tparam T
 		 */
 		template <typename T>
 		class SinglePropertyMessage : public MessageBase
 		{
 		public:
-			SinglePropertyMessage(const uint32_t id, const T& prop_) : MessageBase{id}, prop{ prop_ }
+			SinglePropertyMessage(const uint32_t id, const T& prop_) : MessageBase{ id }, prop{ prop_ }
 			{
-				
+
 			}
 			;
 			BP_TYPE_DEFAULTS(SinglePropertyMessage);
@@ -41,7 +41,7 @@ namespace commproto
 		class DoublePropertyMessage : public MessageBase
 		{
 		public:
-			DoublePropertyMessage(const uint32_t id, const T& prop_, const U& prop2_) : MessageBase{ id }, prop{ prop_ }, prop2{prop2_}
+			DoublePropertyMessage(const uint32_t id, const T& prop_, const U& prop2_) : MessageBase{ id }, prop{ prop_ }, prop2{ prop2_ }
 			{
 
 			}
@@ -65,7 +65,7 @@ namespace commproto
 		class TriplePropertyMessage : public MessageBase
 		{
 		public:
-			TriplePropertyMessage(const uint32_t id, const T& prop_, const U& prop2_, const V& prop3_) : MessageBase{ id }, prop{ prop_ }, prop2{ prop2_ }, prop3{prop3_}
+			TriplePropertyMessage(const uint32_t id, const T& prop_, const U& prop2_, const V& prop3_) : MessageBase{ id }, prop{ prop_ }, prop2{ prop2_ }, prop3{ prop3_ }
 			{
 
 			}
@@ -78,11 +78,26 @@ namespace commproto
 
 			uint32_t getSize() const override
 			{
-				return MessageBase::getSize() + sizeOf(prop) + sizeOf(prop2) +sizeOf(prop3);
+				return MessageBase::getSize() + sizeOf(prop) + sizeOf(prop2) + sizeOf(prop3);
 			}
 		};
 	}
 
 }
+
+
+#define MAKE_SINGLE_PROP_MESSAGE(MESSAGE_NAME, TYPE)								\
+class MESSAGE_NAME : public commproto::messages::SinglePropertyMessage<TYPE>		\
+{																					\
+public:																				\
+	MESSAGE_NAME(uint32_t id, const TYPE& prop_)									\
+		: SinglePropertyMessage(id, prop_)											\
+	{																				\
+	}																				\
+	BP_TYPE_DEFAULTS(MESSAGE_NAME)													\
+}
+
+
+
 
 #endif// COMMPROTO_SINGLE_PROPERTY_MESSAGE_H

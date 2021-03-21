@@ -17,5 +17,15 @@ namespace commproto
 
 	}
 
+	namespace endpoint
+	{
+		class ParserDelegatorFactory
+		{
+		public:
+			static parser::ParserDelegatorHandle build();
+		};
+
+	}
+
 }
 #endif // COMMPROTO_PARSER_DELEGATOR_BUILDER_H

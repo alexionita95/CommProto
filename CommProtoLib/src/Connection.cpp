@@ -2,17 +2,20 @@
 #include <commproto/logger/Logging.h>
 #include <commproto/service/Dispatch.h>
 #include <commproto/service/ParserDelegatorFactory.h>
+#include <commproto/service/ServiceChains.h>
+#include "TypeMapperImpl.h"
 
 namespace commproto {
 	namespace service {
 
 		Connection::Connection(uint32_t id_, const commproto::sockets::SocketHandle& socket_, const DispatchHandle& dispatch_, uint32_t sleepTime_)
 			: socket{ socket_ }
-			, id{id_}
+			, id{ id_ }
 			, running{ false }
 			, sleepMicro{ sleepTime_ }
 			, dispatch{ dispatch_ }
-			, builder{std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this,dispatch_))}
+			, builder{ std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this,dispatch_)) }
+			, mapper{std::make_shared<messages::TypeMapperImpl>(std::make_shared<messages::TypeMapperObserver>(socket))}
 		{
 		}
 
@@ -45,14 +48,13 @@ namespace commproto {
 
 		void Connection::send(const Message& msg)
 		{
-			LOG_INFO("Enqueued message to connection \"%s\"", name.c_str());
 			messagesOut.enqueue(msg);
 		}
 
 		void Connection::receive(const Message& msg)
 		{
 			std::lock_guard<std::mutex> lock(subscriberMutex);
-			for(ConnectionHandle con : subs)
+			for (ConnectionHandle con : subs)
 			{
 				con->send(msg);
 			}
@@ -65,8 +67,8 @@ namespace commproto {
 
 		void Connection::subscribe(const std::string& channelName)
 		{
-			ConnectionHandle target =  dispatch->getConnection(channelName);
-			if(!target)
+			ConnectionHandle target = dispatch->getConnection(channelName);
+			if (!target)
 			{
 				//TODO: let the channel know there is no channel by that name
 				return;
@@ -98,9 +100,9 @@ namespace commproto {
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			auto it = subs.end();
 
-			for(auto it2 = subs.begin(); it2 != subs.end(); ++it2)
+			for (auto it2 = subs.begin(); it2 != subs.end(); ++it2)
 			{
-				if(it2->get() == it->get())
+				if (it2->get() == it->get())
 				{
 					it = it2;
 					break;
@@ -120,15 +122,20 @@ namespace commproto {
 		void Connection::loop()
 		{
 			LOG_INFO("Starting receive loop for connection \"%s\"", name.c_str());
+			socket->sendByte(sizeof(void*));
+
+			uint32_t registerIdId = mapper->registerType<RegisterIdMessage>();
+			RegisterIdMessage registerId(registerIdId, id);
+			socket->sendBytes(RegisterIdSerializer::serialize(std::move(registerId)));
+
 			while (running && socket)
 			{
 				//recv part
 				builder->pollAndRead();
 				//send part
-				Message msg; 
+				Message msg;
 				while (messagesOut.try_dequeue(msg))
 				{
-					LOG_INFO("Sent a message to connection \"%s\"", name.c_str());
 					int sent = socket->sendBytes(msg);
 					if (sent != msg.size())
 					{
