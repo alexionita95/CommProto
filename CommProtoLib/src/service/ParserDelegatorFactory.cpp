@@ -5,6 +5,15 @@
 #include <commproto/service/ServiceHandlers.h>
 
 namespace commproto {
+
+	template <typename ParserType, typename MessageType>
+	void addParserHandlerPair(const parser::ParserDelegatorHandle & delegator, const parser::HandlerHandle &handler)
+	{
+		parser::ParserHandle parser = std::make_shared<ParserType>(handler);
+
+		delegator->registerParser<MessageType>(parser);
+	}
+
 	namespace service {
 
 		parser::ParserDelegatorHandle ParserDelegatorFactory::build(Connection& connection, Dispatch * dispatch)
@@ -12,10 +21,9 @@ namespace commproto {
 			std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<ParserDelegator>(connection);
 			parser::buildBase(delegator);
 
-			parser::HandlerHandle registerChannelHandler = std::make_shared<RegisterChannelHandler>(dispatch,connection.getId());
-			parser::ParserHandle registerChannelParser = std::make_shared<RegisterChannelParser>(registerChannelHandler);
-
-			delegator->registerParser<RegisterChannelMessage>(registerChannelParser);
+			addParserHandlerPair<RegisterChannelParser, RegisterChannelMessage>(delegator, std::make_shared<RegisterChannelHandler>(dispatch,connection.getId()));
+			addParserHandlerPair<SubscribeParser, SubscribeMessage>(delegator, std::make_shared<SubscribeHandler>(connection));
+			addParserHandlerPair<UnsubscribeParser, UnsubscribeMessage>(delegator, std::make_shared<UnsubscribeHandler>(connection));
 
 			return delegator;
 		}
@@ -26,11 +34,8 @@ namespace commproto {
 		std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
 		parser::buildBase(delegator);
 
-		parser::HandlerHandle registerIdHandler = std::make_shared<service::RegisterIdHandler>();
-		parser::ParserHandle registerIdParser = std::make_shared<service::RegisterIdParser>(registerIdHandler);
+		addParserHandlerPair<service::RegisterIdParser, service::RegisterIdMessage>(delegator,std::make_shared<service::RegisterIdHandler>());
 	
-		delegator->registerParser<service::RegisterIdMessage>(registerIdParser);
-
 		return delegator;
 	}
 }

@@ -3,6 +3,7 @@
 #include <commproto/service/Dispatch.h>
 #include <commproto/service/ParserDelegatorFactory.h>
 #include <commproto/service/ServiceChains.h>
+#include <algorithm>
 #include "TypeMapperImpl.h"
 
 namespace commproto {
@@ -67,6 +68,8 @@ namespace commproto {
 
 		void Connection::subscribe(const std::string& channelName)
 		{
+			LOG_INFO("Connection \"%s\" attempting to subscribe to \"%s\".",name.c_str(),channelName.c_str());
+			//TODO: subscribe all
 			ConnectionHandle target = dispatch->getConnection(channelName);
 			if (!target)
 			{
@@ -79,6 +82,7 @@ namespace commproto {
 
 		void Connection::unsubscribe(const std::string& channelName)
 		{
+			LOG_INFO("Connection \"%s\" attempting to unsubscribe from \"%s\".", name.c_str(), channelName.c_str());
 			ConnectionHandle target = dispatch->getConnection(channelName);
 			if (!target)
 			{
@@ -91,23 +95,21 @@ namespace commproto {
 
 		void Connection::registerSubscription(const ConnectionHandle& subscriber)
 		{
+			LOG_INFO("Connection \"%s\" registered subscribtion from \"%s\".", name.c_str(), subscriber->name.c_str());
 			std::lock_guard<std::mutex> lock(subscriberMutex);
+			//TODO: send channel mapping
+			if(std::find(subs.begin(), subs.end(), subscriber)!=subs.end())
+			{
+				return;
+			}
 			subs.emplace_back(subscriber);
 		}
 
 		void Connection::unregisterSubscription(const ConnectionHandle& subscriber)
 		{
+			LOG_INFO("Connection \"%s\" unregistered subscribtion from \"%s\".", name.c_str(), subscriber->name.c_str());
 			std::lock_guard<std::mutex> lock(subscriberMutex);
-			auto it = subs.end();
-
-			for (auto it2 = subs.begin(); it2 != subs.end(); ++it2)
-			{
-				if (it2->get() == it->get())
-				{
-					it = it2;
-					break;
-				}
-			}
+			auto it = std::find(subs.begin(), subs.end(), subscriber);
 			if (it != subs.end()) {
 				subs.erase(it);
 			}
@@ -121,7 +123,7 @@ namespace commproto {
 
 		void Connection::loop()
 		{
-			LOG_INFO("Starting receive loop for connection \"%s\"", name.c_str());
+			LOG_INFO("Starting receive loop for connection with id:\"%d\"", id);
 			socket->sendByte(sizeof(void*));
 
 			uint32_t registerIdId = mapper->registerType<RegisterIdMessage>();
@@ -144,7 +146,7 @@ namespace commproto {
 					}
 
 				}
-				std::this_thread::sleep_for(std::chrono::microseconds(sleepMicro));
+				//std::this_thread::sleep_for(std::chrono::microseconds(sleepMicro));
 			}
 			LOG_INFO("Stopping receive loop for connection \"%s\"", name.c_str());
 		}

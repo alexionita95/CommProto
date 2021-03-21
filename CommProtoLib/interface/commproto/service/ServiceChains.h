@@ -23,10 +23,35 @@ namespace commproto
 
 		using RegisterIdSerializer = messages::SinglePropetySerializer<uint32_t>;
 
+		//subscribe
+		MAKE_SINGLE_PROP_MESSAGE(SubscribeMessage, std::string);
+
+		using SubscribeParser = messages::SinglePropertyParser<std::string>;
+
+		using SubscribeSerializer = messages::SinglePropetySerializer<std::string>;
+
+		//channel mapping
+		MAKE_DOUBLE_PROP_MESSAGE(ChannelMappingMessage, std::string, uint32_t);
+
+		using ChannelMappingParser = messages::DoublePropertyParser<std::string, uint32_t>;
+
+		using ChannelMappingSerializer = messages::DoublePropertySerializer<std::string, uint32_t>;
+
+
+		//unsubscribe
+		MAKE_SINGLE_PROP_MESSAGE(UnsubscribeMessage, std::string);
+
+		using UnsubscribeParser = messages::SinglePropertyParser<std::string>;
+
+		using UnsubscribeSerializer = messages::SinglePropetySerializer<std::string>;
+
 	}
 	namespace messages {
 		DEFINE_DATA_TYPE(service::RegisterChannelMessage);
 		DEFINE_DATA_TYPE(service::RegisterIdMessage);
+		DEFINE_DATA_TYPE(service::SubscribeMessage);
+		DEFINE_DATA_TYPE(service::UnsubscribeMessage);
+		DEFINE_DATA_TYPE(service::ChannelMappingMessage);
 	}
 }
 

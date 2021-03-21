@@ -30,8 +30,6 @@ namespace commproto {
 			const uint32_t connectionId = idCounter++;
 			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, connection, this);
 			connections.insert({ connectionId,  newCon });
-			
-			newCon->registerSubscription(newCon);
 			newCon->start();
 		}
 

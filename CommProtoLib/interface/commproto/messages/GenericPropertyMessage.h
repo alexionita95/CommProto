@@ -1,6 +1,8 @@
 #ifndef COMMPROTO_PROPERTY_MESSAGE_H
 #define COMMPROTO_PROPERTY_MESSAGE_H
 
+//TODO: CLEANUP - Split into multiple files
+
 #include <commproto/messages/MessageBase.h>
 #include <commproto/messages/MessageName.h>
 
@@ -97,7 +99,15 @@ public:																				\
 	BP_TYPE_DEFAULTS(MESSAGE_NAME)													\
 }
 
-
-
+#define MAKE_DOUBLE_PROP_MESSAGE(MESSAGE_NAME, TYPE,TYPE2)							\
+class MESSAGE_NAME : public commproto::messages::DoublePropertyMessage<TYPE,TYPE2>	\
+{																					\
+public:																				\
+	MESSAGE_NAME(uint32_t id, const TYPE& prop_, const TYPE2& prop2_)				\
+		: DoublePropertyMessage(id, prop_,prop2_)									\
+	{																				\
+	}																				\
+	BP_TYPE_DEFAULTS(MESSAGE_NAME)													\
+}
 
 #endif// COMMPROTO_SINGLE_PROPERTY_MESSAGE_H

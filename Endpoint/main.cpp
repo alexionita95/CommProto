@@ -14,7 +14,7 @@
 using namespace commproto;
 using namespace service;
 
-MAKE_SINGLE_PROP_MESSAGE(StringMessage,std::string);
+MAKE_SINGLE_PROP_MESSAGE(StringMessage, std::string);
 
 using StringParser = messages::SinglePropertyParser<std::string>;
 using StringSerialize = messages::SinglePropetySerializer<std::string>;
@@ -37,15 +37,15 @@ public:
 void StringHandler::handle(messages::MessageBase&& data)
 {
 	StringMessage& message = static_cast<StringMessage&>(data);
-	LOG_INFO("%s [sender:%d]",message.prop.c_str(),message.senderId);
+	LOG_INFO("%s [sender:%d]", message.prop.c_str(), message.senderId);
 }
 
-Message generateMessage(uint32_t id,int32_t attempt)
+Message generateMessage(uint32_t id, int32_t attempt)
 {
 	std::stringstream writer;
 	writer << "This is attempt #" << attempt << "!";
 	uint32_t size = writer.str().size() + sizeof(uint32_t) + sizeof(uint32_t);
-	StringMessage msg(id,writer.str());
+	StringMessage msg(id, writer.str());
 	return StringSerialize::serialize(std::move(msg));
 }
 
@@ -78,20 +78,32 @@ int main(int argc, const char * argv[])
 	parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 	delegator->registerParser<StringMessage>(stringParser);
 	delegator->registerMapping(messages::MessageName<StringMessage>::name(), stringId);
-	
+
+	uint32_t registerSubId = mapper->registerType<SubscribeMessage>();
+	uint32_t unsubId = mapper->registerType<UnsubscribeMessage >();
+	UnsubscribeMessage unsub(unsubId, SenderMapping::getName());
+	SubscribeMessage sub(registerSubId, SenderMapping::getName());
+	socket->sendBytes(SubscribeSerializer::serialize(std::move(sub)));
+
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, delegator);
 
+	bool subscribed = true;
 	for (uint32_t index = 0; index < maxAttempt; ++index)
 	{
 		int poll = 0;
 		LOG_INFO("Sending attempt #%d", attempt);
-		const int sent = socket->sendBytes(generateMessage(stringId,attempt++));
-		LOG_INFO("Sent %d bytes", sent);
+		const int sent = socket->sendBytes(generateMessage(stringId, attempt++));
 		do {
 			poll = socket->pollSocket();
-		} while (poll == 0);
+		} while ( subscribed && poll == 0);
 
 		builder->pollAndRead();
+		if(subscribed && attempt>=maxAttempt/2)
+		{
+			LOG_INFO("unsubscribing...");
+			subscribed = false;
+			socket->sendBytes(UnsubscribeSerializer::serialize(std::move(unsub)));
+		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 

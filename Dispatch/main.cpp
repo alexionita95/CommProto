@@ -16,14 +16,10 @@ int main(int argc, const char * argv[])
 	}
 	LOG_INFO("Dispatch server started, wating for new connection...");
 
-	std::string name;
-
-
 	while (true) {
 		commproto::sockets::SocketHandle newCon = socket->acceptNext();
 		int poll = 0;
 		dsp.addConnection(newCon);
-		LOG_INFO("A new connection has been added: \"%s\"", name.c_str());
 	}
 	return 0;
 }
