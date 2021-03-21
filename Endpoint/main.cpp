@@ -5,7 +5,7 @@
 #include <sstream>
 #include <conio.h>
 #include <commproto/messages/SenderMaping.h>
-#include <commproto/service/RegisterChannelChain.h>
+#include <commproto/service/ServiceChains.h>
 #include <commproto/messages/MessageMapper.h>
 #include "../CommProtoLib/src/TypeMapperObserver.h"
 #include "../CommProtoLib/src/TypeMapperImpl.h"

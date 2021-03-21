@@ -33,9 +33,6 @@ namespace commproto {
 			
 			newCon->registerSubscription(newCon);
 			newCon->start();
-
-			//TODO::
-			//send our connection the reply with their ID
 		}
 
 		void Dispatch::removeConnection(const std::string& name)
@@ -62,6 +59,9 @@ namespace commproto {
 
 			connectionMapping.insert({ name,id });
 			connection->second->setName(name);
+
+			//TODO::
+			//send our connection the reply with their ID
 		}
 
 		ConnectionHandle Dispatch::getConnection(const std::string& name) const

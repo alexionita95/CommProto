@@ -1,7 +1,8 @@
 #include <commproto/service/ParserDelegatorFactory.h>
 #include <commproto/service/ParserDelegator.h>
 #include <commproto/parser/ParserDelegatorFactory.h>
-#include <commproto/service/RegisterChannelChain.h>
+#include <commproto/service/ServiceChains.h>
+#include <commproto/service/ServiceHandlers.h>
 
 namespace commproto {
 	namespace service {
