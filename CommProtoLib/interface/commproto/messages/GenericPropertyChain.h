@@ -39,7 +39,7 @@ namespace commproto
 		template <typename T, typename  U>
 		Message DoublePropertySerializer<T, U>::serialize(messages::MessageBase&& data)
 		{
-			DoublePropertyMessage<T, U>& realData = static_cast<DoublePropertySerializer<T, U>&>(data);
+			DoublePropertyMessage<T, U>& realData = static_cast<DoublePropertyMessage<T, U>&>(data);
 			parser::ByteStream stream;
 			stream.writeHeader(data);
 			stream.write<T>(realData.prop);

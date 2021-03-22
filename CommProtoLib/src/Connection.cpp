@@ -17,7 +17,13 @@ namespace commproto {
 			, dispatch{ dispatch_ }
 			, builder{ std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this,dispatch_)) }
 			, mapper{std::make_shared<messages::TypeMapperImpl>(std::make_shared<messages::TypeMapperObserver>(socket))}
+			, channelMappingId(0)
 		{
+			socket->sendByte(sizeof(void*));
+			channelMappingId = mapper->registerType<ChannelMappingMessage>();
+
+			RegisterIdMessage registerId(mapper->registerType<RegisterIdMessage>(), id);
+			socket->sendBytes(RegisterIdSerializer::serialize(std::move(registerId)));
 		}
 
 		Connection::~Connection()
@@ -69,14 +75,21 @@ namespace commproto {
 		void Connection::subscribe(const std::string& channelName)
 		{
 			LOG_INFO("Connection \"%s\" attempting to subscribe to \"%s\".",name.c_str(),channelName.c_str());
-			//TODO: subscribe all
-			ConnectionHandle target = dispatch->getConnection(channelName);
-			if (!target)
+
+			if(channelName.compare("")==0)
 			{
-				//TODO: let the channel know there is no channel by that name
+				//TODO: subscribe all
 				return;
 			}
 
+			
+			ConnectionHandle target = dispatch->getConnection(channelName);
+			if (!target)
+			{
+				return;
+			}
+			ChannelMappingMessage mapping(channelMappingId, target->name, target->getId());
+			send(ChannelMappingSerializer::serialize(std::move(mapping)));
 			target->registerSubscription(shared_from_this());
 		}
 
@@ -123,12 +136,7 @@ namespace commproto {
 
 		void Connection::loop()
 		{
-			LOG_INFO("Starting receive loop for connection with id:\"%d\"", id);
-			socket->sendByte(sizeof(void*));
-
-			uint32_t registerIdId = mapper->registerType<RegisterIdMessage>();
-			RegisterIdMessage registerId(registerIdId, id);
-			socket->sendBytes(RegisterIdSerializer::serialize(std::move(registerId)));
+			LOG_INFO("Starting receive loop for connection with id %d", id);
 
 			while (running && socket)
 			{
@@ -141,7 +149,7 @@ namespace commproto {
 					int sent = socket->sendBytes(msg);
 					if (sent != msg.size())
 					{
-						LOG_WARNING("Connection \"%s\" interrupted.", name.c_str());
+						LOG_WARNING("Connection \"%s\"[%d] interrupted.", name.c_str(),id);
 						stop();
 					}
 

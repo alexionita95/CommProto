@@ -58,6 +58,7 @@ namespace commproto
 			Subscribers subs;
 			std::mutex subscriberMutex;
 			messages::TypeMapperHandle mapper;
+			uint32_t channelMappingId;
 		};
 
 

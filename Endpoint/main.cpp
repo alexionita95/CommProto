@@ -72,12 +72,11 @@ int main(int argc, const char * argv[])
 	Message nameSerialized = RegisterChannelSerializer::serialize(std::move(nameMsg));
 	socket->sendBytes(nameSerialized);
 
-	uint32_t stringId = mapper->registerType<StringMessage>();
+	
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build();
 	parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
 	parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 	delegator->registerParser<StringMessage>(stringParser);
-	delegator->registerMapping(messages::MessageName<StringMessage>::name(), stringId);
 
 	uint32_t registerSubId = mapper->registerType<SubscribeMessage>();
 	uint32_t unsubId = mapper->registerType<UnsubscribeMessage >();
@@ -87,17 +86,29 @@ int main(int argc, const char * argv[])
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, delegator);
 
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+	int poll = 0;
+	do
+	{
+		LOG_INFO("Polling while messages are still coming...");
+		poll = socket->pollSocket();
+		builder->pollAndRead();
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
+	} while (poll != 0);
+
+	uint32_t stringId = mapper->registerType<StringMessage>();	
+	delegator->registerMapping(messages::MessageName<StringMessage>::name(), stringId);
+
+
 	bool subscribed = true;
 	for (uint32_t index = 0; index < maxAttempt; ++index)
 	{
-		int poll = 0;
+		builder->pollAndRead();
+
 		LOG_INFO("Sending attempt #%d", attempt);
 		const int sent = socket->sendBytes(generateMessage(stringId, attempt++));
-		do {
-			poll = socket->pollSocket();
-		} while ( subscribed && poll == 0);
-
-		builder->pollAndRead();
+		
 		if(subscribed && attempt>=maxAttempt/2)
 		{
 			LOG_INFO("unsubscribing...");

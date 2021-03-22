@@ -35,6 +35,7 @@ namespace commproto {
 		parser::buildBase(delegator);
 
 		addParserHandlerPair<service::RegisterIdParser, service::RegisterIdMessage>(delegator,std::make_shared<service::RegisterIdHandler>());
+		addParserHandlerPair<service::ChannelMappingParser, service::ChannelMappingMessage>(delegator,std::make_shared<service::MappingHandler>());
 	
 		return delegator;
 	}

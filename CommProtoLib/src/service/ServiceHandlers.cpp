@@ -1,5 +1,6 @@
 #include <commproto/service/ServiceHandlers.h>
 #include <commproto/service/ServiceChains.h>
+#include <commproto/logger/Logging.h>
 
 //TODO: CLEANUP - Split into multiple files
 
@@ -33,7 +34,7 @@ namespace commproto
 			connection.subscribe(message.prop);
 		}
 
-		UnsubscribeHandler::UnsubscribeHandler(Connection& connection) : connection{connection}
+		UnsubscribeHandler::UnsubscribeHandler(Connection& connection) : connection{ connection }
 		{
 		}
 
@@ -47,6 +48,12 @@ namespace commproto
 		{
 			RegisterIdMessage& message = static_cast<RegisterIdMessage&>(data);
 			SenderMapping::InitializeId(message.prop);
+		}
+
+		void MappingHandler::handle(messages::MessageBase&& data)
+		{
+			ChannelMappingMessage& message = static_cast<ChannelMappingMessage&>(data);
+			LOG_INFO("Registed a mapping \"%s\" = %d", message.prop.c_str(), message.prop2);
 		}
 	}
 }

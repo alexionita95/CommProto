@@ -47,6 +47,14 @@ namespace commproto
 		public:
 			void handle(messages::MessageBase&& data) override;
 		};
+
+
+		class MappingHandler : public parser::Handler
+		{
+		public:
+			void handle(messages::MessageBase&& data) override;
+		};
+
 	}
 }
 
