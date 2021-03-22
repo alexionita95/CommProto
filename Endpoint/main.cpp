@@ -86,16 +86,8 @@ int main(int argc, const char * argv[])
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, delegator);
 
+	//wait a bit for the messages to arrive
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-	int poll = 0;
-	do
-	{
-		LOG_INFO("Polling while messages are still coming...");
-		poll = socket->pollSocket();
-		builder->pollAndRead();
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
-	} while (poll != 0);
 
 	uint32_t stringId = mapper->registerType<StringMessage>();	
 	delegator->registerMapping(messages::MessageName<StringMessage>::name(), stringId);
