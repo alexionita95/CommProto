@@ -1,7 +1,7 @@
 #ifndef COMMPROTO_SERVICE_PARSER_DELEGATOR_FACTORY_H
 #define COMMPROTO_SERVICE_PARSER_DELEGATOR_FACTORY_H
 #include <commproto/parser/ParserDelegator.h>
-#include "ChannelParserDelegator.h"
+#include <commproto/endpoint/ChannelParserDelegator.h>
 
 
 namespace commproto
@@ -33,7 +33,7 @@ namespace commproto
 		class ParserDelegatorFactory
 		{
 		public:
-			static parser::ParserDelegatorHandle build(const service::ChannelParserDelegatorHandle & channelDelegator);
+			static parser::ParserDelegatorHandle build(const endpoint::ChannelParserDelegatorHandle & channelDelegator);
 		};
 
 	}

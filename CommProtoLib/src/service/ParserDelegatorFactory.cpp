@@ -29,7 +29,7 @@ namespace commproto {
 		}
 	}
 
-	parser::ParserDelegatorHandle endpoint::ParserDelegatorFactory::build(const service::ChannelParserDelegatorHandle & channelDelegator)
+	parser::ParserDelegatorHandle endpoint::ParserDelegatorFactory::build(const endpoint::ChannelParserDelegatorHandle & channelDelegator)
 	{
 		std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
 		parser::buildBase(delegator);

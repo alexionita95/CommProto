@@ -7,11 +7,11 @@
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/messages/MessageMapper.h>
-#include "../CommProtoLib/src/TypeMapperObserver.h"
-#include "../CommProtoLib/src/TypeMapperImpl.h"
-#include "commproto/service/ParserDelegatorFactory.h"
-#include "commproto/service/ChannelParserDelegator.h"
-#include "commproto/parser/ParserDelegatorFactory.h"
+#include <../CommProtoLib/src/TypeMapperObserver.h>
+#include <../CommProtoLib/src/TypeMapperImpl.h>
+#include <commproto/service/ParserDelegatorFactory.h>
+#include <commproto/endpoint/ChannelParserDelegator.h>
+#include <commproto/parser/ParserDelegatorFactory.h>
 
 using namespace commproto;
 using namespace service;
@@ -24,10 +24,7 @@ using StringSerialize = messages::SinglePropetySerializer<std::string>;
 
 namespace commproto
 {
-	namespace messages
-	{
-		DEFINE_DATA_TYPE(StringMessage);
-	}
+	DEFINE_DATA_TYPE(StringMessage);
 }
 
 class StringHandler : public parser::Handler
@@ -43,7 +40,7 @@ void StringHandler::handle(messages::MessageBase&& data)
 }
 
 
-class StringProvider : public DelegatorProvider{
+class StringProvider : public endpoint::DelegatorProvider{
 public:
 	StringProvider(const messages::TypeMapperHandle & mapper_)
 		: stringId{0}
@@ -60,7 +57,7 @@ public:
 		parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
 		parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 		delegator->registerParser<StringMessage>(stringParser);
-		delegator->registerMapping(messages::MessageName<StringMessage>::name(), stringId);
+		delegator->registerMapping(MessageName<StringMessage>::name(), stringId);
 
 		return delegator;
 	}
@@ -110,7 +107,7 @@ int main(int argc, const char * argv[])
 
 	//delegator to parse incoming messages
 	std::shared_ptr<StringProvider> provider = std::make_shared<StringProvider>(mapper);
-	ChannelParserDelegatorHandle channelDelegator = std::make_shared<ChannelParserDelegator>(provider);
+	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
 

@@ -4,23 +4,12 @@
 #include <map>
 
 #include <commproto/parser/ParserDelegator.h>
+#include <commproto/endpoint/DelegatorProvider.h>
 
 namespace commproto
 {
-	namespace service
+	namespace endpoint
 	{
-		
-		
-		
-		class DelegatorProvider
-		{
-		public:
-			virtual parser::ParserDelegatorHandle provide(const std::string & name) = 0;
-			virtual ~DelegatorProvider() = default;
-		};
-
-		using DelegatorProviderHandle = std::shared_ptr<DelegatorProvider>;
-
 		class ChannelParserDelegator : public parser::ParserDelegator
 		{
 		public:
@@ -29,7 +18,7 @@ namespace commproto
 			void notifyMapping(const std::string & name, const uint32_t id);
 			void addDelegator(const uint32_t id, const parser::ParserDelegatorHandle & delegator);
 		private:
-            std::map<uint32_t, parser::ParserDelegatorHandle> delegators;
+			std::map<uint32_t, parser::ParserDelegatorHandle> delegators;
 			DelegatorProviderHandle provider;
 		};
 

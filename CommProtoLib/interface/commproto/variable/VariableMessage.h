@@ -54,10 +54,8 @@ namespace commproto
 		};
 
 	}
-	namespace messages
-	{
-		DEFINE_DATA_TYPE(variable::VariableMessage);
-	}
+
+	DEFINE_DATA_TYPE(variable::VariableMessage);
 }
 
 #endif //COMMPROTO_VARIABLE_MESSAGE_H

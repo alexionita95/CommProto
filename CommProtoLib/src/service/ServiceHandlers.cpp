@@ -50,7 +50,7 @@ namespace commproto
 			SenderMapping::InitializeId(message.prop);
 		}
 
-		MappingHandler::MappingHandler(const ChannelParserDelegatorHandle& delegator_)
+		MappingHandler::MappingHandler(const endpoint::ChannelParserDelegatorHandle& delegator_)
 			: delegator{delegator_}
 		{
 		}

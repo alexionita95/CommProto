@@ -49,12 +49,8 @@ namespace commproto
 	}
 
 
-	
+	DEFINE_DATA_TYPE(variable::VariableMappingMessage);
 
-	namespace messages
-	{
-		DEFINE_DATA_TYPE(variable::VariableMappingMessage);
-	}
 }
 
 #endif //COMMPROTO_VARIABLE_MAPPING_MESSAGE_H

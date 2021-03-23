@@ -1,7 +1,8 @@
 #ifndef COMMPROTO_SERVICE_CHAINS_H
 #define COMMPROTO_SERVICE_CHAINS_H
 
-#include <commproto/messages/GenericPropertyChain.h>
+#include <commproto/messages/SinglePropertyChain.h>
+#include <commproto/messages/DoublePropertyChain.h>
 
 
 namespace commproto
@@ -46,13 +47,13 @@ namespace commproto
 		using UnsubscribeSerializer = messages::SinglePropetySerializer<std::string>;
 
 	}
-	namespace messages {
-		DEFINE_DATA_TYPE(service::RegisterChannelMessage);
-		DEFINE_DATA_TYPE(service::RegisterIdMessage);
-		DEFINE_DATA_TYPE(service::SubscribeMessage);
-		DEFINE_DATA_TYPE(service::UnsubscribeMessage);
-		DEFINE_DATA_TYPE(service::ChannelMappingMessage);
-	}
+
+	DEFINE_DATA_TYPE(service::RegisterChannelMessage);
+	DEFINE_DATA_TYPE(service::RegisterIdMessage);
+	DEFINE_DATA_TYPE(service::SubscribeMessage);
+	DEFINE_DATA_TYPE(service::UnsubscribeMessage);
+	DEFINE_DATA_TYPE(service::ChannelMappingMessage);
+	
 }
 
 #endif //COMMPROTO_SERVICE_CHAINS_H

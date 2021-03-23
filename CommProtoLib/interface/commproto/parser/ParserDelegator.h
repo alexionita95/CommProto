@@ -32,7 +32,7 @@ namespace commproto
 		template <class T>
 		void ParserDelegator::registerParser(const ParserHandle& parser)
 		{
-			registerParserInternal(messages::MessageName<T>::name(),parser);
+			registerParserInternal(MessageName<T>::name(),parser);
 		}
 
 

@@ -31,8 +31,6 @@ namespace  commproto
 			}
 		};
 
-		DEFINE_DATA_TYPE(MappingType);
-
 		class MappingTypeSerializer
 		{
 		public:
@@ -48,6 +46,7 @@ namespace  commproto
 		};
 
 	}
+	DEFINE_DATA_TYPE(messages::MappingType);
 };
 
 #endif //COMMMPROTO_MAPPING_TYPE_H

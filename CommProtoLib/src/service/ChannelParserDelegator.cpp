@@ -1,10 +1,10 @@
-#include <commproto/service/ChannelParserDelegator.h>
-#include "commproto/logger/Logging.h"
+#include <commproto/endpoint/ChannelParserDelegator.h>
+#include <commproto/logger/Logging.h>
 
 
 namespace commproto
 {
-	namespace service
+	namespace endpoint
 	{
 
 		ChannelParserDelegator::ChannelParserDelegator(const DelegatorProviderHandle& provider_)

@@ -15,7 +15,6 @@
 
 namespace commproto 
 {
-    namespace messages{
         template <typename T>
         class MessageName{
         public:
@@ -23,7 +22,6 @@ namespace commproto
                 return "";
             }
 		};
-    }
 }
 
 #endif // COMMPROTO_TYPE_NAME_H

@@ -53,7 +53,7 @@ namespace commproto
 			ParserHandle mappingParser = std::make_shared<MappingTypeParser>(std::make_shared<MappingTypeHandler>(delegator));
 
 			delegator->registerParser<messages::MappingType>(mappingParser);
-			delegator->registerMapping(messages::MessageName<messages::MappingType>::name(), 0);
+			delegator->registerMapping(MessageName<messages::MappingType>::name(), 0);
 		}
 
 		ParserDelegatorHandle ParserDelegatorFactory::build(const variable::ContextHandle& context)
