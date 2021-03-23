@@ -3,6 +3,7 @@
 
 //TODO: CLEANUP - Split into multiple files
 
+#include <commproto/service/ChannelParserDelegator.h>
 #include <commproto/parser/Handler.h>
 #include <commproto/service/Dispatch.h>
 
@@ -52,7 +53,10 @@ namespace commproto
 		class MappingHandler : public parser::Handler
 		{
 		public:
+			MappingHandler(const ChannelParserDelegatorHandle & delegator);
 			void handle(messages::MessageBase&& data) override;
+		private:
+			ChannelParserDelegatorHandle delegator;
 		};
 
 	}

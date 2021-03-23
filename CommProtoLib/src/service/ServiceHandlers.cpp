@@ -50,10 +50,16 @@ namespace commproto
 			SenderMapping::InitializeId(message.prop);
 		}
 
+		MappingHandler::MappingHandler(const ChannelParserDelegatorHandle& delegator_)
+			: delegator{delegator_}
+		{
+		}
+
 		void MappingHandler::handle(messages::MessageBase&& data)
 		{
 			ChannelMappingMessage& message = static_cast<ChannelMappingMessage&>(data);
 			LOG_INFO("Registed a mapping \"%s\" = %d", message.prop.c_str(), message.prop2);
+			delegator->notifyMapping(message.prop, message.prop2);			
 		}
 	}
 }
