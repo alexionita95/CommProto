@@ -3,7 +3,7 @@
 #include <commproto/logger/Logging.h>
 #include <commproto/variable/ContextImpl.h>
 #include <commproto/parser/ParserDelegatorFactory.h>
-#include <TypeMapperImpl.h>
+#include <parser/TypeMapperImpl.h>
 #include <commproto/variable/VariableMappingMessage.h>
 
 DeviceWrapper::DeviceWrapper(SDKWrapper* device_, const char* host_, uint32_t port_)

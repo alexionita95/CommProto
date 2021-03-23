@@ -4,8 +4,8 @@
 #include <commproto/service/ParserDelegatorFactory.h>
 #include <commproto/service/ServiceChains.h>
 #include <algorithm>
-#include "TypeMapperImpl.h"
 #include <commproto/endpoint/EndpointChains.h>
+#include "../parser/TypeMapperImpl.h"
 
 namespace commproto {
 	namespace service {

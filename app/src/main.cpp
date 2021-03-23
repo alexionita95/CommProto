@@ -5,11 +5,11 @@
 #include <commproto/parser/ParserDelegatorFactory.h>
 #include <commproto/parser/MessageBuilder.h>
 #include <commproto/messages/MessageMapper.h>
-#include "../../CommProtoLib/src/TypeMapperImpl.h"
 #include <commproto/variable/Variable.h>
 #include <commproto/variable/ContextImpl.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/variable/VariableMappingMessage.h>
+#include "../../CommProtoLib/src/parser/TypeMapperImpl.h"
 
 using namespace commproto;
 Message makeMessage(const std::string& msg)

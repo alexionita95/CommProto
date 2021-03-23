@@ -7,11 +7,12 @@
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/messages/MessageMapper.h>
-#include <../CommProtoLib/src/TypeMapperObserver.h>
-#include <../CommProtoLib/src/TypeMapperImpl.h>
-#include <commproto/service/ParserDelegatorFactory.h>
+#include <../CommProtoLib/src/parser/TypeMapperObserver.h>
+#include <../CommProtoLib/src/parser/TypeMapperImpl.h>
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/parser/ParserDelegatorFactory.h>
+#include <commproto/parser/ParserDelegatorUtils.h>
+#include <commproto/endpoint/ParserDelegatorFactory.h>
 
 using namespace commproto;
 using namespace service;
@@ -39,6 +40,13 @@ void StringHandler::handle(messages::MessageBase&& data)
 	LOG_INFO("%s [sender:%d]", message.prop.c_str(), message.senderId);
 }
 
+parser::ParserDelegatorHandle buildSelfDelegator()
+{
+	std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
+	parser::buildBase(delegator);
+	return delegator;
+}
+
 
 class StringProvider : public endpoint::DelegatorProvider{
 public:
@@ -50,7 +58,7 @@ public:
 	}
 	parser::ParserDelegatorHandle provide(const std::string& name) override
 	{
-		parser::ParserDelegatorHandle delegator = simulator::ParserDelegatorFactory::build();
+		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
 
 		stringId = mapper->registerType<StringMessage>();
 

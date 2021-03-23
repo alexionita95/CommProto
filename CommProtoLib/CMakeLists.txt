@@ -19,8 +19,6 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
         interface/*.h
         src/*.cpp
         src/*.h
-		src/service/*.cpp
-        src/service/*.h
         )
 
 
