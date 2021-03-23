@@ -5,6 +5,7 @@
 #include <commproto/service/ServiceChains.h>
 #include <algorithm>
 #include "TypeMapperImpl.h"
+#include <commproto/endpoint/EndpointChains.h>
 
 namespace commproto {
 	namespace service {
@@ -20,10 +21,10 @@ namespace commproto {
 			, channelMappingId(0)
 		{
 			socket->sendByte(sizeof(void*));
-			channelMappingId = mapper->registerType<ChannelMappingMessage>();
+			channelMappingId = mapper->registerType<endpoint::ChannelMappingMessage>();
 
-			RegisterIdMessage registerId(mapper->registerType<RegisterIdMessage>(), id);
-			socket->sendBytes(RegisterIdSerializer::serialize(std::move(registerId)));
+			endpoint::RegisterIdMessage registerId(mapper->registerType<endpoint::RegisterIdMessage>(), id);
+			socket->sendBytes(endpoint::RegisterIdSerializer::serialize(std::move(registerId)));
 		}
 
 		Connection::~Connection()
@@ -88,8 +89,8 @@ namespace commproto {
 			{
 				return;
 			}
-			ChannelMappingMessage mapping(channelMappingId, target->name, target->getId());
-			send(ChannelMappingSerializer::serialize(std::move(mapping)));
+			endpoint::ChannelMappingMessage mapping(channelMappingId, target->name, target->getId());
+			send(endpoint::ChannelMappingSerializer::serialize(std::move(mapping)));
 			target->registerSubscription(shared_from_this());
 		}
 
@@ -99,7 +100,6 @@ namespace commproto {
 			ConnectionHandle target = dispatch->getConnection(channelName);
 			if (!target)
 			{
-				//TODO: let the channel know there is no channel by that name
 				return;
 			}
 
@@ -110,7 +110,6 @@ namespace commproto {
 		{
 			LOG_INFO("Connection \"%s\" registered subscribtion from \"%s\".", name.c_str(), subscriber->name.c_str());
 			std::lock_guard<std::mutex> lock(subscriberMutex);
-			//TODO: send channel mapping
 			if(std::find(subs.begin(), subs.end(), subscriber)!=subs.end())
 			{
 				return;

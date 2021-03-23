@@ -2,7 +2,12 @@
 #include <commproto/service/ParserDelegator.h>
 #include <commproto/parser/ParserDelegatorFactory.h>
 #include <commproto/service/ServiceChains.h>
-#include <commproto/service/ServiceHandlers.h>
+#include <commproto/service/SubscribeHandler.h>
+#include <commproto/service/UnsubscribeHandler.h>
+#include <commproto/service/RegisterChannelHandler.h>
+#include <commproto/endpoint/ChannelMappingHandler.h>
+#include <commproto/endpoint/EndpointChains.h>
+#include <commproto/endpoint/RegisterIdHandler.h>
 
 namespace commproto {
 
@@ -34,8 +39,8 @@ namespace commproto {
 		std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
 		parser::buildBase(delegator);
 
-		addParserHandlerPair<service::RegisterIdParser, service::RegisterIdMessage>(delegator,std::make_shared<service::RegisterIdHandler>());
-		addParserHandlerPair<service::ChannelMappingParser, service::ChannelMappingMessage>(delegator,std::make_shared<service::MappingHandler>(channelDelegator));
+		addParserHandlerPair<RegisterIdParser, RegisterIdMessage>(delegator,std::make_shared<RegisterIdHandler>());
+		addParserHandlerPair<ChannelMappingParser, ChannelMappingMessage>(delegator,std::make_shared<ChannelMappingHandler>(channelDelegator));
 	
 		return delegator;
 	}

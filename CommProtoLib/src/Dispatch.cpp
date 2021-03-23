@@ -57,9 +57,6 @@ namespace commproto {
 
 			connectionMapping.insert({ name,id });
 			connection->second->setName(name);
-
-			//TODO::
-			//send our connection the reply with their ID
 		}
 
 		ConnectionHandle Dispatch::getConnection(const std::string& name) const
