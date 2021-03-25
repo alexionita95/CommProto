@@ -61,6 +61,7 @@ namespace commproto {
 
 		void Connection::receive(const Message& msg)
 		{
+			//TODO: find if this needs optimization
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			for (ConnectionHandle con : subs)
 			{

@@ -22,10 +22,7 @@ namespace commproto
 
 		bool ParserDelegator::parse(Message& msg)
 		{
-			if(parser::ParserDelegator::parse(msg))
-			{
-				return true;
-			}
+			parser::ParserDelegator::parse(msg);
 			Message size = getSize(msg);
 			msg.insert(msg.begin(),size.begin(),size.end());
 			owner.receive(msg);
