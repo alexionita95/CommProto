@@ -86,7 +86,7 @@ Message generateMessage(uint32_t id, int32_t attempt)
 
 int main(int argc, const char * argv[])
 {
-	SenderMapping::InitializeName("Endpoint::Simulator");
+	SenderMapping::InitializeName("Service::UX");
 	sockets::SocketHandle socket = std::make_shared<sockets::SocketImpl>();
 	if (!socket->initClient("localhost", 25565))
 	{
@@ -94,10 +94,7 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 
-	LOG_INFO("Endpoint started...");
-
-	uint8_t attempt = 0;
-	uint8_t maxAttempt = 10;
+	LOG_INFO("UX service started...");
 
 	//send ptr size
 	socket->sendByte(sizeof(void*));
@@ -119,22 +116,22 @@ int main(int argc, const char * argv[])
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
 
+	//subscribe - unsubscribe
+	uint32_t registerSubId = mapper->registerType<SubscribeMessage>();
+	uint32_t unsubId = mapper->registerType<UnsubscribeMessage >();
+
+	SubscribeMessage sub(registerSubId, "");
+
+	socket->sendBytes(SubscribeSerializer::serialize(std::move(sub)));
+
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, channelDelegator);
 
 	//wait a bit for the messages to arrive
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-	for (uint32_t index = 0; index < maxAttempt; ++index)
-	{
+	bool subscribed = true;
+	while(true){
 		builder->pollAndRead();
-
-		LOG_INFO("Sending attempt #%d", attempt);
-		const int sent = socket->sendBytes(generateMessage(provider->stringId, attempt++));
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
 	}
-	socket->close();
-	_getch();
 	return 0;
 }

@@ -34,6 +34,9 @@ namespace commproto
 			void receive(const Message& msg);
 			void setName(const std::string & name);
 
+			bool isRunning() const;
+			std::string getName() const;
+
 			uint32_t getId() const;
 
 			void subscribe(const std::string & channelName);
@@ -59,8 +62,8 @@ namespace commproto
 			std::mutex subscriberMutex;
 			messages::TypeMapperHandle mapper;
 			uint32_t channelMappingId;
+			Message keepAliveMessage;
 		};
-
 
 	}
 }

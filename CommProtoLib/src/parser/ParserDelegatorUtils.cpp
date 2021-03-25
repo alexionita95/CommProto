@@ -1,5 +1,6 @@
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include "MappingType.h"
+#include <commproto/messages/KeepAlive.h>
 
 namespace commproto
 {
@@ -49,6 +50,9 @@ namespace commproto
 
 			delegator->registerParser<messages::MappingType>(mappingParser);
 			delegator->registerMapping(MessageName<messages::MappingType>::name(), 0);
+
+			ParserHandle keepAliveParser = std::make_shared<messages::KeepAliveParser>();
+			delegator->registerParser<messages::KeepAliveMessage>(keepAliveParser);
 		}
     }
 }

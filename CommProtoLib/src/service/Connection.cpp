@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <commproto/endpoint/EndpointChains.h>
 #include "../parser/TypeMapperImpl.h"
+#include "commproto/messages/KeepAlive.h"
 
 namespace commproto {
 	namespace service {
@@ -29,9 +30,9 @@ namespace commproto {
 
 		Connection::~Connection()
 		{
-			stop();
-			clearSubscriptions();
-			dispatch->removeConnection(name);
+			stop(); 
+			worker->join();
+			clearSubscriptions();		
 		}
 
 		void Connection::start()
@@ -50,8 +51,7 @@ namespace commproto {
 			{
 				return;
 			}
-			running = false;
-			worker->join();
+			running = false;	
 		}
 
 		void Connection::send(const Message& msg)
@@ -73,13 +73,18 @@ namespace commproto {
 			name = name_;
 		}
 
+		bool Connection::isRunning() const
+		{
+			return running;
+		}
+
 		void Connection::subscribe(const std::string& channelName)
 		{
 			LOG_INFO("Connection \"%s\" attempting to subscribe to \"%s\".",name.c_str(),channelName.c_str());
 
 			if(channelName.compare("")==0)
 			{
-				//TODO: subscribe all
+				dispatch->subsribeAll(id);
 				return;
 			}
 
@@ -136,7 +141,10 @@ namespace commproto {
 		void Connection::loop()
 		{
 			LOG_INFO("Starting receive loop for connection with id %d", id);
-
+			keepAliveMessage = messages::KeepAliveSerializer::serialize(std::move(messages::KeepAliveMessage(mapper->registerType<messages::KeepAliveMessage>())));
+			static const uint32_t keepAliveTimeMs = 2000;
+			auto then = std::chrono::system_clock::now().time_since_epoch();
+			auto now = std::chrono::system_clock::now().time_since_epoch();
 			while (running && socket)
 			{
 				//recv part
@@ -154,6 +162,19 @@ namespace commproto {
 
 				}
 				//std::this_thread::sleep_for(std::chrono::microseconds(sleepMicro));
+				//check if our connection is still alive
+				now = std::chrono::system_clock::now().time_since_epoch();
+				uint32_t diff =  std::chrono::duration_cast<std::chrono::milliseconds>( now - then).count();
+				if(diff >= keepAliveTimeMs)
+				{			
+					then = now;
+					int32_t sent = socket->sendBytes(keepAliveMessage);
+					if(sent != keepAliveMessage.size())
+					{
+						LOG_WARNING("Connection \"%s\"[%d] interrupted ny keep alive.", name.c_str(), id);
+						stop();
+					}
+				}
 			}
 			LOG_INFO("Stopping receive loop for connection \"%s\"", name.c_str());
 		}
@@ -168,5 +189,9 @@ namespace commproto {
 			return lhs.id == rhs.id && lhs.name.compare(rhs.name) == 0;
 		}
 
+		std::string Connection::getName() const
+		{
+			return name;
+		}
 	}
 }
