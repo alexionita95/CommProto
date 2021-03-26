@@ -49,5 +49,15 @@ namespace commproto
 			delegators.insert({id,delegator});
 		}
 
+		void ChannelParserDelegator::notifyTermination(const uint32_t id)
+		{
+			auto it = delegators.find(id);
+			if ( it == delegators.end())
+			{
+				return;
+			}
+			LOG_INFO("Connection %d has been terminated", it->first);
+			delegators.erase(it);
+		}
 	}
 }

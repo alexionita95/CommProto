@@ -12,14 +12,14 @@ namespace commproto
 	namespace messages
 	{
 		template <typename  T>
-		class SinglePropetySerializer
+		class SinglePropertySerializer
 		{
 		public:
 			static Message serialize(messages::MessageBase&& data);
 		};
 
 		template <typename T>
-		Message SinglePropetySerializer<T>::serialize(messages::MessageBase&& data)
+		Message SinglePropertySerializer<T>::serialize(messages::MessageBase&& data)
 		{
 			SinglePropertyMessage<T>& realData = static_cast<SinglePropertyMessage<T>&>(data);
 			parser::ByteStream stream;

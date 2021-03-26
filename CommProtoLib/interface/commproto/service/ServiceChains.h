@@ -15,14 +15,14 @@ namespace commproto
 
 		using RegisterChannelParser = messages::SinglePropertyParser<std::string>;
 
-		using RegisterChannelSerializer = messages::SinglePropetySerializer<std::string>;
+		using RegisterChannelSerializer = messages::SinglePropertySerializer<std::string>;
 
 		//subscribe
 		MAKE_SINGLE_PROP_MESSAGE(SubscribeMessage, std::string);
 
 		using SubscribeParser = messages::SinglePropertyParser<std::string>;
 
-		using SubscribeSerializer = messages::SinglePropetySerializer<std::string>;
+		using SubscribeSerializer = messages::SinglePropertySerializer<std::string>;
 
 
 		//unsubscribe
@@ -30,7 +30,7 @@ namespace commproto
 
 		using UnsubscribeParser = messages::SinglePropertyParser<std::string>;
 
-		using UnsubscribeSerializer = messages::SinglePropetySerializer<std::string>;
+		using UnsubscribeSerializer = messages::SinglePropertySerializer<std::string>;
 
 	}
 

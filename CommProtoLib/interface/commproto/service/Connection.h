@@ -34,7 +34,7 @@ namespace commproto
 			void send(const Message& msg);
 			void receive(const Message& msg);
 			void setName(const std::string & name);
-
+			void notifyTermination(const uint32_t id);
 			bool isRunning() const;
 			std::string getName() const;
 
@@ -65,6 +65,7 @@ namespace commproto
 			messages::TypeMapperHandle mapper;
 			uint32_t channelMappingId;
 			Message keepAliveMessage;
+			uint32_t terminationId;
 		};
 
 	}

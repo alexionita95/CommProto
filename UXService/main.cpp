@@ -20,7 +20,7 @@ using namespace service;
 MAKE_SINGLE_PROP_MESSAGE(StringMessage, std::string);
 
 using StringParser = messages::SinglePropertyParser<std::string>;
-using StringSerialize = messages::SinglePropetySerializer<std::string>;
+using StringSerialize = messages::SinglePropertySerializer<std::string>;
 
 
 namespace commproto

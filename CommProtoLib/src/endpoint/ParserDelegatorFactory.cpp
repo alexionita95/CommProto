@@ -4,6 +4,7 @@
 #include <commproto/endpoint/EndpointChains.h>
 #include <commproto/endpoint/RegisterIdHandler.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
+#include "commproto/endpoint/ChannelTerminationHandler.h"
 
 namespace commproto {
 
@@ -14,6 +15,7 @@ namespace commproto {
 
 		parser::addParserHandlerPair<RegisterIdParser, RegisterIdMessage>(delegator,std::make_shared<RegisterIdHandler>());
 		parser::addParserHandlerPair<ChannelMappingParser, ChannelMappingMessage>(delegator,std::make_shared<ChannelMappingHandler>(channelDelegator));
+		parser::addParserHandlerPair<ChannelTerminationParser, ChannelTerminationMessage>(delegator,std::make_shared<ChannelTerminationHandler>(channelDelegator));
 	
 		return delegator;
 	}

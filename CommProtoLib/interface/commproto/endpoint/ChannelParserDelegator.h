@@ -16,6 +16,7 @@ namespace commproto
 			ChannelParserDelegator(const DelegatorProviderHandle& provider);
 			bool parse(Message & msg) override;
 			void notifyMapping(const std::string & name, const uint32_t id);
+			void notifyTermination(const uint32_t id);
 			void addDelegator(const uint32_t id, const parser::ParserDelegatorHandle & delegator);
 		private:
 			std::map<uint32_t, parser::ParserDelegatorHandle> delegators;

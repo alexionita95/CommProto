@@ -1,9 +1,6 @@
 #include <commproto/service/Dispatch.h>
 #include <commproto/logger/Logging.h>
-#include <commproto/service/Dispatch.h>
 #include <commproto/service/ParserDelegatorFactory.h>
-#include <commproto/service/ServiceChains.h>
-#include <algorithm>
 #include <commproto/endpoint/EndpointChains.h>
 #include "../parser/TypeMapperImpl.h"
 #include "commproto/messages/KeepAlive.h"
@@ -21,9 +18,11 @@ namespace commproto {
 			, builder{ std::make_shared<parser::MessageBuilder>(socket_,delegator)}
 			, mapper{std::make_shared<messages::TypeMapperImpl>(std::make_shared<messages::TypeMapperObserver>(socket))}
 			, channelMappingId(0)
+			, terminationId(0)
 		{
 			socket->sendByte(sizeof(void*));
 			channelMappingId = mapper->registerType<endpoint::ChannelMappingMessage>();
+			terminationId = mapper->registerType<endpoint::ChannelTerminationMessage>();
 
 			endpoint::RegisterIdMessage registerId(mapper->registerType<endpoint::RegisterIdMessage>(), id);
 			socket->sendBytes(endpoint::RegisterIdSerializer::serialize(std::move(registerId)));
@@ -74,6 +73,11 @@ namespace commproto {
 		void Connection::setName(const std::string& name_)
 		{
 			name = name_;
+		}
+
+		void Connection::notifyTermination(const uint32_t id_)
+		{
+			send(endpoint::ChannelTerminationSerializer::serialize(std::move(endpoint::ChannelTerminationMessage(terminationId,id_))));
 		}
 
 		bool Connection::isRunning() const
@@ -149,6 +153,10 @@ namespace commproto {
 		void Connection::clearSubscriptions()
 		{
 			std::lock_guard<std::mutex> lock(subscriberMutex);
+			for(auto con : subs)
+			{
+				con->notifyTermination(id);
+			}
 			subs.clear();
 		}
 
