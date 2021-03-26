@@ -54,5 +54,14 @@ namespace commproto
 			ParserHandle keepAliveParser = std::make_shared<messages::KeepAliveParser>();
 			delegator->registerParser<messages::KeepAliveMessage>(keepAliveParser);
 		}
+
+	    void sendMappings(const ParserDelegatorHandle& delegator, const sockets::SocketHandle& socket)
+	    {
+			auto mappings = delegator->getMappings();
+			for(auto it = mappings.begin(); it != mappings.end();++it)
+			{				
+				socket->sendBytes(messages::MappingTypeSerializer::serialize(std::move(messages::MappingType(it->first, it->second))));
+			}
+	    }
     }
 }

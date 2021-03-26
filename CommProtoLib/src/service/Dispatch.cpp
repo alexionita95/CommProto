@@ -33,7 +33,6 @@ namespace commproto {
 			ConnectionHandle newCon = std::make_shared<Connection>(connectionId, connection, this);
 			connections.insert({ connectionId,  newCon });
 			newCon->start();
-			subscribeToNewConnection(newCon);
 		}
 
 		void Dispatch::removeConnection(const uint32_t id)
@@ -61,6 +60,7 @@ namespace commproto {
 
 			connectionMapping.insert({ name,id });
 			connection->second->setName(name);
+			subscribeToNewConnection(connection->second);
 		}
 
 		void Dispatch::subsribeAll(const uint32_t id)
@@ -143,7 +143,7 @@ namespace commproto {
 		{
 			for(auto subscriber : subscribedToAll)
 			{
-				connection->registerSubscription(subscriber);
+				subscriber->subscribe(connection->getName());
 			}
 		}
 

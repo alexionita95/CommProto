@@ -51,25 +51,19 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 class StringProvider : public endpoint::DelegatorProvider{
 public:
 	StringProvider(const messages::TypeMapperHandle & mapper_)
-		: stringId{0}
-		, mapper{mapper_}
+		: mapper{mapper_}
 	{
 		
 	}
 	parser::ParserDelegatorHandle provide(const std::string& name) override
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
-
-		stringId = mapper->registerType<StringMessage>();
-
 		parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
 		parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 		delegator->registerParser<StringMessage>(stringParser);
-		delegator->registerMapping(MessageName<StringMessage>::name(), stringId);
 
 		return delegator;
 	}
-	uint32_t stringId;
 private:
 	messages::TypeMapperHandle mapper;
 };
@@ -126,8 +120,11 @@ int main(int argc, const char * argv[])
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, channelDelegator);
 
-	//wait a bit for the messages to arrive
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	//wait until we are sure we have an ID
+	do
+	{
+		builder->pollAndRead();
+	} while (SenderMapping::getId() == 0);
 
 	bool subscribed = true;
 	while(true){

@@ -17,7 +17,8 @@ namespace commproto {
 			, running{ false }
 			, sleepMicro{ sleepTime_ }
 			, dispatch{ dispatch_ }
-			, builder{ std::make_shared<parser::MessageBuilder>(socket_,ParserDelegatorFactory::build(*this,dispatch_)) }
+			, delegator{ ParserDelegatorFactory::build(*this, dispatch_) }
+			, builder{ std::make_shared<parser::MessageBuilder>(socket_,delegator)}
 			, mapper{std::make_shared<messages::TypeMapperImpl>(std::make_shared<messages::TypeMapperObserver>(socket))}
 			, channelMappingId(0)
 		{
@@ -62,6 +63,7 @@ namespace commproto {
 		void Connection::receive(const Message& msg)
 		{
 			//TODO: find if this needs optimization
+			LOG_INFO("Got message from connection %s(%d)",name.c_str(),id);
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			for (ConnectionHandle con : subs)
 			{
@@ -121,6 +123,17 @@ namespace commproto {
 				return;
 			}
 			subs.emplace_back(subscriber);
+
+			LOG_INFO("Connection \"%s\" forwarding mappings",name.c_str());
+			// forward current mappings
+			auto mappings = delegator->getMappings();
+			for (auto it = mappings.begin(); it != mappings.end(); ++it)
+			{
+				messages::MappingType msg = messages::MappingType(it->first, it->second);
+				LOG_INFO("Connection \"%s\" forwarding mapping %s -> %d", name.c_str(),it->first.c_str(),it->second);
+				msg.senderId = id;
+				socket->sendBytes(messages::MappingTypeSerializer::serialize(std::move(msg)));
+			}
 		}
 
 		void Connection::unregisterSubscription(const ConnectionHandle& subscriber)

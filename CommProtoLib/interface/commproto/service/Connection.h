@@ -7,6 +7,7 @@
 #include <concurrentqueue.h>
 #include <mutex>
 #include <commproto/messages/MessageMapper.h>
+#include "ParserDelegator.h"
 
 
 namespace commproto
@@ -57,6 +58,7 @@ namespace commproto
 			std::atomic_bool running;
 			const uint32_t sleepMicro;
 			DispatchHandle dispatch;
+			parser::ParserDelegatorHandle delegator;
 			parser::MessageBuilderHandle builder;
 			Subscribers subs;
 			std::mutex subscriberMutex;

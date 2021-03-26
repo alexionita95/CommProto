@@ -97,7 +97,7 @@ int main(int argc, const char * argv[])
 	LOG_INFO("Endpoint started...");
 
 	uint8_t attempt = 0;
-	uint8_t maxAttempt = 10;
+	uint8_t maxAttempt = 1;
 
 	//send ptr size
 	socket->sendByte(sizeof(void*));
@@ -121,15 +121,24 @@ int main(int argc, const char * argv[])
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, channelDelegator);
 
-	//wait a bit for the messages to arrive
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	//wait until we are sure we have an ID
+	do
+	{
+		builder->pollAndRead();
+	} while (SenderMapping::getId() == 0);
 
-	for (uint32_t index = 0; index < maxAttempt; ++index)
+	std::string messages[] ={"Hello from the first ever endpoint using the commproto framework!","Hopefully, this message finds you well, subscriber!","Anyway, I gotta go now, my cookies are burning in the oven.","Ciao!"};
+
+
+
+	uint32_t stringId = mapper->registerType<StringMessage>();
+	LOG_INFO("String mapping = %d", stringId);
+	for (uint32_t index = 0; index < 4; ++index)
 	{
 		builder->pollAndRead();
 
-		LOG_INFO("Sending attempt #%d", attempt);
-		const int sent = socket->sendBytes(generateMessage(provider->stringId, attempt++));
+		LOG_INFO("Sending attempt #%d", index);
+		const int sent = socket->sendBytes(StringSerialize::serialize(std::move(StringMessage(stringId, messages[index]))));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 

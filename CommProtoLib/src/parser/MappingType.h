@@ -34,7 +34,7 @@ namespace  commproto
 		class MappingTypeSerializer
 		{
 		public:
-			Message serialize(MessageBase && data)
+			static Message serialize(MessageBase && data)
 			{
 				MappingType& mapping = static_cast<MappingType&>(data);
 				parser::ByteStream stream;

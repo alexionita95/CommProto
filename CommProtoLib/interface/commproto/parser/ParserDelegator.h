@@ -11,6 +11,14 @@ namespace commproto
 {
 	namespace parser
 	{
+
+		enum class MappingResult
+		{
+			NoMatchingParser,
+			AlreadyRegistered,
+			Success
+
+		};
 		class ParserDelegator
 		{
 		public:
@@ -18,14 +26,18 @@ namespace commproto
 			template <class T>
 			void registerParser(const ParserHandle & parser);
 
-			void registerMapping(const std::string & name, uint32_t id);
+			virtual MappingResult registerMapping(const std::string & name, uint32_t id);
+			std::map<std::string, uint32_t> getMappings() const;
 
 			virtual bool parse(Message & msg);
+
+			
 
 		private:
 
 			void registerParserInternal(const std::string & typeName, const ParserHandle & parser);
 			std::map<std::string, ParserHandle> nameToParser;
+			std::map<std::string, uint32_t> nameToId;
 			std::map<uint32_t, ParserHandle> idToParser;
 		};
 

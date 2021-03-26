@@ -15,6 +15,7 @@ namespace commproto
 		{
 		public:
 			ParserDelegator(Connection& dispatch);
+			parser::MappingResult registerMapping(const std::string & name, uint32_t id) override;
 			bool parse(Message & msg) override;
 		private:
 			Connection& owner;

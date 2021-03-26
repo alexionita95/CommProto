@@ -2,6 +2,7 @@
 #define PARSER_DELEGATOR_UTILS_H
 
 #include <commproto/parser/ParserDelegator.h>
+#include <commproto/sockets/Socket.h>
 
 namespace commproto
 {
@@ -16,6 +17,9 @@ namespace commproto
 		}
 
 		void buildBase(const ParserDelegatorHandle & delegator);
+
+
+		void sendMappings(const ParserDelegatorHandle & delegator, const sockets::SocketHandle & socket);
     }
 }
 
