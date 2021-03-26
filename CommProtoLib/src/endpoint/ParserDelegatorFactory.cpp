@@ -7,17 +7,18 @@
 #include "commproto/endpoint/ChannelTerminationHandler.h"
 
 namespace commproto {
-
-	parser::ParserDelegatorHandle endpoint::ParserDelegatorFactory::build(const endpoint::ChannelParserDelegatorHandle & channelDelegator)
+	namespace endpoint
 	{
-		std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
-		parser::buildBase(delegator);
+		parser::ParserDelegatorHandle ParserDelegatorFactory::build(const ChannelParserDelegatorHandle & channelDelegator)
+		{
+			std::shared_ptr<parser::ParserDelegator> delegator = std::make_shared<parser::ParserDelegator>();
+			parser::buildBase(delegator);
 
-		parser::addParserHandlerPair<RegisterIdParser, RegisterIdMessage>(delegator,std::make_shared<RegisterIdHandler>());
-		parser::addParserHandlerPair<ChannelMappingParser, ChannelMappingMessage>(delegator,std::make_shared<ChannelMappingHandler>(channelDelegator));
-		parser::addParserHandlerPair<ChannelTerminationParser, ChannelTerminationMessage>(delegator,std::make_shared<ChannelTerminationHandler>(channelDelegator));
-	
-		return delegator;
+			parser::addParserHandlerPair<RegisterIdParser, RegisterIdMessage>(delegator, std::make_shared<RegisterIdHandler>());
+			parser::addParserHandlerPair<ChannelMappingParser, ChannelMappingMessage>(delegator, std::make_shared<ChannelMappingHandler>(channelDelegator));
+			parser::addParserHandlerPair<ChannelTerminationParser, ChannelTerminationMessage>(delegator, std::make_shared<ChannelTerminationHandler>(channelDelegator));
+
+			return delegator;
+		}
 	}
-
 }
