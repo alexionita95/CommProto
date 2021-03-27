@@ -5,8 +5,14 @@
 
 namespace commproto
 {
-	namespace control {
+	namespace control
+	{
 		class ControlBase : public Control {
+		public:
+			ControlBase(const std::string & name);
+			std::string getName() const override;
+		protected:
+			std::string name;
 		};
 
 	}
