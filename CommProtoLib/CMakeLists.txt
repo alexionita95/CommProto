@@ -32,7 +32,7 @@ foreach(source IN LISTS PROJECT_SRC)
 endforeach()  
 
 
-target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue)
+target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue rapidjson)
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)
