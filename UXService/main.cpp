@@ -33,26 +33,39 @@ using namespace Poco::Net;
 using namespace Poco::Util;
 using namespace std;
 
+static int counter = 0;
+
 class MyRequestHandler : public HTTPRequestHandler
 {
 public:
 	virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
 	{
-		resp.setStatus(HTTPResponse::HTTP_OK);
-		resp.setContentType("text/html");
-
-		ostream& out = resp.send();
-		ifstream file("cp\\index.html");
-		if(file.is_open())
+		if(req.getMethod().compare("POST")==0)
 		{
-			while (!file.eof()) {
-				std::string line;
-				std::getline(file, line);
-				out << line;
+			std::string url = req.getURI();
+			if (url.compare("/update") == 0) {
+				ostream& out = resp.send();
+				out << "update #" << counter++ << " :D <br>";
+				out.flush();
 			}
 		}
-		file.close();
-		out.flush();
+		else {
+			resp.setStatus(HTTPResponse::HTTP_OK);
+			resp.setContentType("text/html");
+
+			ostream& out = resp.send();
+			ifstream file("cp\\index.html");
+			if (file.is_open())
+			{
+				while (!file.eof()) {
+					std::string line;
+					std::getline(file, line);
+					out << line;
+				}
+			}
+			file.close();
+			out.flush();
+		}
 	}
 
 private:
