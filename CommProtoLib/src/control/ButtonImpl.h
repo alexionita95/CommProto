@@ -29,6 +29,22 @@ namespace commproto
 			std::string connectionName;
 		};
 
+		class UxGenerator;
+		using UxGeneratorHandle =  std::shared_ptr<UxGenerator>;
+
+		class UxButton : public ControlBase {
+		public:
+			UxButton(const std::string& name_, const UxGeneratorHandle& generator_)
+				: ControlBase{ name_ }
+				, generator{ generator_ }
+			{
+			}
+
+			std::string getUX() const override;
+		private:
+			UxGeneratorHandle generator;
+		};
+
 		class UxGenerator
 		{
 		public:
@@ -43,6 +59,12 @@ namespace commproto
 			UxManager& manager;
 
 		};
+
+		template <>
+		inline std::string UxGenerator::generate(const UxButton& control) const
+		{
+			return manager.getConnectionName() + manager.getName() + control.getName();
+		}
 
 
 		using ButtonAction = std::function<void()>;
@@ -70,27 +92,6 @@ namespace commproto
 			ButtonAction action;
 		};
 
-		class UxButton : public ControlBase {
-		public:
-			UxButton(const std::string& name_, const UxGenerator& generator_)
-				: ControlBase{name_}
-				, generator{generator_}
-			{
-			}
-
-			std::string getUX() const override
-			{
-				return generator.generate(*this);
-			}
-			private:
-				UxGenerator generator;
-		};
-
-		template <>
-		inline std::string UxGenerator::generate(const UxButton& control) const
-		{
-			return manager.getConnectionName()+  manager.getName() + control.getName();
-		}
 	}
 }
 

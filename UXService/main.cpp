@@ -14,6 +14,81 @@
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 
+
+
+#include <Poco/Net/ServerSocket.h>
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPServerRequest.h>
+#include <Poco/Net/HTTPServerResponse.h>
+#include <Poco/Util/ServerApplication.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+
+using namespace Poco::Net;
+using namespace Poco::Util;
+using namespace std;
+
+class MyRequestHandler : public HTTPRequestHandler
+{
+public:
+	virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
+	{
+		resp.setStatus(HTTPResponse::HTTP_OK);
+		resp.setContentType("text/html");
+
+		ostream& out = resp.send();
+		ifstream file("cp\\index.html");
+		if(file.is_open())
+		{
+			while (!file.eof()) {
+				std::string line;
+				std::getline(file, line);
+				out << line;
+			}
+		}
+		file.close();
+		out.flush();
+	}
+
+private:
+	static int count;
+};
+
+int MyRequestHandler::count = 0;
+
+class MyRequestHandlerFactory : public HTTPRequestHandlerFactory
+{
+public:
+	virtual HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &)
+	{
+		return new MyRequestHandler;
+	}
+};
+
+class MyServerApp : public ServerApplication
+{
+protected:
+	int main(const vector<string> &)
+	{
+		HTTPServer s(new MyRequestHandlerFactory, ServerSocket(9090), new HTTPServerParams);
+
+		s.start();
+		cout << endl << "Server started" << endl;
+
+		waitForTerminationRequest();  // wait for CTRL-C or kill
+
+		cout << endl << "Shutting down..." << endl;
+		s.stop();
+
+		return Application::EXIT_OK;
+	}
+};
+
 using namespace commproto;
 using namespace service;
 
@@ -78,22 +153,23 @@ Message generateMessage(uint32_t id, int32_t attempt)
 	return StringSerialize::serialize(std::move(msg));
 }
 
-int main(int argc, const char * argv[])
+
+void serviceApp()
 {
 	SenderMapping::InitializeName("Service::UX");
 	sockets::SocketHandle socket = std::make_shared<sockets::SocketImpl>();
 	if (!socket->initClient("localhost", 25565))
 	{
 		LOG_ERROR("A problem occurred while starting endpoint, shutting down...");
-		return 1;
+		return;
 	}
 
 	LOG_INFO("UX service started...");
 
 	//send ptr size
 	socket->sendByte(sizeof(void*));
-	
-	
+
+
 	//core dependencies
 	messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(socket);
 	messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
@@ -127,8 +203,19 @@ int main(int argc, const char * argv[])
 	} while (SenderMapping::getId() == 0);
 
 	bool subscribed = true;
-	while(true){
+	while (true) {
 		builder->pollAndRead();
 	}
-	return 0;
+	return;
+}
+
+
+int main(int argc, char * argv[])
+{
+
+	MyServerApp app;
+	std::thread appThread(serviceApp);
+	int res =  app.run(argc, argv);
+	appThread.join();
+	return res;
 }
