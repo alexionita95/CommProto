@@ -51,38 +51,21 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 class StringProvider : public endpoint::DelegatorProvider{
 public:
 	StringProvider(const messages::TypeMapperHandle & mapper_)
-		: stringId{0}
-		, mapper{mapper_}
+		: mapper{mapper_}
 	{
 		
 	}
 	parser::ParserDelegatorHandle provide(const std::string& name) override
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
-
-		stringId = mapper->registerType<StringMessage>();
-
 		parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
 		parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 		delegator->registerParser<StringMessage>(stringParser);
-		delegator->registerMapping(MessageName<StringMessage>::name(), stringId);
-
 		return delegator;
 	}
-	uint32_t stringId;
 private:
 	messages::TypeMapperHandle mapper;
 };
-
-
-Message generateMessage(uint32_t id, int32_t attempt)
-{
-	std::stringstream writer;
-	writer << "This is attempt #" << attempt << "!";
-	uint32_t size = writer.str().size() + sizeof(uint32_t) + sizeof(uint32_t);
-	StringMessage msg(id, writer.str());
-	return StringSerialize::serialize(std::move(msg));
-}
 
 int main(int argc, const char * argv[])
 {
@@ -130,18 +113,29 @@ int main(int argc, const char * argv[])
 	std::string messages[] ={"Hello from the first ever endpoint using the commproto framework!","Hopefully, this message finds you well, subscriber!","Anyway, I gotta go now, my cookies are burning in the oven.","Ciao!"};
 
 
+	for(uint32_t index =0 ; index<100;++index)
+	{
+		builder->pollAndRead();
+	}
+
 
 	uint32_t stringId = mapper->registerType<StringMessage>();
 	LOG_INFO("String mapping = %d", stringId);
 	for (uint32_t index = 0; index < 4; ++index)
 	{
-		builder->pollAndRead();
+		
 
 		LOG_INFO("Sending attempt #%d", index);
 		const int sent = socket->sendBytes(StringSerialize::serialize(std::move(StringMessage(stringId, messages[index]))));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
+	}
+
+
+	while (true)
+	{
+		builder->pollAndRead();
 	}
 	socket->close();
 	_getch();

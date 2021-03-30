@@ -24,8 +24,8 @@ namespace commproto
 			DoublePropertyMessage<T, U>& realData = static_cast<DoublePropertyMessage<T, U>&>(data);
 			parser::ByteStream stream;
 			stream.writeHeader(data);
-			stream.write<T>(realData.prop);
-			stream.write<U>(realData.prop2);
+			stream.write(realData.prop);
+			stream.write(realData.prop2);
 			return stream.getStream();
 		}
 
@@ -50,8 +50,8 @@ namespace commproto
 			T prop;
 			U prop2;
 			stream.read < uint32_t>(sender);
-			stream.read<T>(prop);
-			stream.read<U>(prop2);
+			stream.read(prop);
+			stream.read(prop2);
 			DoublePropertyMessage<T, U> realMessage(0, prop, prop2);
 			realMessage.senderId = sender;
 			handler->handle(std::move(realMessage));

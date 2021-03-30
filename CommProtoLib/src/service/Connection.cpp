@@ -62,7 +62,6 @@ namespace commproto {
 		void Connection::receive(const Message& msg)
 		{
 			//TODO: find if this needs optimization
-			LOG_INFO("Got message from connection %s(%d)",name.c_str(),id);
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			for (ConnectionHandle con : subs)
 			{
@@ -87,7 +86,7 @@ namespace commproto {
 
 		void Connection::subscribe(const std::string& channelName)
 		{
-			LOG_INFO("Connection \"%s\" attempting to subscribe to \"%s\".",name.c_str(),channelName.c_str());
+			LOG_INFO("[%s-%d] Attempting to subscribe to \"%s\".",name.c_str(),id,channelName.c_str());
 
 			if(channelName.compare("")==0)
 			{
@@ -108,7 +107,7 @@ namespace commproto {
 
 		void Connection::unsubscribe(const std::string& channelName)
 		{
-			LOG_INFO("Connection \"%s\" attempting to unsubscribe from \"%s\".", name.c_str(), channelName.c_str());
+			LOG_INFO("[%s-%d] Attempting to unsubscribe from \"%s\".", name.c_str(), id, channelName.c_str());
 			ConnectionHandle target = dispatch->getConnection(channelName);
 			if (!target)
 			{
@@ -120,7 +119,7 @@ namespace commproto {
 
 		void Connection::registerSubscription(const ConnectionHandle& subscriber)
 		{
-			LOG_INFO("Connection \"%s\" registered subscribtion from \"%s\".", name.c_str(), subscriber->name.c_str());
+			LOG_INFO("[%s-%d] Registered subscribtion from \"%s\".", name.c_str(),id, subscriber->name.c_str());
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			if(std::find(subs.begin(), subs.end(), subscriber)!=subs.end())
 			{
@@ -128,26 +127,29 @@ namespace commproto {
 			}
 			subs.emplace_back(subscriber);
 
-			LOG_INFO("Connection \"%s\" forwarding mappings",name.c_str());
+			LOG_INFO("[%s-%d] Forwarding mappings",name.c_str(),id);
 			// forward current mappings
-			auto mappings = delegator->getMappings();
-			for (auto it = mappings.begin(); it != mappings.end(); ++it)
-			{
-				messages::MappingType msg = messages::MappingType(it->first, it->second);
-				LOG_INFO("Connection \"%s\" forwarding mapping %s -> %d", name.c_str(),it->first.c_str(),it->second);
-				msg.senderId = id;
-				socket->sendBytes(messages::MappingTypeSerializer::serialize(std::move(msg)));
-			}
+			sendMappings(subscriber);
 		}
 
 		void Connection::unregisterSubscription(const ConnectionHandle& subscriber)
 		{
-			LOG_INFO("Connection \"%s\" unregistered subscribtion from \"%s\".", name.c_str(), subscriber->name.c_str());
+			LOG_INFO("[%s-%d] Unregistered subscribtion from \"%s\".", name.c_str(),id, subscriber->name.c_str());
 			std::lock_guard<std::mutex> lock(subscriberMutex);
 			auto it = std::find(subs.begin(), subs.end(), subscriber);
 			if (it != subs.end()) {
 				subs.erase(it);
 			}
+			auto it2 = std::find(sentMapping.begin(), sentMapping.end(), subscriber->getId());
+			if(it2 != sentMapping.end())
+			{
+				sentMapping.erase(it2);
+			}
+		}
+
+		void Connection::handshake(const ConnectionHandle& target)
+		{
+			sendMappings(target);
 		}
 
 		void Connection::clearSubscriptions()
@@ -160,9 +162,33 @@ namespace commproto {
 			subs.clear();
 		}
 
+		void Connection::sendMappings(const ConnectionHandle& target)
+		{
+			if(std::find(sentMapping.begin(),sentMapping.end(),target->getId()) != sentMapping.end())
+			{
+				return;
+			}
+
+			sentMapping.push_back(target->getId());
+			target->sendChannelMapping(name,id);
+			auto mappings = delegator->getMappings();
+			for (auto it = mappings.begin(); it != mappings.end(); ++it)
+			{
+				messages::MappingType msg = messages::MappingType(it->first, it->second);
+				msg.senderId = id;
+				target->send(messages::MappingTypeSerializer::serialize(std::move(msg)));
+			}
+		}
+
+		void Connection::sendChannelMapping(const std::string & name_, const uint32_t id_)
+		{
+			endpoint::ChannelMappingMessage mapping(channelMappingId, name_, id_);
+			send(endpoint::ChannelMappingSerializer::serialize(std::move(mapping)));
+		}
+
 		void Connection::loop()
 		{
-			LOG_INFO("Starting receive loop for connection with id %d", id);
+			LOG_INFO("[%s-%d] Starting receive loop.", name.c_str(),id);
 			keepAliveMessage = messages::KeepAliveSerializer::serialize(std::move(messages::KeepAliveMessage(mapper->registerType<messages::KeepAliveMessage>())));
 			static const uint32_t keepAliveTimeMs = 2000;
 			auto then = std::chrono::system_clock::now().time_since_epoch();

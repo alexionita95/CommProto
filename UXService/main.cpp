@@ -202,6 +202,18 @@ void serviceApp()
 	//subscribe - unsubscribe
 	uint32_t registerSubId = mapper->registerType<SubscribeMessage>();
 	uint32_t unsubId = mapper->registerType<UnsubscribeMessage >();
+	uint32_t sendtoId = mapper->registerType<SendToMessage>();
+	uint32_t stringId = mapper->registerType<StringMessage>();
+
+	endpoint::MappingNotification mappingSub = [sendtoId, stringId, &socket](const std::string & name, const uint32_t id)
+	{
+		StringMessage msg(stringId,"Hello!");
+		SendToMessage sendto(sendtoId, id, StringSerialize::serialize(std::move(msg)));
+		LOG_INFO("Sending message to connection \"%s\" - %d", name.c_str(), id);
+		socket->sendBytes(SendtoSerializer::serialize(std::move(sendto)));
+	};
+
+	channelDelegator->subscribeToChannelMapping(mappingSub);
 
 	SubscribeMessage sub(registerSubId, "");
 
@@ -214,8 +226,6 @@ void serviceApp()
 	{
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
-
-	bool subscribed = true;
 	while (true) {
 		builder->pollAndRead();
 	}

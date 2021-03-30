@@ -12,7 +12,8 @@ namespace commproto {
 		{
 		public:
 			Dispatch();
-			void sentTo(const std::string& name, const commproto::Message& msg);
+			void sendTo(const uint32_t sender, const std::string& name, const commproto::Message& msg);
+			void sendTo(const uint32_t sender, const uint32_t id, const commproto::Message& msg);
 			void sendAll(const commproto::Message& msg);
 			void addConnection(const commproto::sockets::SocketHandle& connection);
 			void removeConnection(const uint32_t id);
@@ -31,6 +32,7 @@ namespace commproto {
 			void removeFromAllAsSubscriber(const ConnectionHandle& connection);
 			void subscribeToNewConnection(const ConnectionHandle& connection);
 			void unsubscribeAllNoLock(const uint32_t id);
+			void sendToNoLock(const uint32_t sender, const uint32_t id, const commproto::Message& msg);
 
 			std::map<uint32_t, ConnectionHandle> connections;
 			std::vector<ConnectionHandle> subscribedToAll;

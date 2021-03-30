@@ -25,13 +25,13 @@ namespace commproto
 			void write(const T& value);
 
 			bool read(void* buf, const uint32_t size);
-			bool write(const void* buf, const uint32_t size);
+			void write(const void* buf, const uint32_t size);
 
 			template <typename T>
 			bool read(std::vector<T> & vec);
 
 			template <typename T>
-			void write(const std::vector<T>& vec);
+			void write(const std::vector<T> & vec);
 
 			bool skip(uint32_t bytes);
 				
@@ -113,17 +113,16 @@ namespace commproto
 			return true;
 		}
 
-		inline bool ByteStream::write(const void* buf, const uint32_t size)
+		inline void ByteStream::write(const void* buf, const uint32_t size)
 		{
 			if (!size || !buf)
 			{
-				return false;
+				return;
 			}
 
 			const uint8_t* bufPtr = reinterpret_cast<const uint8_t*>(buf);
 			stream.insert(stream.end(), bufPtr, bufPtr + size);
 			position += size;
-			return true;
 		}
 
 		inline bool ByteStream::skip(uint32_t bytes)
@@ -158,7 +157,6 @@ namespace commproto
 			}
 			return true;
 		}
-
 
 		template <typename T>
 		void ByteStream::write(const std::vector<T>& vec)

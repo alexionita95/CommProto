@@ -25,9 +25,9 @@ namespace commproto
 			TriplePropertyMessage<T, U, V>& realData = static_cast<TriplePropertyMessage<T, U, V>&>(data);
 			parser::ByteStream stream;
 			stream.writeHeader(data);
-			stream.write<T>(realData.prop);
-			stream.write<U>(realData.prop2);
-			stream.write<V>(realData.prop3);
+			stream.write(realData.prop);
+			stream.write(realData.prop2);
+			stream.write(realData.prop3);
 			return stream.getStream();
 		}
 
@@ -53,9 +53,9 @@ namespace commproto
 			U prop2;
 			V prop3;
 			stream.read < uint32_t>(sender);
-			stream.read<T>(prop);
-			stream.read<U>(prop2);
-			stream.read<V>(prop3);
+			stream.read(prop);
+			stream.read(prop2);
+			stream.read(prop3);
 			TriplePropertyMessage<T, U, V> realMessage(0, prop, prop2, prop3);
 			realMessage.senderId = sender;
 			handler->handle(std::move(realMessage));

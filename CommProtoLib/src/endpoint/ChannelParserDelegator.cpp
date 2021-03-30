@@ -36,7 +36,10 @@ namespace commproto
 			{
 				return;
 			}
-
+			for(auto sub : subscribers)
+			{
+				sub(name, id);
+			}
 			addDelegator(id, provider->provide(name));
 		}
 
@@ -47,6 +50,11 @@ namespace commproto
 				return;
 			}
 			delegators.insert({id,delegator});
+		}
+
+		void ChannelParserDelegator::subscribeToChannelMapping(MappingNotification& onMapping)
+		{
+			subscribers.push_back(onMapping);
 		}
 
 		void ChannelParserDelegator::notifyTermination(const uint32_t id)

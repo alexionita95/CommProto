@@ -46,9 +46,14 @@ namespace commproto
 			void registerSubscription(const ConnectionHandle& subscriber);
 			void unregisterSubscription(const ConnectionHandle& subscriber);
 		
+			void handshake(const ConnectionHandle& target);
+
 			void clearSubscriptions();
 			friend bool operator==(const Connection& lhs, const Connection& rhs);
 		private:
+
+			void sendMappings(const ConnectionHandle& subscriber);
+			void sendChannelMapping(const std::string & name, const uint32_t id);
 
 			sockets::SocketHandle socket;
 			std::string name;
@@ -66,6 +71,7 @@ namespace commproto
 			uint32_t channelMappingId;
 			Message keepAliveMessage;
 			uint32_t terminationId;
+			std::vector<uint32_t> sentMapping;
 		};
 
 	}

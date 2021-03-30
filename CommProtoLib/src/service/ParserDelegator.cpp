@@ -22,7 +22,7 @@ namespace commproto
 			}
 			messages::MappingType msg = messages::MappingType(name, id);
 			msg.senderId = owner.getId();
-			LOG_INFO("Parser delegator forwarding mapping %s -> %d",name, id);
+			LOG_INFO("Parser delegator forwarding mapping %s -> %d",name.c_str(), id);
 			owner.receive(messages::MappingTypeSerializer::serialize(std::move(msg)));
 
 			return registered;

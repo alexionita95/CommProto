@@ -16,7 +16,7 @@ namespace commproto
 		void ChannelMappingHandler::handle(messages::MessageBase&& data)
 		{
 			ChannelMappingMessage& message = static_cast<ChannelMappingMessage&>(data);
-			LOG_INFO("Registed a mapping \"%s\" = %d", message.prop.c_str(), message.prop2);
+			LOG_INFO("Registed a channel mapping \"%s\" = %d", message.prop.c_str(), message.prop2);
 			delegator->notifyMapping(message.prop, message.prop2);			
 		}
     }

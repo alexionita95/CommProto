@@ -8,14 +8,20 @@ namespace commproto {
 		{
 		}
 
-		void Dispatch::sentTo(const std::string& name, const Message& msg)
+
+
+		void Dispatch::sendTo(const uint32_t sender, const std::string& name, const Message& msg)
 		{
+			std::lock_guard<std::mutex> lock(connectionMutex);
 			const uint32_t id = getId(name);
-			if (connections.find(id) == connections.end())
-			{
-				return;
-			}
-			connections[id]->send(msg);
+			sendToNoLock(sender,id, msg);
+			
+		}
+
+		void Dispatch::sendTo(const uint32_t sender, const uint32_t id, const commproto::Message& msg)
+		{
+			std::lock_guard<std::mutex> lock(connectionMutex);
+			sendToNoLock(sender,id, msg);
 		}
 
 		void Dispatch::sendAll(const Message& msg)
@@ -44,7 +50,7 @@ namespace commproto {
 				return;
 			}
 
-			LOG_INFO("Removing connection \"%s\"(%d)", it->second->getName().c_str(), id);
+			LOG_INFO("[Dispatch] Removing connection \"%s\"(%d)", it->second->getName().c_str(), id);
 			connectionMapping.erase(it->second->getName());
 			connections.erase(it);
 			unsubscribeAllNoLock(id);
@@ -181,6 +187,19 @@ namespace commproto {
 			{
 				removeConnection(id);
 			}
+		}
+
+		void Dispatch::sendToNoLock(const uint32_t senderId, const uint32_t id, const commproto::Message& msg)
+		{
+			LOG_INFO("[Dispatch] Sending message from %d to %d", senderId, id);
+			auto sender = connections.find(senderId);
+			auto receiver = connections.find(id);
+			if (sender == connections.end() || receiver == connections.end())
+			{
+				return;
+			}
+			sender->second->handshake(receiver->second);
+			receiver->second->send(msg);
 		}
 	}
 }

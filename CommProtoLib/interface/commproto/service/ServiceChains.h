@@ -32,11 +32,19 @@ namespace commproto
 
 		using UnsubscribeSerializer = messages::SinglePropertySerializer<std::string>;
 
+		//send to message
+		MAKE_DOUBLE_PROP_MESSAGE(SendToMessage, uint32_t, Message);
+
+		using SendtoParser = messages::DoublePropertyParser<uint32_t, Message>;
+
+		using SendtoSerializer = messages::DoublePropertySerializer<uint32_t, Message>;
+
 	}
 
 	DEFINE_DATA_TYPE(service::RegisterChannelMessage);
 	DEFINE_DATA_TYPE(service::SubscribeMessage);
 	DEFINE_DATA_TYPE(service::UnsubscribeMessage);
+	DEFINE_DATA_TYPE(service::SendToMessage);
 	
 }
 

@@ -76,6 +76,27 @@ namespace commproto
 				ASSERT_TRUE(res);
 				ASSERT_EQ(input, output);
 			}
+
+			TEST(ByteStream, CanReadAndWriteMessage)
+			{
+				ByteStream writer;
+				Message input;
+				Message output;
+
+				for (uint32_t index = 0; index<42; ++index)
+				{
+					input.push_back(42 - index);
+				}
+
+				writer.write(input);
+
+				ByteStream reader(writer.getStream());
+
+				bool res = reader.read(output);
+
+				ASSERT_TRUE(res);
+				ASSERT_EQ(input, output);
+			}
 		}
 	}
 }
