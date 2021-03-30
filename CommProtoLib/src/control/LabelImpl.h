@@ -4,9 +4,18 @@
 
 namespace commproto
 {
-    namespace control{
-        class LabelImpl : public Label{
-		};
+    namespace control
+	{
+		namespace endpoint 
+    	{
+			class LabelImpl : public Label {
+			};
+		}
+		namespace ux 
+    	{
+			class LabelImpl : public Label {
+			};
+		}
     }
 }
 

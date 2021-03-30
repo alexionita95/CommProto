@@ -5,12 +5,17 @@
 namespace commproto
 {
     namespace control{
-        class UIController
-        {
-            public:
-	        virtual ~UIController() = default;
-	        virtual void addControl(const std::string &name, const ControlHandle & control) = 0;
-		};
+		namespace endpoint {
+			class UIController : public Control
+			{
+			public:
+				UIController(const std::string & name) : Control{name}{}
+				virtual ~UIController() = default;
+				virtual void addControl(const std::string &name, const ControlHandle & control) = 0;
+			};
+
+			using UIControllerHandle = std::shared_ptr<UIController>;
+		}
     }
 }
 

@@ -4,9 +4,24 @@
 
 namespace commproto
 {
-    namespace control{
-        class Slider : public Control{
-		};
+    namespace control
+	{
+		namespace endpoint
+		{
+			class Slider : public Control {
+			public:
+				Slider(const std::string & name) : Control{name}{}
+				virtual void setValue(const float) = 0;
+			};
+		}
+		namespace ux
+		{
+			class Slider : public Control {
+			public:
+				Slider(const std::string & name) : Control{ name } {}
+				virtual void setValue(const float) = 0;
+			};
+		}
     }
 }
 

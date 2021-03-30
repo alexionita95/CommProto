@@ -1,7 +1,7 @@
 #ifndef BUTTON_IMPL_H
 #define BUTTON_IMPL_H
-#include "ControlBase.h"
 #include <functional>
+#include <commproto/control/Button.h>
 
 namespace commproto
 {
@@ -11,10 +11,10 @@ namespace commproto
 		{
 		public:
 			UxManager(const std::string & name_, const std::string & connectionName_)
-				: name{name_}
+				: name{ name_ }
 				, connectionName{ connectionName_ }
 			{
-				
+
 			}
 			std::string getName() const
 			{
@@ -30,30 +30,36 @@ namespace commproto
 		};
 
 		class UxGenerator;
-		using UxGeneratorHandle =  std::shared_ptr<UxGenerator>;
+		using UxGeneratorHandle = std::shared_ptr<UxGenerator>;
 
-		class UxButton : public ControlBase {
-		public:
-			UxButton(const std::string& name_, const UxGeneratorHandle& generator_)
-				: ControlBase{ name_ }
-				, generator{ generator_ }
-			{
-			}
+		namespace ux {
+			class ButtonImpl : public Button {
+			public:
+				ButtonImpl(const std::string& name_, const UxGeneratorHandle& generator_)
+					: Button{ name }
+					, generator{ generator_ }
+				{
+				}
 
-			std::string getUX() const override;
-		private:
-			UxGeneratorHandle generator;
-		};
+				void press() override
+				{
+				}
+
+				std::string getUx() const override;
+			private:
+				UxGeneratorHandle generator;
+			};
+		}
 
 		class UxGenerator
 		{
 		public:
-			UxGenerator(UxManager& manager_) 
-			: manager{manager_}
+			UxGenerator(UxManager& manager_)
+				: manager{ manager_ }
 			{
-				
+
 			}
-			template <typename ControlType> 
+			template <typename ControlType>
 			std::string generate(const ControlType& control) const;
 		protected:
 			UxManager& manager;
@@ -61,36 +67,34 @@ namespace commproto
 		};
 
 		template <>
-		inline std::string UxGenerator::generate(const UxButton& control) const
+		inline std::string UxGenerator::generate(const ux::ButtonImpl& control) const
 		{
 			return manager.getConnectionName() + manager.getName() + control.getName();
 		}
 
+		namespace endpoint {
+			class ButtonImpl : public Button {
+			public:
+				ButtonImpl(const std::string & name, const ButtonAction & action_)
+					: Button{ name }
+					, action{ action_ }
+				{
+				}
 
-		using ButtonAction = std::function<void()>;
+				void press() override
+				{
+					action();
+				}
 
-		class EndpointButton : public ControlBase {
-		public:
-			EndpointButton(const std::string & name, const ButtonAction & action_)
-				: ControlBase(name)
-				, action{ action_ }
-			{
-
-			}
-
-			void press() const
-			{
-				action();
-			}
-
-			std::string getUX() const override
-			{
-				return "";
-			}
-
-		private:
-			ButtonAction action;
-		};
+				Message serialize() const override
+				{
+					Message msg;
+					return msg;
+				}
+			private:
+				ButtonAction action;
+			};
+		}
 
 	}
 }

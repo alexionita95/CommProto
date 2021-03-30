@@ -4,9 +4,18 @@
 
 namespace commproto
 {
-    namespace control{
-        class ToggleImpl : public Toggle{
-		};
+    namespace control
+	{
+		namespace endpoint
+		{
+			class ToggleImpl : public Toggle {
+			};
+		}
+		namespace ux
+		{
+			class ToggleImpl : public Toggle {
+			};
+		}
     }
 }
 

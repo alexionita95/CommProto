@@ -4,9 +4,18 @@
 
 namespace commproto
 {
-    namespace control{
-        class SliderImpl : public Slider{
-		};
+    namespace control
+	{
+		namespace endpoint
+		{
+			class SliderImpl : public Slider {
+			};
+		}
+		namespace ux
+		{
+			class SliderImpl : public Slider {
+			};
+		}
     }
 }
 

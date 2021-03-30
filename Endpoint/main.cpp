@@ -13,6 +13,8 @@
 #include <commproto/parser/ParserDelegatorFactory.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
+#include <commproto/control/UIFactory.h>
+
 
 using namespace commproto;
 using namespace service;
@@ -110,28 +112,10 @@ int main(int argc, const char * argv[])
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
 
-	std::string messages[] ={"Hello from the first ever endpoint using the commproto framework!","Hopefully, this message finds you well, subscriber!","Anyway, I gotta go now, my cookies are burning in the oven.","Ciao!"};
-
-
-	for(uint32_t index =0 ; index<100;++index)
+	for(uint32_t index = 0; index<100;++index)
 	{
 		builder->pollAndRead();
 	}
-
-
-	uint32_t stringId = mapper->registerType<StringMessage>();
-	LOG_INFO("String mapping = %d", stringId);
-	for (uint32_t index = 0; index < 4; ++index)
-	{
-		
-
-		LOG_INFO("Sending attempt #%d", index);
-		const int sent = socket->sendBytes(StringSerialize::serialize(std::move(StringMessage(stringId, messages[index]))));
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-	}
-
 
 	while (true)
 	{

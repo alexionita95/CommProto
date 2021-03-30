@@ -7,16 +7,47 @@
 
 namespace commproto
 {
-    namespace control{
-        class Control{
-        public:
-        virtual ~Control() = default;
-        virtual std::string getName() const = 0;
-        virtual std::string getUX() const = 0;
+	namespace control {
+
+		class BaseControl
+		{
+		public:
+			BaseControl(const std::string& name_) : name{ name_ }
+			{
+			}
+
+			std::string getName() const
+			{
+				return name;
+			}
+		protected:
+			std::string name;
 		};
-        
-        using ControlHandle = std::shared_ptr<Control>;
-    }
+
+
+		namespace endpoint {
+			class Control : public BaseControl {
+			public:
+				Control(const std::string & name) : BaseControl(name){}
+				virtual ~Control() = default;
+				virtual Message serialize() const = 0;
+			};
+			using ControlHandle = std::shared_ptr<Control>;
+		}
+
+		namespace ux
+		{
+			class Control : public BaseControl {
+			public:
+				Control(const std::string & name) : BaseControl(name) {}
+				virtual ~Control() = default;
+				virtual std::string getUx() const = 0;
+			};
+			using ControlHandle = std::shared_ptr<Control>;
+		}
+
+
+	}
 }
 
 

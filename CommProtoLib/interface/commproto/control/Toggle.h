@@ -4,9 +4,25 @@
 
 namespace commproto
 {
-    namespace control{
-        class Toggle : public Control{
-		};
+    namespace control
+	{
+		namespace endpoint
+		{
+			class Toggle : public Control {
+			public:
+				Toggle(const std::string & name) : Control {name}{}
+
+			};
+		}
+		namespace ux
+		{
+			class Toggle : public Control {
+			public:
+				Toggle(const std::string & name) : Control{ name } {}
+				virtual void toggle() = 0;
+
+			};
+		}
     }
 }
 
