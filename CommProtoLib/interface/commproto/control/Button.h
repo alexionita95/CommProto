@@ -13,6 +13,7 @@ namespace commproto
 				Button(const std::string & name) : Control(name){}
 				virtual void press() = 0;
 			};
+			using ButtonHandle = std::shared_ptr<Button>;
 		}
 		namespace  ux
 		{
@@ -21,6 +22,7 @@ namespace commproto
 				Button(const std::string & name) : Control(name) {}
 				virtual void press() = 0;
 			};
+			using ButtonHandle = std::shared_ptr<Button>;
 		}
 	}
 }

@@ -2,97 +2,72 @@
 #define BUTTON_IMPL_H
 #include <functional>
 #include <commproto/control/Button.h>
+#include <commproto/messages/SinglePropertyChain.h>
+#include <commproto/parser/Handler.h>
+#include <commproto/control/UIController.h>
 
 namespace commproto
 {
 	namespace control {
-
-		class UxManager
-		{
-		public:
-			UxManager(const std::string & name_, const std::string & connectionName_)
-				: name{ name_ }
-				, connectionName{ connectionName_ }
-			{
-
-			}
-			std::string getName() const
-			{
-				return name;
-			}
-			std::string getConnectionName() const
-			{
-				return connectionName;
-			}
-		protected:
-			std::string name;
-			std::string connectionName;
-		};
-
-		class UxGenerator;
-		using UxGeneratorHandle = std::shared_ptr<UxGenerator>;
-
 		namespace ux {
+
+			MAKE_SINGLE_PROP_MESSAGE(PressButtonMessage, std::string);
+
+			using PressButtonParser = messages::SinglePropertyParser<std::string>;
+			using PressButtonSerializer = messages::SinglePropertySerializer<std::string>;
+
+			class PressButtonHandler : public parser::Handler
+			{
+			public:
+				PressButtonHandler(endpoint::UIControllerHandle& controller_);
+				void handle(messages::MessageBase&& data) override;
+			private:
+				endpoint::UIControllerHandle controller;
+			};
+
+			class Generator;
+			using GeneratorHandle = std::shared_ptr<Generator>;
+
 			class ButtonImpl : public Button {
 			public:
-				ButtonImpl(const std::string& name_, const UxGeneratorHandle& generator_)
-					: Button{ name }
-					, generator{ generator_ }
-				{
-				}
+				ButtonImpl(const std::string& name_, const uint32_t pressId, const GeneratorHandle& generator_);
 
-				void press() override
-				{
-				}
+				void press() override;
 
 				std::string getUx() const override;
 			private:
-				UxGeneratorHandle generator;
+				GeneratorHandle generator;
+				const uint32_t pressId;
 			};
 		}
 
-		class UxGenerator
-		{
-		public:
-			UxGenerator(UxManager& manager_)
-				: manager{ manager_ }
-			{
-
-			}
-			template <typename ControlType>
-			std::string generate(const ControlType& control) const;
-		protected:
-			UxManager& manager;
-
-		};
-
-		template <>
-		inline std::string UxGenerator::generate(const ux::ButtonImpl& control) const
-		{
-			return manager.getConnectionName() + manager.getName() + control.getName();
-		}
-
 		namespace endpoint {
+
+			MAKE_SINGLE_PROP_MESSAGE(ButtonMessage,std::string);
+
+			using ButtonParser = messages::SinglePropertyParser<std::string>;
+			using ButtonSerializer = messages::SinglePropertySerializer<std::string>;
+
+			class ButtonHandler : public parser::Handler
+			{
+			public:
+				ButtonHandler(ux::UIControllerHandle& controller_);
+				void handle(messages::MessageBase&& data) override;
+			private:
+				ux::UIControllerHandle controller;
+			};
+
+
 			class ButtonImpl : public Button {
 			public:
-				ButtonImpl(const std::string & name, const ButtonAction & action_)
-					: Button{ name }
-					, action{ action_ }
-				{
-				}
+				ButtonImpl(const std::string& name, const uint32_t buttonId, const ButtonAction& action_);
 
-				void press() override
-				{
-					action();
-				}
+				void press() override;
 
-				Message serialize() const override
-				{
-					Message msg;
-					return msg;
-				}
+				Message serialize() const override;
 			private:
 				ButtonAction action;
+				const uint32_t buttonId;
 			};
 		}
 

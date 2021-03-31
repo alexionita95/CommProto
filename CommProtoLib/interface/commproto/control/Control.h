@@ -21,7 +21,7 @@ namespace commproto
 				return name;
 			}
 		protected:
-			std::string name;
+			const std::string name;
 		};
 
 
