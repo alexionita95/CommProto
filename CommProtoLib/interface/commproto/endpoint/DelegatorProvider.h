@@ -9,7 +9,7 @@ namespace commproto
 		class DelegatorProvider
 		{
 		public:
-			virtual parser::ParserDelegatorHandle provide(const std::string & name) = 0;
+			virtual parser::ParserDelegatorHandle provide(const std::string & name, const uint32_t id) = 0;
 			virtual ~DelegatorProvider() = default;
 		};
 

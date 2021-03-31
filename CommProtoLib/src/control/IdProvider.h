@@ -3,6 +3,7 @@
 
 #include "../parser/TypeMapperImpl.h"
 #include "ButtonImpl.h"
+#include <commproto/service/ServiceChains.h>
 
 namespace commproto
 {
@@ -30,10 +31,12 @@ namespace commproto
 			public:
 				IdProvider(const messages::TypeMapperHandle& mapper)
 					: buttonId{ mapper->registerType<PressButtonMessage>() }
+					, sendToId(mapper->registerType<service::SendToMessage>())
 				{
 
 				}
 				const uint32_t buttonId;
+				const uint32_t sendToId;
 			};
 		}
 

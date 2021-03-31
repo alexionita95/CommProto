@@ -32,6 +32,7 @@ namespace commproto
 			public:
 				UIController(const std::string & name) : Control{ name } {}
 				virtual std::string getConnectionName() = 0;
+				virtual uint32_t getConnectionId() = 0;
 				virtual ~UIController() = default;
 				virtual IdProvider& getIdProvider() = 0;
 				virtual void send(Message msg) = 0;

@@ -40,7 +40,7 @@ namespace commproto
 			{
 				sub(name, id);
 			}
-			addDelegator(id, provider->provide(name));
+			addDelegator(id, provider->provide(name,id));
 		}
 
 		void ChannelParserDelegator::addDelegator(const uint32_t id, const parser::ParserDelegatorHandle& delegator)

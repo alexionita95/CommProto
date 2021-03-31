@@ -15,7 +15,6 @@
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 
 
-
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPRequestHandler.h>
@@ -28,6 +27,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <commproto/control/UIController.h>
+#include "commproto/control/ParserDelegatorUtils.h"
+#include "commproto/control/UIFactory.h"
 
 using namespace Poco::Net;
 using namespace Poco::Util;
@@ -38,9 +40,9 @@ static int counter = 0;
 class MyRequestHandler : public HTTPRequestHandler
 {
 public:
-	virtual void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
+	void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp) override
 	{
-		if(req.getMethod().compare("POST")==0)
+		if (req.getMethod().compare("POST") == 0)
 		{
 			std::string url = req.getURI();
 			if (url.compare("/update") == 0) {
@@ -77,7 +79,7 @@ int MyRequestHandler::count = 0;
 class MyRequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
-	virtual HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &)
+	HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &) override
 	{
 		return new MyRequestHandler;
 	}
@@ -136,24 +138,31 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 }
 
 
-class StringProvider : public endpoint::DelegatorProvider{
+class UXServiceProvider : public endpoint::DelegatorProvider {
 public:
-	StringProvider(const messages::TypeMapperHandle & mapper_)
-		: mapper{mapper_}
+	UXServiceProvider(const messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_)
+		: mapper{ mapper_ }
+		, socket{ socket_ }
 	{
-		
+
 	}
-	parser::ParserDelegatorHandle provide(const std::string& name) override
+	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
 		parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
 		parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 		delegator->registerParser<StringMessage>(stringParser);
 
+
+		auto controller = std::make_shared<control::ux::UIFactory>("UI", name, mapper, socket,id)->build();
+		
+		control::ux::addParsers(delegator, controller);
+
 		return delegator;
 	}
 private:
 	messages::TypeMapperHandle mapper;
+	sockets::SocketHandle socket;
 };
 
 
@@ -194,7 +203,8 @@ void serviceApp()
 	socket->sendBytes(nameSerialized);
 
 	//delegator to parse incoming messages
-	std::shared_ptr<StringProvider> provider = std::make_shared<StringProvider>(mapper);
+
+	std::shared_ptr<UXServiceProvider> provider = std::make_shared<UXServiceProvider>(mapper,socket);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
@@ -204,16 +214,6 @@ void serviceApp()
 	uint32_t unsubId = mapper->registerType<UnsubscribeMessage >();
 	uint32_t sendtoId = mapper->registerType<SendToMessage>();
 	uint32_t stringId = mapper->registerType<StringMessage>();
-
-	endpoint::MappingNotification mappingSub = [sendtoId, stringId, &socket](const std::string & name, const uint32_t id)
-	{
-		StringMessage msg(stringId,"Hello!");
-		SendToMessage sendto(sendtoId, id, StringSerialize::serialize(std::move(msg)));
-		LOG_INFO("Sending message to connection \"%s\" - %d", name.c_str(), id);
-		socket->sendBytes(SendtoSerializer::serialize(std::move(sendto)));
-	};
-
-	channelDelegator->subscribeToChannelMapping(mappingSub);
 
 	SubscribeMessage sub(registerSubId, "");
 
@@ -238,7 +238,7 @@ int main(int argc, char * argv[])
 
 	MyServerApp app;
 	std::thread appThread(serviceApp);
-	int res =  app.run(argc, argv);
+	int res = app.run(argc, argv);
 	appThread.join();
 	return res;
 }

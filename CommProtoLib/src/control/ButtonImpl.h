@@ -19,7 +19,7 @@ namespace commproto
 			class PressButtonHandler : public parser::Handler
 			{
 			public:
-				PressButtonHandler(endpoint::UIControllerHandle& controller_);
+				PressButtonHandler(const endpoint::UIControllerHandle& controller_);
 				void handle(messages::MessageBase&& data) override;
 			private:
 				endpoint::UIControllerHandle controller;
@@ -43,7 +43,7 @@ namespace commproto
 
 		namespace endpoint {
 
-			MAKE_SINGLE_PROP_MESSAGE(ButtonMessage,std::string);
+			MAKE_SINGLE_PROP_MESSAGE(ButtonMessage, std::string);
 
 			using ButtonParser = messages::SinglePropertyParser<std::string>;
 			using ButtonSerializer = messages::SinglePropertySerializer<std::string>;
@@ -51,7 +51,7 @@ namespace commproto
 			class ButtonHandler : public parser::Handler
 			{
 			public:
-				ButtonHandler(ux::UIControllerHandle& controller_);
+				ButtonHandler(const ux::UIControllerHandle& controller_);
 				void handle(messages::MessageBase&& data) override;
 			private:
 				ux::UIControllerHandle controller;
@@ -72,6 +72,10 @@ namespace commproto
 		}
 
 	}
+
+	DEFINE_DATA_TYPE(control::endpoint::ButtonMessage);
+	DEFINE_DATA_TYPE(control::ux::PressButtonMessage);
+
 }
 
 

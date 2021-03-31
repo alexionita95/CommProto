@@ -14,6 +14,7 @@
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/control/UIFactory.h>
+#include <commproto/control/ParserDelegatorUtils.h>
 
 
 using namespace commproto;
@@ -50,23 +51,29 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 }
 
 
-class StringProvider : public endpoint::DelegatorProvider{
+class EndpointProvider : public endpoint::DelegatorProvider{
 public:
-	StringProvider(const messages::TypeMapperHandle & mapper_)
+	EndpointProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_)
 		: mapper{mapper_}
+		, controller { controller_}
 	{
 		
 	}
-	parser::ParserDelegatorHandle provide(const std::string& name) override
+	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
 		parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
 		parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
 		delegator->registerParser<StringMessage>(stringParser);
+
+
+		control::endpoint::addParsers(delegator, controller);
+
 		return delegator;
 	}
 private:
 	messages::TypeMapperHandle mapper;
+	control::endpoint::UIControllerHandle controller;
 };
 
 int main(int argc, const char * argv[])
@@ -99,7 +106,14 @@ int main(int argc, const char * argv[])
 	socket->sendBytes(nameSerialized);
 
 	//delegator to parse incoming messages
-	std::shared_ptr<StringProvider> provider = std::make_shared<StringProvider>(mapper);
+	auto uiFactory =  std::make_shared<control::endpoint::UIFactory>("myUI",mapper);
+	uiFactory->addButton("MyButton",[]()
+	{
+		LOG_INFO("MyButton has been pressed");
+	});
+
+	control::endpoint::UIControllerHandle controller = uiFactory->build();
+	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper,controller);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
@@ -111,6 +125,9 @@ int main(int argc, const char * argv[])
 	{
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
+
+
+	socket->sendBytes(controller->serialize());
 
 	for(uint32_t index = 0; index<100;++index)
 	{

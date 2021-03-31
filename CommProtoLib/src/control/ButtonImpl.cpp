@@ -8,7 +8,7 @@ namespace commproto
 	{
 		namespace ux
 		{
-			PressButtonHandler::PressButtonHandler(endpoint::UIControllerHandle& controller_)
+			PressButtonHandler::PressButtonHandler(const endpoint::UIControllerHandle& controller_)
 				: controller{ controller_ }
 			{
 			}
@@ -32,10 +32,11 @@ namespace commproto
 			}
 
 			ButtonImpl::ButtonImpl(const std::string& name_, const uint32_t pressId_, const GeneratorHandle& generator_)
-				: Button{ name }
+				: Button{ name_ }
 				, generator{ generator_ }
 				, pressId{ pressId_ }
 			{
+
 			}
 
 			void ButtonImpl::press()
@@ -52,7 +53,7 @@ namespace commproto
 
 		namespace endpoint {
 
-			ButtonHandler::ButtonHandler(ux::UIControllerHandle& controller_)
+			ButtonHandler::ButtonHandler(const ux::UIControllerHandle& controller_)
 				: controller{ controller_ }
 			{
 			}
@@ -62,6 +63,7 @@ namespace commproto
 				ButtonMessage& msg = static_cast<ButtonMessage&>(data);
 				ux::ButtonHandle button = std::make_shared<ux::ButtonImpl>(msg.prop, controller->getIdProvider().buttonId, std::make_shared<ux::Generator>(*controller));
 				controller->addControl(button);
+				button->press();
 			}
 
 			ButtonImpl::ButtonImpl(const std::string& name, const uint32_t buttonId_, const ButtonAction& action_)
