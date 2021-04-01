@@ -45,7 +45,7 @@ namespace commproto
 				generator->send(msg);
 			}
 
-			std::string ButtonImpl::getUx() const
+			std::string ButtonImpl::getUx()
 			{
 				return generator->generate(*this);
 			}

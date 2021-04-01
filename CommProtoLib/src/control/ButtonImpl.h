@@ -34,7 +34,7 @@ namespace commproto
 
 				void press() override;
 
-				std::string getUx() const override;
+				std::string getUx() override;
 			private:
 				GeneratorHandle generator;
 				const uint32_t pressId;

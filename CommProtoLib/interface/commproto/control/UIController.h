@@ -37,6 +37,7 @@ namespace commproto
 				virtual IdProvider& getIdProvider() = 0;
 				virtual void send(Message msg) = 0;
 				virtual void addControl(const ControlHandle & control) = 0;
+				virtual ControlHandle getControl(const std::string & name) = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;

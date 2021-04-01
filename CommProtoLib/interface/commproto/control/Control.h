@@ -41,7 +41,7 @@ namespace commproto
 			public:
 				Control(const std::string & name) : BaseControl(name) {}
 				virtual ~Control() = default;
-				virtual std::string getUx() const = 0;
+				virtual std::string getUx() = 0;
 			};
 			using ControlHandle = std::shared_ptr<Control>;
 		}

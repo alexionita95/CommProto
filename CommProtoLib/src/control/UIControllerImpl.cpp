@@ -70,6 +70,7 @@ namespace commproto
 			void UIControllerImpl::addControl(const ControlHandle& control)
 			{
 				LOG_INFO("Adding a control named \"%s\"", control->getName().c_str());
+				std::lock_guard<std::mutex> lock(controlMutex);
 				const std::string name = control->getName();
 				if (controls.find(name) != controls.end())
 				{
@@ -83,9 +84,10 @@ namespace commproto
 				return connectionName;
 			}
 
-			std::string UIControllerImpl::getUx() const
+			std::string UIControllerImpl::getUx()
 			{
 				std::stringstream stream;
+				std::lock_guard<std::mutex> lock(controlMutex);
 				for (auto it = controls.begin(); it != controls.end(); ++it)
 				{
 					stream << it->second->getUx();
@@ -113,6 +115,17 @@ namespace commproto
 			uint32_t UIControllerImpl::getConnectionId()
 			{
 				return connectionId;
+			}
+
+			ControlHandle UIControllerImpl::getControl(const std::string& name)
+			{
+				std::lock_guard<std::mutex> lock(controlMutex);
+				auto it = controls.find(name);
+				if (it == controls.end())
+				{
+					return nullptr;
+				}
+				return  it->second;
 			}
 		}
 	}

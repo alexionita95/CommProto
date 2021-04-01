@@ -35,17 +35,19 @@ namespace commproto
 				UIControllerImpl(const std::string& name, const std::string& connectionName_, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket, const uint32_t id);
 				void addControl(const ControlHandle& control) override;
 				std::string getConnectionName() override;
-				std::string getUx() const override;
+				std::string getUx() override;
 				void send(Message msg) override;
 				~UIControllerImpl();
 				IdProvider& getIdProvider() override;
 				uint32_t getConnectionId() override;
+				ControlHandle getControl(const std::string& name) override;
 			private:
 				std::map<std::string, ControlHandle> controls;
 				const std::string connectionName; 
 				IdProvider provider;
 				sockets::SocketHandle socket;
 				uint32_t connectionId;
+				std::mutex controlMutex;
 			};
 		}
 	}
