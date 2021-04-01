@@ -3,6 +3,8 @@
 
 #include <commproto/control/UIController.h>
 #include "ButtonImpl.h"
+#include <sstream>
+#include "commproto/logger/Logging.h"
 
 namespace commproto
 {
@@ -41,7 +43,9 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const ButtonImpl& control) const
 			{
-				return manager.getConnectionName() + manager.getName() + control.getName();
+				std::stringstream sstream;
+				sstream << "<button onclick = \"post('" << manager.getConnectionName() << "','" << control.getName() << "')\"> Test </button>";
+				return sstream.str();
 			}
 
 			using GeneratorHandle = std::shared_ptr<Generator>;

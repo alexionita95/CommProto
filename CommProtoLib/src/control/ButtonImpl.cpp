@@ -63,7 +63,6 @@ namespace commproto
 				ButtonMessage& msg = static_cast<ButtonMessage&>(data);
 				ux::ButtonHandle button = std::make_shared<ux::ButtonImpl>(msg.prop, controller->getIdProvider().buttonId, std::make_shared<ux::Generator>(*controller));
 				controller->addControl(button);
-				button->press();
 			}
 
 			ButtonImpl::ButtonImpl(const std::string& name, const uint32_t buttonId_, const ButtonAction& action_)
