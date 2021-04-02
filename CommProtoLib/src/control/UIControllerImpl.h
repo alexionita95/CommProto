@@ -43,6 +43,7 @@ namespace commproto
 				IdProvider& getIdProvider() override;
 				uint32_t getConnectionId() override;
 				ControlHandle getControl(const uint32_t id) override;
+				bool hasUpdate() override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				const std::string connectionName; 
@@ -50,6 +51,7 @@ namespace commproto
 				sockets::SocketHandle socket;
 				uint32_t connectionId;
 				std::mutex controlMutex;
+				std::atomic_bool update;
 			};
 		}
 	}

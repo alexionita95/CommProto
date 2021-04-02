@@ -70,6 +70,7 @@ namespace commproto
 				, provider{ mapper }
 				, socket{ socket_ }
 				, connectionId{ id }
+				, update {true}
 			{
 			}
 
@@ -77,6 +78,7 @@ namespace commproto
 			{
 				LOG_INFO("Adding a control named \"%s\"", control->getName().c_str());
 				std::lock_guard<std::mutex> lock(controlMutex);
+				update = true;
 				const uint32_t id = control->getId();
 				if (controls.find(id) != controls.end())
 				{
@@ -98,6 +100,7 @@ namespace commproto
 				{
 					stream << it->second->getUx();
 				}
+				update = false;
 				return stream.str();
 			}
 
@@ -132,6 +135,11 @@ namespace commproto
 					return nullptr;
 				}
 				return  it->second;
+			}
+
+			bool UIControllerImpl::hasUpdate()
+			{
+				return update;
 			}
 		}
 	}

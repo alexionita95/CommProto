@@ -70,5 +70,16 @@ namespace commproto
 			return true;
 		}
 
+		bool MessageBuilder::pollAndReadTimes(const uint32_t times)
+		{
+			for(uint32_t index = 0; index < times ;++index)
+			{
+				if(!pollAndRead())
+				{
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 }

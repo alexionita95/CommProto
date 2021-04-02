@@ -38,6 +38,7 @@ namespace commproto
 				virtual IdProvider& getIdProvider() = 0;
 				virtual void send(Message msg) = 0;
 				virtual void addControl(const ControlHandle & control) = 0;
+				virtual bool hasUpdate() = 0;
 				virtual ControlHandle getControl(const uint32_t id) = 0;
 			};
 

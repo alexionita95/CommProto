@@ -196,7 +196,7 @@ namespace commproto {
 			while (running && socket)
 			{
 				//recv part
-				builder->pollAndRead();
+				builder->pollAndReadTimes(100u);
 				//send part
 				Message msg;
 				while (messagesOut.try_dequeue(msg))
@@ -223,6 +223,7 @@ namespace commproto {
 						stop();
 					}
 				}
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
 			LOG_INFO("Stopping receive loop for connection \"%s\"", name.c_str());
 		}

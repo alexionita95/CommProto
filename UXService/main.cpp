@@ -65,6 +65,18 @@ public:
 		return it->second;
 
 	}
+	bool hasUpdate()
+	{
+		bool update = false;
+		for(auto it : controllers)
+		{
+			if(it.second->hasUpdate())
+			{
+				return true;
+			}
+		}
+		return update;
+	}
 private:
 	std::map<std::string, commproto::control::ux::UIControllerHandle> controllers;
 };
@@ -170,7 +182,16 @@ public:
 		{
 			std::string url = req.getURI();
 			if (url.compare("/update") == 0) {
+				
+				if (!controllers->hasUpdate())
+				{
+					resp.setStatusAndReason(HTTPResponse::HTTP_OK);
+					resp.send();
+					return;
+				}
 				ostream& out = resp.send();
+
+				//TODO: actually handle other controllers
 				auto simulator = controllers->getController("Endpoint::Simulator");
 				if (simulator) {
 					out << simulator->getUx();
@@ -205,7 +226,7 @@ public:
 				while (!file.eof()) {
 					std::string line;
 					std::getline(file, line);
-					out << line;
+					out << line << std::endl;
 				}
 			}
 			file.close();
@@ -361,7 +382,8 @@ int main(int argc, char * argv[])
 	std::thread websiteThread(websiteLoop, argc, argv);
 
 	while (true) {
-		builder->pollAndRead();
+		builder->pollAndReadTimes(100u);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 	return 0;
 }
