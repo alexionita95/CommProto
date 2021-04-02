@@ -44,7 +44,7 @@ namespace commproto
 			inline std::string Generator::generate(const ButtonImpl& control) const
 			{
 				std::stringstream sstream;
-				sstream << "<button onclick = \"post('" << manager.getConnectionName() << "','" << control.getName() << "')\"> Test </button>";
+				sstream << "<button onclick = \"postButton('" << manager.getConnectionName() << "','" << control.getId() << "')\">" << control.getName() << " </button>";
 				return sstream.str();
 			}
 

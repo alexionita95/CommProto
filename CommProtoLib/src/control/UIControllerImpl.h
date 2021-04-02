@@ -20,10 +20,12 @@ namespace commproto
 				Message serialize() const override;
 				~UIControllerImpl();
 				IdProvider& getIdProvider() override;
-				ControlHandle getControl(const std::string& name) override;
+				ControlHandle getControl(const uint32_t id) override;
+				uint32_t reserveId() override;
 			private:
-				std::map<std::string, ControlHandle> controls;
+				std::map<uint32_t, ControlHandle> controls;
 				IdProvider provider;
+				uint32_t idCounter;
 			};
 		}
 
@@ -40,9 +42,9 @@ namespace commproto
 				~UIControllerImpl();
 				IdProvider& getIdProvider() override;
 				uint32_t getConnectionId() override;
-				ControlHandle getControl(const std::string& name) override;
+				ControlHandle getControl(const uint32_t id) override;
 			private:
-				std::map<std::string, ControlHandle> controls;
+				std::map<uint32_t, ControlHandle> controls;
 				const std::string connectionName; 
 				IdProvider provider;
 				sockets::SocketHandle socket;

@@ -4,13 +4,13 @@
 
 namespace commproto
 {
-    namespace control
+	namespace control
 	{
 		namespace endpoint
 		{
 			class Toggle : public Control {
 			public:
-				Toggle(const std::string & name) : Control {name}{}
+				Toggle(const std::string & name, const uint32_t id) : Control{ name, id } {}
 
 			};
 		}
@@ -18,12 +18,12 @@ namespace commproto
 		{
 			class Toggle : public Control {
 			public:
-				Toggle(const std::string & name) : Control{ name } {}
+				Toggle(const std::string & name, const uint32_t id) : Control{ name , id } {}
 				virtual void toggle() = 0;
 
 			};
 		}
-    }
+	}
 }
 
 

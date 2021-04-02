@@ -31,8 +31,8 @@ namespace commproto
 
 			}
 
-			ButtonImpl::ButtonImpl(const std::string& name_, const uint32_t pressId_, const GeneratorHandle& generator_)
-				: Button{ name_ }
+			ButtonImpl::ButtonImpl(const std::string& name_, const uint32_t id_, const uint32_t pressId_, const GeneratorHandle& generator_)
+				: Button{ name_,id_ }
 				, generator{ generator_ }
 				, pressId{ pressId_ }
 			{
@@ -41,7 +41,7 @@ namespace commproto
 
 			void ButtonImpl::press()
 			{
-				Message msg = PressButtonSerializer::serialize(std::move(PressButtonMessage(pressId, name)));
+				Message msg = PressButtonSerializer::serialize(std::move(PressButtonMessage(pressId, id)));
 				generator->send(msg);
 			}
 
@@ -61,12 +61,12 @@ namespace commproto
 			void ButtonHandler::handle(messages::MessageBase&& data)
 			{
 				ButtonMessage& msg = static_cast<ButtonMessage&>(data);
-				ux::ButtonHandle button = std::make_shared<ux::ButtonImpl>(msg.prop, controller->getIdProvider().buttonId, std::make_shared<ux::Generator>(*controller));
+				ux::ButtonHandle button = std::make_shared<ux::ButtonImpl>(msg.prop2, msg.prop, controller->getIdProvider().buttonId, std::make_shared<ux::Generator>(*controller));
 				controller->addControl(button);
 			}
 
-			ButtonImpl::ButtonImpl(const std::string& name, const uint32_t buttonId_, const ButtonAction& action_)
-				: Button{ name }
+			ButtonImpl::ButtonImpl(const std::string& name, const uint32_t id_, const uint32_t buttonId_, const ButtonAction& action_)
+				: Button{ name ,id_ }
 				, action{ action_ }
 				, buttonId{ buttonId_ }
 			{
@@ -79,7 +79,7 @@ namespace commproto
 
 			Message ButtonImpl::serialize() const
 			{
-				return ButtonSerializer::serialize(std::move(ButtonMessage(buttonId, name)));
+				return ButtonSerializer::serialize(std::move(ButtonMessage(buttonId, id, name)));
 			}
 		}
 

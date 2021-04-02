@@ -16,7 +16,7 @@ namespace commproto
 
 			void UIFactory::addButton(const std::string& name, const ButtonAction& action) const
 			{
-				controller->addControl(std::make_shared<ButtonImpl>(name, controller->getIdProvider().buttonId, action));
+				controller->addControl(std::make_shared<ButtonImpl>(name,controller->reserveId(), controller->getIdProvider().buttonId, action));
 			}
 
 			UIControllerHandle UIFactory::build() const

@@ -10,7 +10,7 @@ namespace commproto
 			class Label : public Control 
 			{
 			public:
-				Label(const std::string & name) : Control{name}
+				Label(const std::string & name, const uint32_t id) : Control{name, id}
 				{
 					
 				}
@@ -19,9 +19,10 @@ namespace commproto
 		}
 		namespace ux
 		{
-			class Label : public Control {
+			class Label : public Control
+			{
 			public:
-				Label(const std::string & name) : Control{ name }
+				Label(const std::string & name, const uint32_t id) : Control{ name, id }
 				{
 
 				}

@@ -4,13 +4,13 @@
 
 namespace commproto
 {
-    namespace control
+	namespace control
 	{
 		namespace endpoint
 		{
 			class Slider : public Control {
 			public:
-				Slider(const std::string & name) : Control{name}{}
+				Slider(const std::string & name, const uint32_t id) : Control{ name,id } {}
 				virtual void setValue(const float) = 0;
 			};
 		}
@@ -18,11 +18,11 @@ namespace commproto
 		{
 			class Slider : public Control {
 			public:
-				Slider(const std::string & name) : Control{ name } {}
+				Slider(const std::string & name, const uint32_t id) : Control{ name ,id } {}
 				virtual void setValue(const float) = 0;
 			};
 		}
-    }
+	}
 }
 
 

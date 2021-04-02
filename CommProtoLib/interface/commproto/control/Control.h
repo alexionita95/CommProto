@@ -12,7 +12,7 @@ namespace commproto
 		class BaseControl
 		{
 		public:
-			BaseControl(const std::string& name_) : name{ name_ }
+			BaseControl(const std::string& name_, const uint32_t id_) : name{ name_ } , id{id_}
 			{
 			}
 
@@ -20,15 +20,21 @@ namespace commproto
 			{
 				return name;
 			}
+
+			uint32_t getId() const
+			{
+				return id;
+			}
 		protected:
 			const std::string name;
+			const uint32_t id;
 		};
 
 
 		namespace endpoint {
 			class Control : public BaseControl {
 			public:
-				Control(const std::string & name) : BaseControl(name){}
+				Control(const std::string & name, const uint32_t id) : BaseControl(name, id){}
 				virtual ~Control() = default;
 				virtual Message serialize() const = 0;
 			};
@@ -39,7 +45,7 @@ namespace commproto
 		{
 			class Control : public BaseControl {
 			public:
-				Control(const std::string & name) : BaseControl(name) {}
+				Control(const std::string & name, const uint32_t id) : BaseControl(name,id) {}
 				virtual ~Control() = default;
 				virtual std::string getUx() = 0;
 			};

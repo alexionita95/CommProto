@@ -9,18 +9,19 @@ namespace commproto
 			UIControllerImpl::UIControllerImpl(const std::string& name, const messages::TypeMapperHandle & mapper)
 				: UIController{ name }
 				, provider(mapper)
+				, idCounter{1} // id 0 is reserved for the ui controller itself
 			{
 			}
 
 			void UIControllerImpl::addControl(const ControlHandle& control)
 			{
 				LOG_INFO("Adding a control named \"%s\"", control->getName().c_str());
-				const std::string name = control->getName();
-				if (controls.find(name) != controls.end())
+				const uint32_t id = control->getId();
+				if (controls.find(id) != controls.end())
 				{
 					return;
 				}
-				controls.emplace(name, control);
+				controls.emplace(id, control);
 			}
 
 			Message UIControllerImpl::serialize() const
@@ -44,14 +45,19 @@ namespace commproto
 				return provider;
 			}
 
-			ControlHandle UIControllerImpl::getControl(const std::string& name)
+			ControlHandle UIControllerImpl::getControl(const uint32_t id)
 			{
-				auto it = controls.find(name);
+				auto it = controls.find(id);
 				if (it == controls.end())
 				{
 					return nullptr;
 				}
 				return  it->second;
+			}
+
+			uint32_t UIControllerImpl::reserveId()
+			{
+				return idCounter++;
 			}
 		}
 
@@ -71,12 +77,12 @@ namespace commproto
 			{
 				LOG_INFO("Adding a control named \"%s\"", control->getName().c_str());
 				std::lock_guard<std::mutex> lock(controlMutex);
-				const std::string name = control->getName();
-				if (controls.find(name) != controls.end())
+				const uint32_t id = control->getId();
+				if (controls.find(id) != controls.end())
 				{
 					return;
 				}
-				controls.emplace(name, control);
+				controls.emplace(id, control);
 			}
 
 			std::string UIControllerImpl::getConnectionName()
@@ -117,10 +123,10 @@ namespace commproto
 				return connectionId;
 			}
 
-			ControlHandle UIControllerImpl::getControl(const std::string& name)
+			ControlHandle UIControllerImpl::getControl(const uint32_t id)
 			{
 				std::lock_guard<std::mutex> lock(controlMutex);
-				auto it = controls.find(name);
+				auto it = controls.find(id);
 				if (it == controls.end())
 				{
 					return nullptr;

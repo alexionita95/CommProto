@@ -10,7 +10,7 @@ namespace commproto
 		namespace  endpoint {
 			class Button : public Control {
 			public:
-				Button(const std::string & name) : Control(name){}
+				Button(const std::string & name, const uint32_t id) : Control(name,id){}
 				virtual void press() = 0;
 			};
 			using ButtonHandle = std::shared_ptr<Button>;
@@ -19,7 +19,7 @@ namespace commproto
 		{
 			class Button : public Control {
 			public:
-				Button(const std::string & name) : Control(name) {}
+				Button(const std::string & name, const uint32_t id) : Control(name,id) {}
 				virtual void press() = 0;
 			};
 			using ButtonHandle = std::shared_ptr<Button>;

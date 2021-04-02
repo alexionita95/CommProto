@@ -71,12 +71,98 @@ private:
 
 using UxControllersHandle = std::shared_ptr<UxControllers>;
 
+enum class ControlType : uint8_t
+{
+	Button = 0,
+	Slider,
+	Toggle,
+	Label
+};
 
+const std::map<std::string, ControlType> stringMap = {
+	{ "button",ControlType::Button },
+	{ "slider",ControlType::Slider },
+	{ "toggle",ControlType::Toggle },
+	{ "label",ControlType::Label }
+};
+
+using KVMap = std::map<std::string, std::string>;
 
 class MyRequestHandler : public HTTPRequestHandler
 {
 public:
-	MyRequestHandler(const UxControllersHandle & controllers) : controllers{ controllers } {}
+	MyRequestHandler(const UxControllersHandle & controllers) : controllers{ controllers }
+	{
+
+	}
+
+
+	void handleBase(const KVMap & map, std::string & connection, uint32_t & controlId) const
+	{
+		auto conn = map.find("connection");
+		if (conn != map.end())
+		{
+			connection = conn->second;
+		}
+		auto id = map.find("controlId");
+		if (id != map.end())
+		{
+			try {
+				controlId = std::stoi(id->second);
+			}
+			catch (std::invalid_argument arg)
+			{
+				//do nothing
+			}
+		}
+	}
+
+	void handleButton(KVMap && map)
+	{
+		std::string connection = "";
+		uint32_t controlId = 0;
+		handleBase(map, connection, controlId);
+		auto controller = controllers->getController(connection);
+		if(!controller)
+		{
+			return;
+		}
+		commproto::control::ux::ButtonHandle button = std::static_pointer_cast<commproto::control::ux::Button>(controller->getControl(controlId));
+
+		if(!button)
+		{
+			return;
+		}
+
+		button->press();
+	}
+
+	void parseKVMap(KVMap&& map)
+	{
+		auto type = map.find("controlType");
+		if (type == map.end())
+		{
+			return;
+		}
+		auto typeValue = stringMap.find(type->second);
+		if(typeValue == stringMap.end())
+		{
+			return;
+		}
+
+		switch(typeValue->second)
+		{
+		case ControlType::Button: 
+			handleButton(std::move(map));
+			break;
+		case ControlType::Slider: break;
+		case ControlType::Toggle: break;
+		case ControlType::Label: break;
+		default: ;
+		}
+
+	}
+
 	void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp) override
 	{
 
@@ -89,6 +175,7 @@ public:
 				if (simulator) {
 					out << simulator->getUx();
 				}
+				resp.setStatus(HTTPResponse::HTTP_OK);
 				out.flush();
 				return;
 			}
@@ -97,32 +184,14 @@ public:
 				LOG_INFO("POST action - action ");
 				string connection;
 				string control;
-				HTMLForm form(req,req.stream());
-				for (NameValueCollection::ConstIterator i = form.begin(); i != form.end();++i) {
-					if(i->first == "connection")
-					{
-						connection = i->second;
-					} else if(i->first == "control")
-					{
-						control = i->second;
-					}
+				HTMLForm form(req, req.stream());
+				KVMap map;
+				for (NameValueCollection::ConstIterator i = form.begin(); i != form.end(); ++i) {
+					map.emplace(i->first, i->second);
 				}
+				resp.setStatus(HTTPResponse::HTTP_OK);
 				resp.send().flush();
-				if (connection == "" || control == "")
-				{
-					return;
-				}
-				auto controller = controllers->getController(connection);
-				if(!controller)
-				{
-					return;
-				}
-				commproto::control::ux::ControlHandle control_ = controller->getControl(control);
-				if (!control_)
-				{
-					return;
-				}
-				std::static_pointer_cast<commproto::control::ux::Button>(control_)->press();
+				parseKVMap(std::move(map));
 			}
 		}
 		else {
@@ -147,6 +216,7 @@ public:
 private:
 	static int count;
 	UxControllersHandle controllers;
+
 };
 
 int MyRequestHandler::count = 0;
@@ -165,10 +235,10 @@ private:
 
 class MyServerApp : public ServerApplication
 {
-public: 
+public:
 	MyServerApp(const UxControllersHandle & controller) : controller{ controller } {}
 protected:
-	
+
 	int main(const vector<string> &)
 	{
 		HTTPServer s(new MyRequestHandlerFactory(controller), ServerSocket(9090), new HTTPServerParams);
@@ -211,7 +281,7 @@ public:
 	UXServiceProvider(const messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_, const UxControllersHandle& controllers)
 		: mapper{ mapper_ }
 		, socket{ socket_ }
-		, controllers{ controllers}
+		, controllers{ controllers }
 	{
 
 	}
@@ -235,7 +305,7 @@ private:
 void websiteLoop(int argc, char * argv[])
 {
 	MyServerApp app(badPractice.controllers);
-	app.run(argc,argv);
+	app.run(argc, argv);
 }
 
 int main(int argc, char * argv[])
@@ -288,7 +358,7 @@ int main(int argc, char * argv[])
 	SubscribeMessage sub(registerSubId, "");
 	socket->sendBytes(SubscribeSerializer::serialize(std::move(sub)));
 
-	std::thread websiteThread(websiteLoop,argc,argv);
+	std::thread websiteThread(websiteLoop, argc, argv);
 
 	while (true) {
 		builder->pollAndRead();
