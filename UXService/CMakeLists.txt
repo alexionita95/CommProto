@@ -18,8 +18,8 @@ include_directories(.)
 
 set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
-
+install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR})
+install (DIRECTORY "html_files" DESTINATION ${INSTALL_DIR})
 IF(WIN32)
 message("win32 TYPE=${CMAKE_BUILD_TYPE}")
 		  install(FILES 

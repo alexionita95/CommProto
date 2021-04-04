@@ -2,8 +2,9 @@
 #define UIFACTORY_H
 #include <commproto/control/UIController.h>
 #include <commproto/control/Button.h>
-#include "../messages/MessageMapper.h"
-#include "commproto/sockets/Socket.h"
+#include <commproto/sockets/Socket.h>
+#include <commproto/messages/MessageMapper.h>
+#include <commproto/control/Toggle.h>
 
 namespace commproto
 {
@@ -16,6 +17,7 @@ namespace commproto
 			public:
 				UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper );
 				void addButton(const std::string& name, const ButtonAction& action) const;
+				void addToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
 				UIControllerHandle build() const;
 			private:
 				UIControllerHandle controller;

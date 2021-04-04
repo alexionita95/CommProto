@@ -78,6 +78,11 @@ int main(int argc, const char * argv[])
 		LOG_INFO("MyButton has been pressed");
 	});
 
+	uiFactory->addToggle("MyToggle",[](bool state)
+	{
+		LOG_INFO("MyToggle state switched: %s", state?"True":"False");
+	});
+
 	control::endpoint::UIControllerHandle controller = uiFactory->build();
 	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper,controller);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);

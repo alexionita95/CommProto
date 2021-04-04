@@ -26,7 +26,7 @@ namespace commproto
 
 			T prop;
 			U prop2;
-			U prop3;
+			V prop3;
 
 			uint32_t getSize() const override
 			{
@@ -38,7 +38,7 @@ namespace commproto
 }
 
 #define MAKE_TRIPLE_PROP_MESSAGE(MESSAGE_NAME, TYPE,TYPE2,TYPE3)							\
-class MESSAGE_NAME : public commproto::messages::DoublePropertyMessage<TYPE,TYPE2,TYPE3>	\
+class MESSAGE_NAME : public commproto::messages::TriplePropertyMessage<TYPE,TYPE2,TYPE3>	\
 {																							\
 public:																						\
 	MESSAGE_NAME(uint32_t id, const TYPE& prop_, const TYPE2& prop2_,const TYPE3& prop3_)	\

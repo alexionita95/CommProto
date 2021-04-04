@@ -19,6 +19,11 @@ namespace commproto
 				controller->addControl(std::make_shared<ButtonImpl>(name,controller->reserveId(), controller->getIdProvider().buttonId, action));
 			}
 
+			void UIFactory::addToggle(const std::string& name, const ToggleAction& action, const bool defaultState) const
+			{
+				controller->addControl(std::make_shared<ToggleImpl>(name, controller->reserveId(), controller->getIdProvider().toggleId, action, defaultState));
+			}
+
 			UIControllerHandle UIFactory::build() const
 			{
 				return  controller;

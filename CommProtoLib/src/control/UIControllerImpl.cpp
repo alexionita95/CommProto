@@ -1,6 +1,7 @@
 #include "UIControllerImpl.h"
 #include <sstream>
 #include <commproto/service/ServiceChains.h>
+#include <commproto/logger/Logging.h>
 
 namespace commproto
 {

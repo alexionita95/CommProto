@@ -2,10 +2,9 @@
 #define TRIPLE_PROPERTY_CHAIN_H
 
 #include <commproto/parser/Parser.h>
-#include <commproto/messages/TriplePropertyChain.h>
+#include <commproto/messages/TriplePropertyMessage.h>
 #include <commproto/common/Common.h>
 #include <commproto/parser/ByteStream.h>
-#include <commproto/service/Dispatch.h>
 
 namespace commproto
 {

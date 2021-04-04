@@ -4,7 +4,7 @@
 #include <commproto/control/UIController.h>
 #include "ButtonImpl.h"
 #include <sstream>
-#include "commproto/logger/Logging.h"
+#include "ToggleImpl.h"
 
 namespace commproto
 {
@@ -45,6 +45,22 @@ namespace commproto
 			{
 				std::stringstream sstream;
 				sstream << "<button onclick = \"postButton('" << manager.getConnectionName() << "','" << control.getId() << "')\">" << control.getName() << " </button>";
+				return sstream.str();
+			}
+
+			template <>
+			inline std::string Generator::generate(const ToggleImpl& control) const
+			{
+				std::stringstream sstream;
+				sstream << manager.getConnectionName() << "-toggle" << control.getId();
+				std::string controlIdString = sstream.str();
+				sstream.clear();
+				sstream.str(std::string());
+
+				sstream << "<div class=\"toggle-switch\">";
+				sstream << control.getName() << " : <input type=\"checkbox\" id=\""<< controlIdString <<"\" onclick=\"postToggle(this, '"<< manager.getConnectionName() <<"', '"<< control.getId() <<"')\" >";
+				sstream << "<label for=\""<< controlIdString <<"\"></label>";
+				sstream << "</div>";
 				return sstream.str();
 			}
 
