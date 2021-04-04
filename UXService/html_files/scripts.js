@@ -38,7 +38,7 @@ function updateUI()
         {
             if(this.status == 200)
             {
-                if(xhttp.responseText == '')
+                if(xhttp.responseText == '<null>')
                 {
                     console.log('no update');
                 } 

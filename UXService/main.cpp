@@ -11,6 +11,7 @@
 #include <commproto/control/UxControllers.h>
 #include "HTTPServer.h"
 #include "UxDelegatorProvider.h"
+#include "commproto/endpoint/ChannelMappingHandler.h"
 
 using namespace commproto;
 
@@ -48,6 +49,13 @@ int main(int argc, char * argv[])
 	control::ux::UxControllersHandle controllers = std::make_shared<control::ux::UxControllers>();
 	std::shared_ptr<UXServiceProvider> provider = std::make_shared<UXServiceProvider>(mapper, socket, controllers);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
+
+	endpoint::MappingNotification removeController = [controllers](const std::string & name, const uint32_t id)
+	{
+		LOG_INFO("Removing UX controller for connection %s(%d)",name.c_str(),id);
+		controllers->removeController(name);
+	};
+	channelDelegator->subscribeToChannelRemoval(removeController);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
 

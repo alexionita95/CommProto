@@ -94,7 +94,7 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 			if (!update)
 			{
 				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-				resp.send();
+				resp.send() << "<null>";
 				return;
 			}
 			std::ostream& out = resp.send();

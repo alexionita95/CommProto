@@ -13,7 +13,19 @@ namespace commproto
 		        {
 			        return;
 		        }
+				update = true;
 		        controllers.emplace(name, controller);
+	        }
+
+	        void UxControllers::removeController(const std::string& name)
+	        {
+				auto it = controllers.find(name);
+				if(it == controllers.end())
+				{
+					return;
+				}
+				update = true;
+				controllers.erase(it);
 	        }
 
 	        UIControllerHandle UxControllers::getController(const std::string& name)
@@ -29,7 +41,11 @@ namespace commproto
 
 	        bool UxControllers::hasUpdate()
 	        {
-		        bool update = false;
+				if(update)
+				{
+					update = false;
+					return true;
+				}
 		        for (auto it : controllers)
 		        {
 			        if (it.second->hasUpdate())
@@ -37,7 +53,7 @@ namespace commproto
 				        return true;
 			        }
 		        }
-		        return update;
+		        return false;
 	        }
         }
     }

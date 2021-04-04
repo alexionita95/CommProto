@@ -36,11 +36,28 @@ namespace commproto
 			{
 				return;
 			}
+
 			for(auto sub : subscribers)
 			{
 				sub(name, id);
 			}
+			channelNames.emplace(id, name);
 			addDelegator(id, provider->provide(name,id));
+		}
+
+		void ChannelParserDelegator::notifyTerminationSubs(const uint32_t id)
+		{
+			std::string name = "";
+			auto it = channelNames.find(id);
+			if(it != channelNames.end())
+			{
+				name = it->second;
+			}
+			
+			for (auto sub : terminationSub)
+			{
+				sub(name,id);
+			}
 		}
 
 		void ChannelParserDelegator::addDelegator(const uint32_t id, const parser::ParserDelegatorHandle& delegator)
@@ -57,6 +74,11 @@ namespace commproto
 			subscribers.push_back(onMapping);
 		}
 
+		void ChannelParserDelegator::subscribeToChannelRemoval(MappingNotification& onTermination)
+		{
+			terminationSub.push_back(onTermination);
+		}
+
 		void ChannelParserDelegator::notifyTermination(const uint32_t id)
 		{
 			auto it = delegators.find(id);
@@ -65,6 +87,12 @@ namespace commproto
 				return;
 			}
 			LOG_INFO("Connection %d has been terminated", it->first);
+			notifyTerminationSubs(id);
+			auto it2 = channelNames.find(id);
+			if(it2 != channelNames.end())
+			{
+				channelNames.erase(it2);
+			}
 			delegators.erase(it);
 		}
 	}
