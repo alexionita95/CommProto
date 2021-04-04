@@ -13,9 +13,7 @@ const std::map<std::string, ControlType> stringMap = {
 	{ "label",ControlType::Label }
 };
 
-int MyRequestHandler::count = 0;
-
-void MyRequestHandler::handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const
+void UxRequestHandler::handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const
 {
 	auto conn = map.find("connection");
 	if (conn != map.end())
@@ -36,7 +34,7 @@ void MyRequestHandler::handleBase(const KVMap& map, std::string& connection, uin
 	}
 }
 
-void MyRequestHandler::handleButton(KVMap&& map)
+void UxRequestHandler::handleButton(KVMap&& map)
 {
 	std::string connection = "";
 	uint32_t controlId = 0;
@@ -56,7 +54,7 @@ void MyRequestHandler::handleButton(KVMap&& map)
 	button->press();
 }
 
-void MyRequestHandler::parseKVMap(KVMap&& map)
+void UxRequestHandler::parseKVMap(KVMap&& map)
 {
 	auto type = map.find("controlType");
 	if (type == map.end())
@@ -81,7 +79,7 @@ void MyRequestHandler::parseKVMap(KVMap&& map)
 	}
 }
 
-void MyRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
+void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
 	if (req.getMethod().compare("POST") == 0)
 	{

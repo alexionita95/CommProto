@@ -1,0 +1,22 @@
+#ifndef UX_DELEGATOR_PROVIDER
+#define UX_DELEGATOR_PROVIDER
+
+#include <commproto/parser/ParserDelegator.h>
+#include <commproto/control/UxControllers.h>
+#include <commproto/control/UIFactory.h>
+#include <commproto/endpoint/DelegatorProvider.h>
+
+
+
+class UXServiceProvider : public  commproto::endpoint::DelegatorProvider {
+public:
+	UXServiceProvider(const commproto::messages::TypeMapperHandle& mapper_, const commproto::sockets::SocketHandle& socket_, const commproto::control::ux::UxControllersHandle& controllers);
+	commproto::parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override;
+
+private:
+	commproto::messages::TypeMapperHandle mapper;
+	commproto::sockets::SocketHandle socket;
+	commproto::control::ux::UxControllersHandle controllers;
+};
+
+#endif // UX_DELEGATOR_PROVIDER

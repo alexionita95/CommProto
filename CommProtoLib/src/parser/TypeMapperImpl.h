@@ -8,7 +8,7 @@ namespace commproto
 {
 	namespace messages
 	{
-		class TypeMapperImpl : public MessageTypeMapper
+		class TypeMapperImpl : public TypeMapper
 		{
 		public:
 			TypeMapperImpl(const TypeMapperObserverHandle & observer);

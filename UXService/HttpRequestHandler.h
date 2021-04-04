@@ -16,25 +16,20 @@ enum class ControlType : uint8_t
 
 using KVMap = std::map<std::string, std::string>;
 
-class MyRequestHandler : public Poco::Net::HTTPRequestHandler
+class UxRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-	MyRequestHandler(const commproto::control::ux::UxControllersHandle & controllers) : controllers{ controllers }
+	UxRequestHandler(const commproto::control::ux::UxControllersHandle & controllers) : controllers{ controllers }
 	{
 
 	}
 
-
-	void handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const;
-
-	void handleButton(KVMap&& map);
-
-	void parseKVMap(KVMap&& map);
-
 	void handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp) override;
 
 private:
-	static int count;
+	void handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const;
+	void handleButton(KVMap&& map);
+	void parseKVMap(KVMap&& map);
 	commproto::control::ux::UxControllersHandle controllers;
 
 };

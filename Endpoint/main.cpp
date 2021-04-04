@@ -1,16 +1,11 @@
 #include <commproto/service/Dispatch.h>
-#include <commproto/parser/ByteStream.h>
 #include <SocketImpl.h>
 #include <commproto/logger/Logging.h>
-#include <sstream>
 #include <conio.h>
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/messages/MessageMapper.h>
-#include <../CommProtoLib/src/parser/TypeMapperObserver.h>
-#include <../CommProtoLib/src/parser/TypeMapperImpl.h>
 #include <commproto/endpoint/ChannelParserDelegator.h>
-#include <commproto/parser/ParserDelegatorFactory.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/control/UIFactory.h>
@@ -20,28 +15,6 @@
 using namespace commproto;
 using namespace service;
 
-MAKE_SINGLE_PROP_MESSAGE(StringMessage, std::string);
-
-using StringParser = messages::SinglePropertyParser<std::string>;
-using StringSerialize = messages::SinglePropertySerializer<std::string>;
-
-
-namespace commproto
-{
-	DEFINE_DATA_TYPE(StringMessage);
-}
-
-class StringHandler : public parser::Handler
-{
-public:
-	void handle(messages::MessageBase&& data) override;
-};
-
-void StringHandler::handle(messages::MessageBase&& data)
-{
-	StringMessage& message = static_cast<StringMessage&>(data);
-	LOG_INFO("%s [sender:%d]", message.prop.c_str(), message.senderId);
-}
 
 parser::ParserDelegatorHandle buildSelfDelegator()
 {
@@ -62,11 +35,6 @@ public:
 	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override
 	{
 		parser::ParserDelegatorHandle delegator = buildSelfDelegator();
-		parser::HandlerHandle stringHandler = std::make_shared<StringHandler>();
-		parser::ParserHandle stringParser = std::make_shared<StringParser>(stringHandler);
-		delegator->registerParser<StringMessage>(stringParser);
-
-
 		control::endpoint::addParsers(delegator, controller);
 
 		return delegator;
@@ -95,9 +63,7 @@ int main(int argc, const char * argv[])
 	socket->sendByte(sizeof(void*));
 	
 	
-	//core dependencies
-	messages::TypeMapperObserverHandle observer = std::make_shared<messages::TypeMapperObserver>(socket);
-	messages::TypeMapperHandle mapper = std::make_shared<messages::TypeMapperImpl>(observer);
+	messages::TypeMapperHandle mapper = messages::TypeMapperFactory::build(socket);
 
 	//registering our channel name
 	uint32_t registerId = mapper->registerType<RegisterChannelMessage>();

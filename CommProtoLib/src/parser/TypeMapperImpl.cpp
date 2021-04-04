@@ -8,7 +8,7 @@ namespace commproto
 			: counter{ 0 }
 			, observer{ observer_ }
 		{
-			MessageTypeMapper::registerType<MappingType>();
+			TypeMapper::registerType<MappingType>();
 		}
 
 		uint32_t TypeMapperImpl::registerType(const std::string& type)

@@ -1,13 +1,13 @@
 #include "HTTPServer.h"
 
-Poco::Net::HTTPRequestHandler* MyRequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest&)
+Poco::Net::HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest&)
 {
-	return new MyRequestHandler(controller);
+	return new UxRequestHandler(controller);
 }
 
-int MyServerApp::main(const std::vector<std::string>&)
+int UxServerApp::main(const std::vector<std::string>&)
 {
-	Poco::Net::HTTPServer s(new MyRequestHandlerFactory(controller), Poco::Net::ServerSocket(port), new Poco::Net::HTTPServerParams);
+	Poco::Net::HTTPServer s(new RequestHandlerFactory(controller), Poco::Net::ServerSocket(port), new Poco::Net::HTTPServerParams);
 
 	s.start();
 	std::cout << std::endl << "Server started" << std::endl;

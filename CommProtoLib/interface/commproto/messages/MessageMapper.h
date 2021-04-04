@@ -5,12 +5,14 @@
 #include <memory>
 
 #include <commproto/messages/MessageName.h>
+#include <commproto/sockets/Socket.h>
 
 namespace commproto
 {
 	namespace messages
 	{
-		class MessageTypeMapper
+
+		class TypeMapper
 		{
 		public:
 			template <typename T>
@@ -18,26 +20,36 @@ namespace commproto
 
 			template <typename T>
 			bool hasType();
+			virtual ~TypeMapper() = default;
 
-			virtual ~MessageTypeMapper() = default;
+			
 		protected:
 			virtual uint32_t registerType(const std::string& type) = 0;
 			virtual bool hasType(const std::string& type) = 0;
 		};
 
-		using TypeMapperHandle = std::shared_ptr<MessageTypeMapper>;
+		using TypeMapperHandle = std::shared_ptr<TypeMapper>;
+
+		class TypeMapperFactory
+		{
+		public:
+			static TypeMapperHandle build(const sockets::SocketHandle & socket);
+		};
 
 		template <typename T>
-		uint32_t MessageTypeMapper::registerType()
+		uint32_t TypeMapper::registerType()
 		{
 			return registerType(MessageName<T>::name());
 		}
 
 		template <typename T>
-		bool MessageTypeMapper::hasType()
+		bool TypeMapper::hasType()
 		{
 			return hasType(MessageName<T>::name());
 		}
+
+
+		
 
 	}
 }
