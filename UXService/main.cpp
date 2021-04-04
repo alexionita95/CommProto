@@ -31,57 +31,13 @@
 #include <commproto/control/UIController.h>
 #include <commproto/control/ParserDelegatorUtils.h>
 #include <commproto/control/UIFactory.h>
+#include <commproto/control/UxControllers.h>
 
 using namespace Poco::Net;
 using namespace Poco::Util;
 using namespace std;
 
 static int counter = 0;
-
-
-
-
-class UxControllers
-{
-public:
-	void addController(const std::string & name, const commproto::control::ux::UIControllerHandle & controller)
-	{
-		if (controllers.find(name) != controllers.end())
-		{
-			return;
-		}
-		controllers.emplace(name, controller);
-
-	}
-
-	commproto::control::ux::UIControllerHandle getController(const std::string & name)
-	{
-		auto it = controllers.find(name);
-
-		if (it == controllers.end())
-		{
-			return nullptr;
-		}
-		return it->second;
-
-	}
-	bool hasUpdate()
-	{
-		bool update = false;
-		for(auto it : controllers)
-		{
-			if(it.second->hasUpdate())
-			{
-				return true;
-			}
-		}
-		return update;
-	}
-private:
-	std::map<std::string, commproto::control::ux::UIControllerHandle> controllers;
-};
-
-using UxControllersHandle = std::shared_ptr<UxControllers>;
 
 enum class ControlType : uint8_t
 {
@@ -103,7 +59,7 @@ using KVMap = std::map<std::string, std::string>;
 class MyRequestHandler : public HTTPRequestHandler
 {
 public:
-	MyRequestHandler(const UxControllersHandle & controllers) : controllers{ controllers }
+	MyRequestHandler(const commproto::control::ux::UxControllersHandle & controllers) : controllers{ controllers }
 	{
 
 	}
@@ -236,7 +192,7 @@ public:
 
 private:
 	static int count;
-	UxControllersHandle controllers;
+	commproto::control::ux::UxControllersHandle controllers;
 
 };
 
@@ -245,19 +201,19 @@ int MyRequestHandler::count = 0;
 class MyRequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
-	MyRequestHandlerFactory(const UxControllersHandle & controller) : controller{ controller } {}
+	MyRequestHandlerFactory(const commproto::control::ux::UxControllersHandle & controller) : controller{ controller } {}
 	HTTPRequestHandler* createRequestHandler(const HTTPServerRequest &) override
 	{
 		return new MyRequestHandler(controller);
 	}
 private:
-	UxControllersHandle controller;
+	commproto::control::ux::UxControllersHandle controller;
 };
 
 class MyServerApp : public ServerApplication
 {
 public:
-	MyServerApp(const UxControllersHandle & controller) : controller{ controller } {}
+	MyServerApp(const commproto::control::ux::UxControllersHandle & controller) : controller{ controller } {}
 protected:
 
 	int main(const vector<string> &)
@@ -275,7 +231,7 @@ protected:
 		return Application::EXIT_OK;
 	}
 private:
-	UxControllersHandle controller;
+	commproto::control::ux::UxControllersHandle controller;
 };
 
 using namespace commproto;
@@ -292,14 +248,14 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 struct Transferables
 {
 public:
-	UxControllersHandle controllers;
+	control::ux::UxControllersHandle controllers;
 };
 
 Transferables badPractice;
 
 class UXServiceProvider : public endpoint::DelegatorProvider {
 public:
-	UXServiceProvider(const messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_, const UxControllersHandle& controllers)
+	UXServiceProvider(const messages::TypeMapperHandle & mapper_, const sockets::SocketHandle & socket_, const control::ux::UxControllersHandle& controllers)
 		: mapper{ mapper_ }
 		, socket{ socket_ }
 		, controllers{ controllers }
@@ -320,7 +276,7 @@ public:
 private:
 	messages::TypeMapperHandle mapper;
 	sockets::SocketHandle socket;
-	UxControllersHandle controllers;
+	control::ux::UxControllersHandle controllers;
 };
 
 void websiteLoop(int argc, char * argv[])
@@ -355,7 +311,7 @@ int main(int argc, char * argv[])
 	socket->sendBytes(nameSerialized);
 
 	//delegator to parse incoming messages
-	UxControllersHandle controllers = std::make_shared<UxControllers>();
+	control::ux::UxControllersHandle controllers = std::make_shared<control::ux::UxControllers>();
 	badPractice.controllers = controllers;
 	std::shared_ptr<UXServiceProvider> provider = std::make_shared<UXServiceProvider>(mapper, socket, controllers);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
