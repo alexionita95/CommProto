@@ -65,7 +65,7 @@ namespace commproto
 				sstream.str(std::string());
 
 				sstream << "<div class=\"toggle-switch\">";
-				sstream << control.getName() << " : <input type=\"checkbox\" id=\""<< controlIdString <<"\" onclick=\"postToggle(this, '"<< manager.getConnectionName() <<"', '"<< control.getId() <<"')\" >";
+				sstream << control.getName() << " : <input type=\"checkbox\" id=\""<< controlIdString <<"\" onclick=\"postToggle(this, '"<< manager.getConnectionName() <<"', '"<< control.getId() <<"')\"" << (control.getState()?" checked>":" >");
 				sstream << "<label for=\""<< controlIdString <<"\"></label>";
 				sstream << "</div>";
 				return sstream.str();

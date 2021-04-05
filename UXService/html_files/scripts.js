@@ -55,4 +55,4 @@ function updateUI()
     xhttp.send();
 }
 forceUpdateUI();
-var intervalId = setInterval(function() {updateUI();}, 5000);
+var intervalId = setInterval(function() {updateUI();}, 1000);

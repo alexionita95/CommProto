@@ -65,6 +65,7 @@ namespace commproto
 				ToggleImpl(const std::string& name, uint32_t id, const uint32_t messageId, const GeneratorHandle& generator_, const bool defaultState = false);
 				std::string getUx() override;
 				void toggle() override;
+				bool getState() const override;
 			private:
 				GeneratorHandle generator;
 				const uint32_t messageId;

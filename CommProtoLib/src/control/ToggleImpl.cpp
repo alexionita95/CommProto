@@ -86,6 +86,11 @@ namespace commproto
 				ToggleMessage msg(messageId, id);
 				generator->send(ToggleSerializer::serialize(std::move(msg)));
 			}
+
+			bool ToggleImpl::getState() const
+			{
+				return state;
+			}
 		}
 	}
 }

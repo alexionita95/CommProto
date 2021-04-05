@@ -24,6 +24,7 @@ namespace commproto
 			public:
 				Toggle(const std::string & name, const uint32_t id) : Control{ name , id } {}
 				virtual void toggle() = 0;
+				virtual bool getState() const = 0;
 			};
 			using ToggleHandle = std::shared_ptr<Toggle>;
 		}
