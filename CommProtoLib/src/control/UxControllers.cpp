@@ -24,6 +24,7 @@ namespace commproto
 				{
 					return;
 				}
+				it->second->clear();
 				update = true;
 				controllers.erase(it);
 	        }

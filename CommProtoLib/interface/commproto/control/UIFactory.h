@@ -15,9 +15,10 @@ namespace commproto
 			class UIFactory
 			{
 			public:
-				UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper );
-				void addButton(const std::string& name, const ButtonAction& action) const;
-				void addToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
+				UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper , const sockets::SocketHandle& socket);
+				uint32_t addButton(const std::string& name, const ButtonAction& action) const;
+				uint32_t addToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
+				uint32_t addLabel(const std::string& name, const std::string & text) const;
 				UIControllerHandle build() const;
 			private:
 				UIControllerHandle controller;

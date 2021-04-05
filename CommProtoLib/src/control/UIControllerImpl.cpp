@@ -7,10 +7,11 @@ namespace commproto
 {
 	namespace control {
 		namespace endpoint {
-			UIControllerImpl::UIControllerImpl(const std::string& name, const messages::TypeMapperHandle & mapper)
+			UIControllerImpl::UIControllerImpl(const std::string& name, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket_)
 				: UIController{ name }
 				, provider(mapper)
-				, idCounter{1} // id 0 is reserved for the ui controller itself
+				, idCounter{ 1 } // id 0 is reserved for the ui controller itself
+				, socket{ socket_ }
 			{
 			}
 
@@ -60,6 +61,20 @@ namespace commproto
 			{
 				return idCounter++;
 			}
+
+			void UIControllerImpl::clear()
+			{
+				controls.clear();
+			}
+
+			void UIControllerImpl::send(Message msg)
+			{
+				if(!socket)
+				{
+					return;
+				}
+				socket->sendBytes(msg);
+			}
 		}
 
 		namespace ux
@@ -71,7 +86,7 @@ namespace commproto
 				, provider{ mapper }
 				, socket{ socket_ }
 				, connectionId{ id }
-				, update {true}
+				, update{ true }
 			{
 			}
 
@@ -141,6 +156,17 @@ namespace commproto
 			bool UIControllerImpl::hasUpdate()
 			{
 				return update;
+			}
+
+			void UIControllerImpl::clear()
+			{
+				std::lock_guard<std::mutex> lock(controlMutex);
+				controls.clear();
+			}
+
+			void UIControllerImpl::notifyUpdate()
+			{
+				update = true;
 			}
 		}
 	}

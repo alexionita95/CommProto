@@ -5,6 +5,7 @@
 #include "ButtonImpl.h"
 #include <sstream>
 #include "ToggleImpl.h"
+#include "LabelImpl.h"
 
 namespace commproto
 {
@@ -24,6 +25,7 @@ namespace commproto
 				std::string generate(const ControlType& control) const;
 
 				void send(Message msg) const;
+				void notifyUpdate() const;
 			protected:
 				UIController& manager;
 
@@ -32,6 +34,11 @@ namespace commproto
 			inline void Generator::send(Message msg) const
 			{
 				manager.send(msg);
+			}
+
+			inline void Generator::notifyUpdate() const
+			{
+				manager.notifyUpdate();
 			}
 
 			template <typename ControlType>
@@ -61,6 +68,14 @@ namespace commproto
 				sstream << control.getName() << " : <input type=\"checkbox\" id=\""<< controlIdString <<"\" onclick=\"postToggle(this, '"<< manager.getConnectionName() <<"', '"<< control.getId() <<"')\" >";
 				sstream << "<label for=\""<< controlIdString <<"\"></label>";
 				sstream << "</div>";
+				return sstream.str();
+			}
+
+			template <>
+			inline std::string Generator::generate(const LabelImpl& control) const
+			{
+				std::stringstream sstream;
+				sstream <<"<span class=\"c_label\">" << control.getName() << ": "<< control.getText() << "</span>";
 				return sstream.str();
 			}
 

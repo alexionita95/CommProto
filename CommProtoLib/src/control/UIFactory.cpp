@@ -9,19 +9,30 @@ namespace commproto
 	{
 		namespace endpoint
 		{
-			UIFactory::UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper)
-				:controller{ std::make_shared<UIControllerImpl>(name, mapper) }
+			UIFactory::UIFactory(const std::string & name, const messages::TypeMapperHandle& mapper, const sockets::SocketHandle& socket)
+				:controller{ std::make_shared<UIControllerImpl>(name, mapper, socket) }
 			{
 			}
 
-			void UIFactory::addButton(const std::string& name, const ButtonAction& action) const
+			uint32_t UIFactory::addButton(const std::string& name, const ButtonAction& action) const
 			{
-				controller->addControl(std::make_shared<ButtonImpl>(name,controller->reserveId(), controller->getIdProvider().buttonId, action));
+				uint32_t id = controller->reserveId();
+				controller->addControl(std::make_shared<ButtonImpl>(name,id, controller->getIdProvider().buttonId, action));
+				return id;
 			}
 
-			void UIFactory::addToggle(const std::string& name, const ToggleAction& action, const bool defaultState) const
+			uint32_t UIFactory::addToggle(const std::string& name, const ToggleAction& action, const bool defaultState) const
 			{
-				controller->addControl(std::make_shared<ToggleImpl>(name, controller->reserveId(), controller->getIdProvider().toggleId, action, defaultState));
+				uint32_t id = controller->reserveId();
+				controller->addControl(std::make_shared<ToggleImpl>(name, id, controller->getIdProvider().toggleId, action, defaultState));
+				return id;
+			}
+
+			uint32_t UIFactory::addLabel(const std::string& name, const std::string& text) const
+			{
+				uint32_t id = controller->reserveId();
+				controller->addControl(std::make_shared<LabelImpl>(name, id, controller->getIdProvider().labelId, controller->getIdProvider().labelUpdateId, text, controller));
+				return id;
 			}
 
 			UIControllerHandle UIFactory::build() const

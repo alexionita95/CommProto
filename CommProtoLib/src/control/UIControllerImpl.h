@@ -15,17 +15,20 @@ namespace commproto
 			class UIControllerImpl : public UIController
 			{
 			public:
-				UIControllerImpl(const std::string& name, const messages::TypeMapperHandle & mapper);
+				UIControllerImpl(const std::string& name, const messages::TypeMapperHandle & mapper, const sockets::SocketHandle & socket_);
 				void addControl(const ControlHandle& control) override;
 				Message serialize() const override;
 				~UIControllerImpl();
 				IdProvider& getIdProvider() override;
 				ControlHandle getControl(const uint32_t id) override;
 				uint32_t reserveId() override;
+				void clear() override;
+				void send(Message msg) override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				IdProvider provider;
 				uint32_t idCounter;
+				sockets::SocketHandle socket;
 			};
 		}
 
@@ -44,6 +47,8 @@ namespace commproto
 				uint32_t getConnectionId() override;
 				ControlHandle getControl(const uint32_t id) override;
 				bool hasUpdate() override;
+				void clear() override;
+				void notifyUpdate() override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				const std::string connectionName; 

@@ -10,6 +10,8 @@
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/control/UIFactory.h>
 #include <commproto/control/ParserDelegatorUtils.h>
+#include <commproto/control/Label.h>
+#include <sstream>
 
 
 using namespace commproto;
@@ -24,13 +26,13 @@ parser::ParserDelegatorHandle buildSelfDelegator()
 }
 
 
-class EndpointProvider : public endpoint::DelegatorProvider{
+class EndpointProvider : public endpoint::DelegatorProvider {
 public:
 	EndpointProvider(const messages::TypeMapperHandle & mapper_, const control::endpoint::UIControllerHandle & controller_)
-		: mapper{mapper_}
-		, controller { controller_}
+		: mapper{ mapper_ }
+		, controller{ controller_ }
 	{
-		
+
 	}
 	parser::ParserDelegatorHandle provide(const std::string& name, const uint32_t id) override
 	{
@@ -61,8 +63,8 @@ int main(int argc, const char * argv[])
 
 	//send ptr size
 	socket->sendByte(sizeof(void*));
-	
-	
+
+
 	messages::TypeMapperHandle mapper = messages::TypeMapperFactory::build(socket);
 
 	//registering our channel name
@@ -72,19 +74,21 @@ int main(int argc, const char * argv[])
 	socket->sendBytes(nameSerialized);
 
 	//delegator to parse incoming messages
-	auto uiFactory =  std::make_shared<control::endpoint::UIFactory>("myUI",mapper);
-	uiFactory->addButton("MyButton",[]()
+	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
+	uiFactory->addButton("MyButton", []()
 	{
 		LOG_INFO("MyButton has been pressed");
 	});
 
-	uiFactory->addToggle("MyToggle",[](bool state)
+	uiFactory->addToggle("MyToggle", [](bool state)
 	{
-		LOG_INFO("MyToggle state switched: %s", state?"True":"False");
+		LOG_INFO("MyToggle state switched: %s", state ? "True" : "False");
 	});
 
+	uint32_t tempId = uiFactory->addLabel("Temperature","0.00 C");
+
 	control::endpoint::UIControllerHandle controller = uiFactory->build();
-	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper,controller);
+	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper, controller);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
 	channelDelegator->addDelegator(0, delegator);
@@ -100,14 +104,29 @@ int main(int argc, const char * argv[])
 
 	socket->sendBytes(controller->serialize());
 
-	for(uint32_t index = 0; index<100;++index)
+	for (uint32_t index = 0; index < 100; ++index)
 	{
 		builder->pollAndRead();
 	}
 
+	int counter = 0;
+	int updateCounter = 2000;
+	float temp = 0.00f;
+
 	while (true)
 	{
-		builder->pollAndRead();
+		builder->pollAndReadTimes(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		++counter;
+		if(counter == updateCounter)
+		{
+			temp += 0.01f;
+			std::stringstream tempStr;
+			tempStr.precision(2);
+			tempStr << temp << " C";
+			std::static_pointer_cast<control::endpoint::Label>(controller->getControl(tempId))->setText(tempStr.str());
+			counter = 0;
+		}
 	}
 	socket->close();
 	_getch();

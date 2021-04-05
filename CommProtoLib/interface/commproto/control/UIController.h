@@ -18,6 +18,8 @@ namespace commproto
 				virtual void addControl(const ControlHandle & control) = 0;
 				virtual uint32_t reserveId() = 0;
 				virtual ControlHandle getControl(const uint32_t id) = 0;
+				virtual void clear() = 0;
+				virtual void send(Message msg) = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;
@@ -40,6 +42,8 @@ namespace commproto
 				virtual void addControl(const ControlHandle & control) = 0;
 				virtual bool hasUpdate() = 0;
 				virtual ControlHandle getControl(const uint32_t id) = 0;
+				virtual void clear() = 0;
+				virtual void notifyUpdate() = 0;
 			};
 
 			using UIControllerHandle = std::shared_ptr<UIController>;
