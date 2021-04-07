@@ -5,6 +5,7 @@ namespace commproto {
 	namespace service {
 		Dispatch::Dispatch()
 			: idCounter{1}
+			, checkAlive(true)
 		{
 		}
 
@@ -107,6 +108,9 @@ namespace commproto {
 
 		Dispatch::~Dispatch()
 		{
+			LOG_INFO("");
+			checkAlive = false;
+			checkAliveThread->join();
 			for (auto connection : connections)
 			{
 				connection.second->stop();
@@ -187,6 +191,16 @@ namespace commproto {
 			{
 				removeConnection(id);
 			}
+		}
+
+		void Dispatch::startCheckingConnections()
+		{
+			checkAliveThread = std::make_unique<std::thread>([this]() {
+				while (checkAlive) {
+					this->checkActiveConnections();
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				}
+			});
 		}
 
 		void Dispatch::sendToNoLock(const uint32_t senderId, const uint32_t id, const commproto::Message& msg)

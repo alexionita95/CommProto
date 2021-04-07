@@ -3,49 +3,47 @@
 #include <commproto/logger/Logging.h>
 #include <commproto/service/Connection.h>
 #include <commproto/config/ConfigParser.h>
+#include "commproto/logger/FileLogger.h"
 
-const uint32_t defaultPort = 25565;
+struct ConfigValues
+{
+	static constexpr const char * const serverPort = "serverPort";
+	static constexpr const uint32_t defaultServerPort = 25565;
+
+	static constexpr const char * const logToConsole = "logToConsole";
+	static constexpr const bool logToConsoleDefault = true;
+};
+
 
 int main(int argc, const char * argv[])
 {
-	commproto::service::Dispatch dsp;
-	std::atomic_bool checkAlive = true;
-	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
-
-
-	uint32_t port = defaultPort;
 	rapidjson::Document doc = commproto::config::ConfigParser("dispatchConfig.cfg").get();
-	if (!doc.HasParseError() && doc.HasMember("port") && doc["port"].IsInt())
+
+	const uint32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
+	bool logToConsole = commproto::config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
+	
+	commproto::logger::FileLogger logger("dispatch_log_" + commproto::logger::FileLogger::getTimestamp() + ".txt");
+	if (!logToConsole)
 	{
-		port = doc["port"].GetInt();
-		LOG_INFO("Found port in config file = %d", port);
-	}
-	else
-	{
-		LOG_WARNING("Config file not found or does not contain port, starting with default port = %d", port);
+		logger.open();
+		commproto::logger::setLoggable(&logger);
 	}
 
-
+	commproto::service::Dispatch dsp;
+	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
 
 	if (!socket->initServer(port))
 	{
 		LOG_ERROR("A problem occurred while starting dispatch service, shutting down...");
 		return 1;
 	}
-	LOG_INFO("Dispatch server started, wating for new connection...");
+	dsp.startCheckingConnections();
 
-	std::thread checkAliveThread([&dsp, &checkAlive]() {
-		while (checkAlive) {
-			dsp.checkActiveConnections();
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
-	});
+	LOG_INFO("Dispatch server started, wating for new connection...");
 
 	while (true) {
 		commproto::sockets::SocketHandle newCon = socket->acceptNext();
 		dsp.addConnection(newCon);
 	}
-	checkAlive = false;
-	checkAliveThread.join();
 	return 0;
 }

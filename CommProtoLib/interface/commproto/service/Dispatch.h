@@ -23,6 +23,7 @@ namespace commproto {
 			ConnectionHandle getConnection(const std::string& name) const;
 			ConnectionHandle getConnection(const uint32_t id) const;
 			void checkActiveConnections();
+			void startCheckingConnections();
 
 			~Dispatch();
 		private:
@@ -39,6 +40,8 @@ namespace commproto {
 			std::mutex connectionMutex;
 			std::map<std::string, uint32_t> connectionMapping;
 			uint32_t idCounter;
+			std::atomic_bool checkAlive;
+			std::unique_ptr<std::thread> checkAliveThread;
 		};
 
 	}

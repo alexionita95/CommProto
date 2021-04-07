@@ -8,6 +8,7 @@
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/control/UxControllers.h>
 #include <commproto/config/ConfigParser.h>
+#include <commproto/logger/FileLogger.h>
 
 #include "HTTPServer.h"
 #include "UxDelegatorProvider.h"
@@ -25,6 +26,9 @@ struct ConfigValues
 
 	static constexpr const char * const channelName = "channelName";
 	static constexpr const char * const defaultChannelName = "Service::UX";
+
+	static constexpr const char * const logToConsole = "logToConsole";
+	static constexpr const bool logToConsoleDefault = true;
 };
 
 using namespace commproto;
@@ -38,14 +42,20 @@ void websiteLoop(int argc, char * argv[], const uint32_t port, const commproto::
 int main(int argc, char * argv[])
 {
 
-
-
 	rapidjson::Document doc = config::ConfigParser("uxConfig.cfg").get();
 
 	const uint32_t dispatchPort = config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	const char * const dispatchAddr = config::getValueOrDefault(doc, ConfigValues::serverAddr, ConfigValues::defaultServerAddr);
 	const uint32_t httpPort = config::getValueOrDefault(doc, ConfigValues::httpPort, ConfigValues::defaultHttpPort);
 	const char * const name = config::getValueOrDefault(doc, ConfigValues::channelName, ConfigValues::defaultChannelName);
+	bool logToConsole = config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
+
+	logger::FileLogger logger("ux_log_" + logger::FileLogger::getTimestamp() + ".txt");
+	if (!logToConsole)
+	{
+		logger.open();
+		commproto::logger::setLoggable(&logger);
+	}
 
 	SenderMapping::InitializeName(name);
 
