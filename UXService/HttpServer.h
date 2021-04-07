@@ -19,7 +19,7 @@ private:
 class UxServerApp : public Poco::Util::ServerApplication
 {
 public:
-	UxServerApp(const commproto::control::ux::UxControllersHandle & controller, const uint32_t port = 9090) : controller{ controller }, port{ port } {}
+	UxServerApp(const commproto::control::ux::UxControllersHandle & controller, const uint32_t port) : controller{ controller }, port{ port } {}
 protected:
 	int main(const std::vector<std::string>&) override;
 private:

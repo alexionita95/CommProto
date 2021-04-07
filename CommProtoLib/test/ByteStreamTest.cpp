@@ -2,8 +2,6 @@
 
 #include <commproto/parser/ByteStream.h>
 
-
-
 namespace commproto
 {
 	namespace parser

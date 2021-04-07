@@ -4,28 +4,53 @@
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/messages/MessageMapper.h>
-#include <../CommProtoLib/src/parser/TypeMapperObserver.h>
-#include <../CommProtoLib/src/parser/TypeMapperImpl.h>
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/control/UxControllers.h>
+#include <commproto/config/ConfigParser.h>
+
 #include "HTTPServer.h"
 #include "UxDelegatorProvider.h"
-#include "commproto/endpoint/ChannelMappingHandler.h"
+
+struct ConfigValues
+{
+	static constexpr const char * const serverAddr = "serverAddr";
+	static constexpr const char * const defaultServerAddr = "localhost";
+
+	static constexpr const char * const serverPort = "serverPort";
+	static constexpr const uint32_t defaultServerPort = 25565;
+
+	static constexpr const char * const httpPort = "httpPort";
+	static constexpr const uint32_t defaultHttpPort = 9090;
+
+	static constexpr const char * const channelName = "channelName";
+	static constexpr const char * const defaultChannelName = "Service::UX";
+};
 
 using namespace commproto;
 
-void websiteLoop(int argc, char * argv[], const commproto::control::ux::UxControllersHandle & controllers)
+void websiteLoop(int argc, char * argv[], const uint32_t port, const commproto::control::ux::UxControllersHandle & controllers)
 {
-	UxServerApp app(controllers);
+	UxServerApp app(controllers, port);
 	app.run(argc, argv);
 }
 
 int main(int argc, char * argv[])
 {
-	SenderMapping::InitializeName("Service::UX");
+
+
+
+	rapidjson::Document doc = config::ConfigParser("uxConfig.cfg").get();
+
+	const uint32_t dispatchPort = config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
+	const char * const dispatchAddr = config::getValueOrDefault(doc, ConfigValues::serverAddr, ConfigValues::defaultServerAddr);
+	const uint32_t httpPort = config::getValueOrDefault(doc, ConfigValues::httpPort, ConfigValues::defaultHttpPort);
+	const char * const name = config::getValueOrDefault(doc, ConfigValues::channelName, ConfigValues::defaultChannelName);
+
+	SenderMapping::InitializeName(name);
+
 	sockets::SocketHandle socket = std::make_shared<sockets::SocketImpl>();
-	if (!socket->initClient("localhost", 25565))
+	if (!socket->initClient(dispatchAddr, dispatchPort))
 	{
 		LOG_ERROR("A problem occurred while starting endpoint, shutting down...");
 		return 0;
@@ -52,7 +77,7 @@ int main(int argc, char * argv[])
 
 	endpoint::MappingNotification removeController = [controllers](const std::string & name, const uint32_t id)
 	{
-		LOG_INFO("Removing UX controller for connection %s(%d)",name.c_str(),id);
+		LOG_INFO("Removing UX controller for connection %s(%d)", name.c_str(), id);
 		controllers->removeController(name);
 	};
 	channelDelegator->subscribeToChannelRemoval(removeController);
@@ -76,7 +101,7 @@ int main(int argc, char * argv[])
 	service::SubscribeMessage sub(registerSubId, "");
 	socket->sendBytes(service::SubscribeSerializer::serialize(std::move(sub)));
 
-	std::thread websiteThread(websiteLoop, argc, argv, controllers);
+	std::thread websiteThread(websiteLoop, argc, argv, httpPort, controllers);
 
 	while (true) {
 		builder->pollAndReadTimes(100u);
