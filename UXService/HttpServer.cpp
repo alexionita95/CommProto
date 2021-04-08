@@ -1,4 +1,4 @@
-#include "HTTPServer.h"
+#include "HttpServer.h"
 #include <commproto/logger/Logging.h>
 
 Poco::Net::HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const Poco::Net::HTTPServerRequest&)

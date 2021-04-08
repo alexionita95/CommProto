@@ -25,7 +25,8 @@ namespace commproto {
 			terminationId = mapper->registerType<endpoint::ChannelTerminationMessage>();
 
 			endpoint::RegisterIdMessage registerId(mapper->registerType<endpoint::RegisterIdMessage>(), id);
-			socket->sendBytes(endpoint::RegisterIdSerializer::serialize(std::move(registerId)));
+            int res = socket->sendBytes(endpoint::RegisterIdSerializer::serialize(std::move(registerId)));
+            LOG_INFO("Result of sending mapping message: %d",res);
 		}
 
 		Connection::~Connection()
@@ -42,7 +43,7 @@ namespace commproto {
 				return;
 			}
 			running = true;
-			worker = std::make_unique<std::thread>(&Connection::loop, this);
+            worker = std::make_shared<std::thread>(&Connection::loop, this);
 		}
 
 		void Connection::stop()

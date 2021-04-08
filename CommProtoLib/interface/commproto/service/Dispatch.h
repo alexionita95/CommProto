@@ -41,7 +41,7 @@ namespace commproto {
 			std::map<std::string, uint32_t> connectionMapping;
 			uint32_t idCounter;
 			std::atomic_bool checkAlive;
-			std::unique_ptr<std::thread> checkAliveThread;
+            std::shared_ptr<std::thread> checkAliveThread;
 		};
 
 	}

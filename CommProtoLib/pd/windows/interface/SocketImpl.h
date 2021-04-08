@@ -34,7 +34,7 @@ namespace sockets {
         int readByte() override;
         int sendByte(const char byte) override;
 		bool connected() override;
-		void close() override;
+		void shutdown() override;
 		void setTimeout(const uint32_t msec) override;
 
     private:

@@ -1,5 +1,7 @@
 project(UXService)
 
+
+MESSAGE("**************POCO DIR : ${Poco_DIR}")
 find_package(Poco "1.10.1" REQUIRED COMPONENTS Net Util)
 
 include (${CMAKE_SOURCE_DIR}/cmake/utility.cmake)

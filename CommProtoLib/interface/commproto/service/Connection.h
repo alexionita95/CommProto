@@ -58,7 +58,7 @@ namespace commproto
 			sockets::SocketHandle socket;
 			std::string name;
 			const uint32_t id;
-			std::unique_ptr<std::thread> worker;
+            std::shared_ptr<std::thread> worker;
 			moodycamel::ConcurrentQueue<Message> messagesOut;
 			std::atomic_bool running;
 			const uint32_t sleepMicro;

@@ -25,7 +25,7 @@ namespace commproto {
 			socketHandle = INVALID_SOCKET;
 		}
 
-		void SocketImpl::close()
+                void SocketImpl::shutdown()
 		{
 			closesocket(socketHandle);
 		}

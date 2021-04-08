@@ -109,7 +109,9 @@ namespace commproto {
 		Dispatch::~Dispatch()
 		{
 			checkAlive = false;
-			checkAliveThread->join();
+            if(checkAliveThread){
+                checkAliveThread->join();
+            }
 			for (auto connection : connections)
 			{
 				connection.second->stop();
@@ -194,7 +196,7 @@ namespace commproto {
 
 		void Dispatch::startCheckingConnections()
 		{
-			checkAliveThread = std::make_unique<std::thread>([this]() {
+            checkAliveThread = std::make_shared<std::thread>([this]() {
 				while (checkAlive) {
 					this->checkActiveConnections();
 					std::this_thread::sleep_for(std::chrono::milliseconds(100));

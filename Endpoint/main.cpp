@@ -1,7 +1,6 @@
 #include <commproto/service/Dispatch.h>
 #include <SocketImpl.h>
 #include <commproto/logger/Logging.h>
-#include <conio.h>
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/messages/MessageMapper.h>
@@ -143,7 +142,6 @@ int main(int argc, const char * argv[])
 			counter = 0;
 		}
 	}
-	socket->close();
-	_getch();
+    socket->shutdown();
 	return 0;
 }

@@ -7,8 +7,8 @@ namespace commproto
 	namespace logger
 	{
 		FileLogger::FileLogger(const std::string& fileName_, const bool alwaysFlush_)
-			: alwaysFlush{ alwaysFlush_ }
-			, fileName{ fileName_ }
+            : fileName{ fileName_ }
+            , alwaysFlush{ alwaysFlush_ }
 		{
 		}
 
@@ -46,11 +46,17 @@ namespace commproto
 
 		std::string FileLogger::getTimestamp()
 		{
-			std::stringstream stream;
-			auto t = std::time(nullptr);
-			auto tm = *std::localtime(&t);
-			stream << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S");
-			return  stream.str();
+            time_t rawtime;
+            struct tm * timeinfo;
+            char buffer[80];
+
+            time (&rawtime);
+            timeinfo = localtime(&rawtime);
+
+            strftime(buffer,sizeof(buffer),"%d-%m-%Y %H:%M:%S",timeinfo);
+            std::string str(buffer);
+
+            return str;
 		}
 
 		void FileLogger::open()

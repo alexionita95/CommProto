@@ -34,7 +34,7 @@ namespace sockets {
         virtual bool initClient(const std::string& addr, const uint32_t port) = 0;
 
         //initialize the socket as a server and bind it to [port]
-        virtual bool initServer(const uint32_t port) = 0;
+        virtual bool initServer(const std::string& addr, const uint32_t port) = 0;
 
         //block the thread until a connection is available, then accept it
         virtual SocketHandle acceptNext() = 0;
@@ -43,7 +43,7 @@ namespace sockets {
 		virtual bool connected() = 0;
 
 		//close the connection
-		virtual void close() = 0;
+        virtual void shutdown() = 0;
 
 		//set the timeout for socket operation
 		virtual void setTimeout(const uint32_t msec) = 0;

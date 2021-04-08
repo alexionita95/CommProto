@@ -2,7 +2,7 @@
 #define UX_CONTROLLERS_H
 #include <string>
 #include <map>
-#include <commproto/control/UiController.h>
+#include <commproto/control/UIController.h>
 
 namespace commproto
 {

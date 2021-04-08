@@ -7,9 +7,8 @@ elseif(WIN32)
 endif()
 
 if(DEFINED RPI)
-    add_compile_options(-std=c++11)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
-	SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
+    SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
     find_package(Threads REQUIRED)
 endif()
 
@@ -38,11 +37,10 @@ foreach(source IN LISTS PROJECT_SRC)
     source_group("${source_path_msvc}" FILES "${source}")
 endforeach()  
 
-
-target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue rapidjson)
-
-if(DEFINED RPI)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue rapidjson)
+elseif(DEFINED RPI)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ConcurrentQueue rapidjson)
 endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
@@ -54,5 +52,6 @@ message("DEPLOY LOCATION == ${ARDUINO_LIB_DEPLOY_LOCATION}")
 add_custom_target(DEPLOY DEPENDS ${PROJECT_NAME} EspApp
 	COMMAND python "${CMAKE_SOURCE_DIR}/makelib/makelib.py" "${CMAKE_SOURCE_DIR}" "${ARDUINO_LIB_DEPLOY_LOCATION}\\DeviceWrapper")
 
-
-add_subdirectory(test)
+if(WIN32)
+    add_subdirectory(test)
+endif()

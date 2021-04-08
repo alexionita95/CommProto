@@ -5,6 +5,8 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <commproto/logger/Logging.h>
+#include <errno.h>
 
 namespace commproto {
 namespace sockets {
@@ -22,7 +24,7 @@ namespace sockets {
     {
     }
 
-    uint32_t SocketImpl::sendBytes(const Message& message)
+    int32_t SocketImpl::sendBytes(const Message& message)
     {
         if (socketHandle < 0 || !isInitialized) {
             return 0;
@@ -30,7 +32,7 @@ namespace sockets {
         return write(socketHandle, message.data(), message.size());
     }
 
-    uint32_t SocketImpl::receive(Message& message, const uint32_t size)
+    int32_t SocketImpl::receive(Message& message, const uint32_t size)
     {
         if (socketHandle < 0 || !isInitialized) {
             return 0;
@@ -39,13 +41,47 @@ namespace sockets {
         return read(socketHandle, message.data(), size);
     }
 
-    char SocketImpl::readByte()
+    int SocketImpl::readByte()
     {
         if (socketHandle < 0 || !isInitialized) {
             return 0;
         }
         char output;
-        return read(socketHandle, &output, 1);
+        read(socketHandle, &output, 1);
+        return output;
+    }
+
+    int SocketImpl::sendByte(const char byte)
+    {
+        if (socketHandle < 0 || !isInitialized) {
+            return 0;
+        }
+        return write(socketHandle, &byte,1);
+    }
+
+    bool SocketImpl::connected()
+    {
+        //TODO: implement me
+        return true;
+    }
+
+    void SocketImpl::shutdown()
+    {
+        if (socketHandle < 0 || !isInitialized) {
+            return;
+        }
+        close(socketHandle);
+        socketHandle = 0;
+    }
+
+    void SocketImpl::setTimeout(const uint32_t msec)
+    {
+        //TODO: implement me
+    }
+
+    SocketImpl::~SocketImpl()
+    {
+        shutdown();
     }
 
     bool SocketImpl::initClient(const std::string& addr, uint32_t port)
@@ -74,11 +110,15 @@ namespace sockets {
             server->h_length);
         serv_addr.sin_port = port;
         // try to connect
-        isInitialized = connect(socketHandle, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) >= 0;
+        isInitialized = connect(socketHandle, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0;
+        if(!isInitialized)
+        {
+            LOG_ERROR("Error: %s(code:%d)",strerror(errno),errno);
+        }
         return isInitialized;
     }
 
-    bool SocketImpl::initServer(uint32_t port)
+    bool SocketImpl::initServer(const std::string & addr_s, uint32_t port)
     {
         if (socketMode != Mode::Unassigned) {
             return false;
@@ -91,11 +131,19 @@ namespace sockets {
         //make our address data
         struct sockaddr_in serv_addr;
         serv_addr.sin_family = AF_INET;
-        serv_addr.sin_addr.s_addr = INADDR_ANY;
+        struct hostent* addr = gethostbyname(addr_s.c_str());
+        bcopy((char*)addr->h_addr,
+            (char*)&serv_addr.sin_addr.s_addr,
+            addr->h_length);
+        //serv_addr.sin_addr.s_addr = INADDR_ANY;
         serv_addr.sin_port = port;
-
+        LOG_INFO("server port????:%d",serv_addr.sin_port);
         //attempt to bind to port
-        isInitialized = bind(socketHandle, (struct sockaddr*)(&serv_addr), sizeof(serv_addr));
+        isInitialized = (bind(socketHandle, (struct sockaddr*)(&serv_addr), sizeof(serv_addr))==0);
+        if(!isInitialized)
+        {
+            LOG_ERROR("Error: %s(code:%d)",strerror(errno),errno);
+        }
         return isInitialized;
     }
 
@@ -114,7 +162,7 @@ namespace sockets {
         return SocketHandle(new SocketImpl(acceptedHandle, Mode::Client, true));
     }
 
-    uint32_t SocketImpl::pollSocket()
+    int32_t SocketImpl::pollSocket()
     {
         if (socketHandle < 0 || !isInitialized) {
             return 0;

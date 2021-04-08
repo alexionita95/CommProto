@@ -16,13 +16,19 @@ namespace sockets {
     public:
         SocketImpl();
 
-        uint32_t sendBytes(const Message& message) override;
-        uint32_t receive(Message& message, uint32_t size) override;
+        int32_t sendBytes(const Message& message) override;
+        int32_t receive(Message& message, uint32_t size) override;
         bool initClient(const std::string& addr, const uint32_t port) override;
-        bool initServer(const uint32_t port) override;
+        bool initServer(const std::string& addr, const uint32_t port) override;
         SocketHandle acceptNext() override; // blocking
-        uint32_t pollSocket() override;
-        char readByte() override;
+        int32_t pollSocket() override;
+        int readByte() override;
+        int sendByte(const char byte) override;
+        bool connected() override;
+        void shutdown() override;
+        void setTimeout(const uint32_t msec) override;
+
+        ~SocketImpl();
 
     private:
         //returns a ready socket from acceptNext()

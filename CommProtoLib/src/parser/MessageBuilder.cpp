@@ -25,6 +25,7 @@ namespace commproto
 				case State::ReadingHandshake:
 				{
 					ptrSize = byte;
+                    LOG_INFO("Pointer size on target system: %d",ptrSize);
 					state = State::ReadingPacketSize;
 					expectedReadSize = sizeof(uint32_t);
 				}

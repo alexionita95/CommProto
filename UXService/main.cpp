@@ -10,10 +10,10 @@
 #include <commproto/config/ConfigParser.h>
 #include <commproto/logger/FileLogger.h>
 
-#include "HTTPServer.h"
+#include "HttpServer.h"
 #include "UxDelegatorProvider.h"
 
-struct ConfigValues
+namespace ConfigValues
 {
 	static constexpr const char * const serverAddr = "serverAddr";
 	static constexpr const char * const defaultServerAddr = "localhost";
@@ -40,9 +40,18 @@ void websiteLoop(int argc, char * argv[], const uint32_t port, const commproto::
 }
 
 int main(int argc, char * argv[])
-{
+{ 
+    const char * configFile;
+    if(argc <= 1)
+    {
+        configFile = "uxConfig.cfg";
+    }
+    else
+    {
+        configFile = argv[1];
+    }
 
-	rapidjson::Document doc = config::ConfigParser("uxConfig.cfg").get();
+    rapidjson::Document doc = commproto::config::ConfigParser(configFile).get();
 
 	const uint32_t dispatchPort = config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	const char * const dispatchAddr = config::getValueOrDefault(doc, ConfigValues::serverAddr, ConfigValues::defaultServerAddr);
@@ -101,12 +110,15 @@ int main(int argc, char * argv[])
 
 	parser::MessageBuilderHandle builder = std::make_shared<parser::MessageBuilder>(socket, channelDelegator);
 
+
+    LOG_INFO("Waiting to acquire ID");
+
 	//wait until we are sure we have an ID
 	do
 	{
 		builder->pollAndRead();
 	} while (SenderMapping::getId() == 0);
-
+    LOG_INFO("Acquired ID: %d",SenderMapping::getId());
 
 	service::SubscribeMessage sub(registerSubId, "");
 	socket->sendBytes(service::SubscribeSerializer::serialize(std::move(sub)));
