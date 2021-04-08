@@ -28,7 +28,7 @@ namespace sockets {
 	    int32_t sendBytes(const Message& message) override;
 	    int32_t receive(Message& message, uint32_t size) override;
         bool initClient(const std::string& addr, const uint32_t port) override;
-        bool initServer(const uint32_t port) override;
+        bool initServer(const std::string& addr,const uint32_t port) override;
         SocketHandle acceptNext() override; // blocking
 	    int32_t pollSocket() override;
         int readByte() override;

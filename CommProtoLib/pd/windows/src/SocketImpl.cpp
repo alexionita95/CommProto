@@ -154,7 +154,7 @@ namespace commproto {
 			return true;
 		}
 
-		bool SocketImpl::initServer(uint32_t port)
+		bool SocketImpl::initServer(const std::string& addr, uint32_t port)
 		{
 			if (socketMode != Mode::Unassigned || !isWsaStarted)
 			{
@@ -165,15 +165,17 @@ namespace commproto {
 			struct addrinfo hints;
 			struct addrinfo *result;
 			ZeroMemory(&hints, sizeof(hints));
+
 			hints.ai_family = AF_INET;
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_protocol = IPPROTO_TCP;
 			hints.ai_flags = AI_PASSIVE;
+			hints.ai_addr;
 			std::stringstream stream;
 			stream << port;
 
 			// resolve our own address
-			int iResult = getaddrinfo(NULL, stream.str().c_str(), &hints, &result);
+			int iResult = getaddrinfo(addr.c_str(), stream.str().c_str(), &hints, &result);
 			if (iResult != 0) {
 				return false;
 			}
