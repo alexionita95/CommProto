@@ -6,6 +6,13 @@ elseif(WIN32)
     SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/windows")
 endif()
 
+if(DEFINED RPI)
+    add_compile_options(-std=c++11)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+	SET(PD_BASE "${PROJECT_SOURCE_DIR}/pd/unix")
+    find_package(Threads REQUIRED)
+endif()
+
 SET(PD_INTERFACE_FOLDER "${PD_BASE}/interface")
 SET(PD_SRC_FOLDER "${PD_BASE}/src")
 
@@ -33,6 +40,10 @@ endforeach()
 
 
 target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue rapidjson)
+
+if(DEFINED RPI)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})
 include_directories(interface)

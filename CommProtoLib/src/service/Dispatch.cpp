@@ -108,7 +108,6 @@ namespace commproto {
 
 		Dispatch::~Dispatch()
 		{
-			LOG_INFO("");
 			checkAlive = false;
 			checkAliveThread->join();
 			for (auto connection : connections)
