@@ -14,6 +14,6 @@ set(INSTALL_DIR "${CMAKE_BINARY_DIR}/../install")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR})
 
-install(FILES config/dispatchConfig.cfg DESTINATION ${INSTALL_DIR})
+install(FILES config/dispatch.cfg DESTINATION ${INSTALL_DIR})
 
 ##set_executable_path(${PROJECT_NAME}) 

@@ -11,6 +11,16 @@
 #include <commproto/control/ParserDelegatorUtils.h>
 #include <commproto/control/Label.h>
 #include <sstream>
+#include "commproto/config/ConfigParser.h"
+
+namespace ConfigValues
+{
+	static constexpr const char * const serverPort = "serverPort";
+	static constexpr const int32_t defaultServerPort = 25565;
+
+	static constexpr const char * const serverAddress = "serverAddress";
+	static constexpr const char * const serverAddressDefault = "127.0.0.1";
+}
 
 
 using namespace commproto;
@@ -47,9 +57,26 @@ private:
 
 int main(int argc, const char * argv[])
 {
+
+	const char * configFile;
+	if (argc <= 1)
+	{
+		configFile = "endpoint.cfg";
+	}
+	else
+	{
+		configFile = argv[1];
+	}
+
+	rapidjson::Document doc = commproto::config::ConfigParser(configFile).get();
+
+	const int32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
+	const char * const address = commproto::config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
+
+	LOG_INFO("Attempting to connect to %s:%d", address, port);
 	SenderMapping::InitializeName("Endpoint::Simulator");
 	sockets::SocketHandle socket = std::make_shared<sockets::SocketImpl>();
-	if (!socket->initClient("localhost", 25565))
+	if (!socket->initClient(address, port))
 	{
 		LOG_ERROR("A problem occurred while starting endpoint, shutting down...");
 		return 1;

@@ -44,7 +44,7 @@ int main(int argc, char * argv[])
     const char * configFile;
     if(argc <= 1)
     {
-        configFile = "uxConfig.cfg";
+        configFile = "uxservice.cfg";
     }
     else
     {

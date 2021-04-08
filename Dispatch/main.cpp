@@ -26,7 +26,7 @@ int main(int argc, const char * argv[])
     const char * configFile;
     if(argc <= 1)
     {
-        configFile = "dispatchConfig.cfg";
+        configFile = "dispatch.cfg";
     }
     else
     {
