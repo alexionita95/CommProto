@@ -108,7 +108,7 @@ namespace sockets {
         bcopy((char*)server->h_addr,
             (char*)&serv_addr.sin_addr.s_addr,
             server->h_length);
-        serv_addr.sin_port = port;
+        serv_addr.sin_port = htons(port);
         // try to connect
         isInitialized = connect(socketHandle, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0;
         if(!isInitialized)
@@ -136,7 +136,7 @@ namespace sockets {
             (char*)&serv_addr.sin_addr.s_addr,
             addr->h_length);
         //serv_addr.sin_addr.s_addr = INADDR_ANY;
-        serv_addr.sin_port = port;
+        serv_addr.sin_port = htons(port);
         //attempt to bind to port
         isInitialized = (bind(socketHandle, (struct sockaddr*)(&serv_addr), sizeof(serv_addr))==0);
         if(!isInitialized)
