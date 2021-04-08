@@ -137,7 +137,6 @@ namespace sockets {
             addr->h_length);
         //serv_addr.sin_addr.s_addr = INADDR_ANY;
         serv_addr.sin_port = port;
-        LOG_INFO("server port????:%d",serv_addr.sin_port);
         //attempt to bind to port
         isInitialized = (bind(socketHandle, (struct sockaddr*)(&serv_addr), sizeof(serv_addr))==0);
         if(!isInitialized)

@@ -19,10 +19,10 @@ namespace ConfigValues
 	static constexpr const char * const defaultServerAddr = "localhost";
 
 	static constexpr const char * const serverPort = "serverPort";
-	static constexpr const uint32_t defaultServerPort = 25565;
+    static constexpr const int32_t defaultServerPort = 25565;
 
 	static constexpr const char * const httpPort = "httpPort";
-	static constexpr const uint32_t defaultHttpPort = 9090;
+    static constexpr const int32_t defaultHttpPort = 9090;
 
 	static constexpr const char * const channelName = "channelName";
 	static constexpr const char * const defaultChannelName = "Service::UX";
@@ -53,9 +53,9 @@ int main(int argc, char * argv[])
 
     rapidjson::Document doc = commproto::config::ConfigParser(configFile).get();
 
-	const uint32_t dispatchPort = config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
+    const int32_t dispatchPort = config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	const char * const dispatchAddr = config::getValueOrDefault(doc, ConfigValues::serverAddr, ConfigValues::defaultServerAddr);
-	const uint32_t httpPort = config::getValueOrDefault(doc, ConfigValues::httpPort, ConfigValues::defaultHttpPort);
+    const int32_t httpPort = config::getValueOrDefault(doc, ConfigValues::httpPort, ConfigValues::defaultHttpPort);
 	const char * const name = config::getValueOrDefault(doc, ConfigValues::channelName, ConfigValues::defaultChannelName);
 	bool logToConsole = config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
 

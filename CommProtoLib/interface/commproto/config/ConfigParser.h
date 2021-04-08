@@ -27,7 +27,15 @@ namespace commproto
 		template <>
 		inline bool getValueOrDefault(rapidjson::Document & doc, const char* const name, const bool& defaultValue)
 		{
-			if (!doc.HasMember(name) || !doc[name].IsBool())
+            if(doc.HasParseError() || !doc.IsObject())
+            {
+                return defaultValue;
+            }
+            if (!doc.HasMember(name))
+            {
+                return defaultValue;
+            }
+            if (!doc[name].IsBool())
 			{
 				return defaultValue;
 			}
@@ -36,17 +44,36 @@ namespace commproto
 
 		template <>
 		inline int32_t getValueOrDefault(rapidjson::Document & doc, const char* const name, const int32_t& defaultValue)
-		{
-			if (!doc.HasMember(name) && !doc.IsInt())
+        {
+            if(doc.HasParseError() || !doc.IsObject())
+            {
+                return defaultValue;
+            }
+
+            if (!doc.HasMember(name))
 			{
 				return defaultValue;
 			}
+
+            if(!doc[name].IsInt())
+            {
+                return defaultValue;
+            }
+
 			return doc[name].GetInt();
 		}
 
 	    inline const char* getValueOrDefault(rapidjson::Document & doc, const char* const name, const char * defaultValue)
 		{
-			if (!doc.HasMember(name) && !doc.IsString())
+            if(doc.HasParseError() || !doc.IsObject())
+            {
+                return defaultValue;
+            }
+            if (!doc.HasMember(name))
+            {
+                return defaultValue;
+            }
+            if (!doc[name].IsString())
 			{
 				return defaultValue;
 			}

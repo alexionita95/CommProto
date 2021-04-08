@@ -7,8 +7,8 @@
 
 namespace ConfigValues
 {
-	static constexpr const char * const serverPort = "serverPort";
-	static constexpr const uint32_t defaultServerPort = 25565;
+    static constexpr const char * const serverPort = "port";
+    static constexpr const int32_t defaultServerPort = 25565;
 
     static constexpr const char * const serverAddress = "serverAddress";
     static constexpr const char * const serverAddressDefault = "127.0.0.1";
@@ -35,7 +35,7 @@ int main(int argc, const char * argv[])
 
     rapidjson::Document doc = commproto::config::ConfigParser(configFile).get();
 
-	const uint32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
+    const int32_t port = commproto::config::getValueOrDefault(doc, ConfigValues::serverPort, ConfigValues::defaultServerPort);
 	bool logToConsole = commproto::config::getValueOrDefault(doc, ConfigValues::logToConsole, ConfigValues::logToConsoleDefault);
     const char * const address = commproto::config::getValueOrDefault(doc, ConfigValues::serverAddress, ConfigValues::serverAddressDefault);
 
@@ -50,6 +50,7 @@ int main(int argc, const char * argv[])
 	commproto::service::Dispatch dsp;
 	commproto::sockets::SocketHandle socket = std::make_shared<commproto::sockets::SocketImpl>();
 
+    LOG_INFO("Dispatch server starting on %s:%d...",address,port);
     if (!socket->initServer(address,port))
 	{
 		LOG_ERROR("A problem occurred while starting dispatch service, shutting down...");
@@ -59,7 +60,7 @@ int main(int argc, const char * argv[])
 
 	dsp.startCheckingConnections();
 
-    LOG_INFO("Dispatch server started on port %d, wating for new connection...",port);
+    LOG_INFO("Dispatch server started on %s:%d, wating for new connection...",address,port);
 
 	while (true) {
 		commproto::sockets::SocketHandle newCon = socket->acceptNext();
