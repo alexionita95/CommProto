@@ -125,6 +125,10 @@ int main(int argc, const char * argv[])
 		}
 	});
 
+	auto notif = uiFactory->addNotification("HELLO I AM NOTIFICATION");
+	notif->addOption("o... okay");
+	notif->addOption("uh... cool?");
+
 	uint32_t tempId = uiFactory->addLabel("Temperature", "0.00 C");
 
 	control::endpoint::UIControllerHandle controller = uiFactory->build();
@@ -152,7 +156,7 @@ int main(int argc, const char * argv[])
 	int counter = 0;
 	int updateCounter = 2000;
 	float temp = 0.00f;
-
+	bool notifSent = false;
 	while (true)
 	{
 		builder->pollAndReadTimes(100);
@@ -167,6 +171,11 @@ int main(int argc, const char * argv[])
 			tempStr << temp << " C";
 			std::static_pointer_cast<control::endpoint::Label>(controller->getControl(tempId))->setText(tempStr.str());
 			counter = 0;
+		}
+		if(!notifSent && temp >= 0.1)
+		{
+			controller->displayNotification(notif->getId());
+			notifSent = true;
 		}
 	}
     socket->shutdown();

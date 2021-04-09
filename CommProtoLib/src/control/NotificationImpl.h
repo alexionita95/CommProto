@@ -20,7 +20,7 @@ namespace commproto
 			using NotificationSerializer = messages::TriplePropertySerializer<uint32_t, std::string, std::vector<std::string>>;
 			using NotificationParser = messages::TriplePropertyParser<uint32_t, std::string, std::vector<std::string>>;
 
-			class NotificationHandler : parser::Handler
+			class NotificationHandler : public parser::Handler
 			{
 			public:
 				NotificationHandler(const ux::UIControllerHandle & controller_) : controller{ controller_ } {}
@@ -35,7 +35,7 @@ namespace commproto
 			using DisplayNotificationParser = messages::SinglePropertyParser<uint32_t>;
 
 
-			class DisplayNotificationHandler : parser::Handler
+			class DisplayNotificationHandler : public  parser::Handler
 			{
 			public:
 				DisplayNotificationHandler(const ux::UIControllerHandle & controller_) : controller{ controller_ } {}
@@ -75,7 +75,7 @@ namespace commproto
 			using NotificationResponseParser = messages::DoublePropertyParser<uint32_t, std::string>;
 
 
-			class NotificationResponseHandler : parser::Handler
+			class NotificationResponseHandler : public parser::Handler
 			{
 			public:
 				NotificationResponseHandler(const endpoint::UIControllerHandle & controller_) : controller{ controller_ } {}
@@ -108,6 +108,10 @@ namespace commproto
 			};
 		}
 	}
+
+	DEFINE_DATA_TYPE(control::endpoint::NotificationMessage);
+	DEFINE_DATA_TYPE(control::endpoint::DisplayNotificationMessage);
+	DEFINE_DATA_TYPE(control::ux::NotificationResponseMessage);
 }
 
 #endif //NOTIFICATION_IMPL_H

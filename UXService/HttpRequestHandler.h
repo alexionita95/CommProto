@@ -28,9 +28,9 @@ public:
 
 private:
 	void handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const;
-	void handleButton(KVMap&& map);
-	void handleToggle(KVMap&& map);
-	void parseKVMap(KVMap&& map);
+	void handleButton(KVMap&& map) const;
+	void handleToggle(KVMap&& map) const;
+	void parseKVMap(KVMap&& map) const;
 	commproto::control::ux::UxControllersHandle controllers;
 
 };

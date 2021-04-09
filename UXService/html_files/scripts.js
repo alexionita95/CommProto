@@ -21,13 +21,44 @@ function postButton(connection,button)
 }
 
 var updateURI = "update";
-
 function forceUpdateUI()
 {
     updateURI = "update-force";
     updateUI();
     updateURI = "update";
 }    
+
+var notificationURI = "notification";
+function forceNotifications()
+{
+    updateURI = "notification-force";
+    getNotifications();
+    updateURI = "notification";
+}  
+
+function getNotifications()
+{
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() 
+    {
+        if (this.readyState == 4)
+        {
+            if(this.status == 200)
+            {
+                if(xhttp.responseText == '<null>')
+                {
+                } 
+                else 
+                {
+                    console.log(xhttp.responseText);
+                }
+            }
+        } 
+        
+    };  
+    xhttp.open('POST', notificationURI, true);
+    xhttp.send();
+}
 
 function updateUI()
 {
@@ -40,7 +71,6 @@ function updateUI()
             {
                 if(xhttp.responseText == '<null>')
                 {
-                    console.log('no update');
                 } 
                 else 
                 {
@@ -55,4 +85,6 @@ function updateUI()
     xhttp.send();
 }
 forceUpdateUI();
-var intervalId = setInterval(function() {updateUI();}, 1000);
+forceNotifications();
+var updateUiId = setInterval(function() {updateUI();}, 1000);
+var notificationsId = setInterval(function() {getNotifications();}, 1000);

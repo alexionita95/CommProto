@@ -8,8 +8,7 @@
 #include "LabelImpl.h"
 #include "NotificationImpl.h"
 #include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
+#include <commproto/utils/JSONUtils.h>
 
 namespace commproto
 {
@@ -107,11 +106,7 @@ namespace commproto
 
 				obj.AddMember("options", arr, alloc);
 
-				rapidjson::StringBuffer sb;
-				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-				obj.Accept(writer);
-
-				return sb.GetString();
+				return JSONUtils::stringify(obj);
 
 
 			}

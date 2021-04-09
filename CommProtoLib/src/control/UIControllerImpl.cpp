@@ -4,8 +4,7 @@
 #include <commproto/logger/Logging.h>
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
-#include <rapidjson/stringbuffer.h>
-#include <rapidjson/writer.h>
+#include <commproto/utils/JSONUtils.h>
 
 namespace commproto
 {
@@ -34,6 +33,11 @@ namespace commproto
 			{
 				Message result;
 				for (auto it = controls.begin(); it != controls.end(); ++it)
+				{
+					Message controlSerialized = it->second->serialize();
+					result.insert(result.end(), controlSerialized.begin(), controlSerialized.end());
+				}
+				for (auto it = notifications.begin(); it != notifications.end(); ++it)
 				{
 					Message controlSerialized = it->second->serialize();
 					result.insert(result.end(), controlSerialized.begin(), controlSerialized.end());
@@ -269,10 +273,7 @@ namespace commproto
 				{
 					return std::string{};
 				}
-				rapidjson::StringBuffer sb;
-				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-				arr.Accept(writer);
-				return sb.GetString();
+				return JSONUtils::stringify(arr);
 			}
 		}
 	}

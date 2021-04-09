@@ -7,6 +7,9 @@
 #include <fstream>
 #include <commproto/control/Toggle.h>
 #include <Poco/Path.h>
+#include <rapidjson/fwd.h>
+#include <rapidjson/document.h>
+#include "commproto/utils/JSONUtils.h"
 
 const std::map<std::string, ControlType> stringMap = {
 	{ "button",ControlType::Button },
@@ -36,7 +39,7 @@ void UxRequestHandler::handleBase(const KVMap& map, std::string& connection, uin
 	}
 }
 
-void UxRequestHandler::handleButton(KVMap&& map)
+void UxRequestHandler::handleButton(KVMap&& map) const
 {
 	std::string connection = "";
 	uint32_t controlId = 0;
@@ -56,7 +59,7 @@ void UxRequestHandler::handleButton(KVMap&& map)
 	button->press();
 }
 
-void UxRequestHandler::parseKVMap(KVMap&& map)
+void UxRequestHandler::parseKVMap(KVMap&& map) const
 {
 	auto type = map.find("controlType");
 	if (type == map.end())
@@ -88,6 +91,57 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 	if (req.getMethod().compare("POST") == 0)
 	{
 		std::string url = req.getURI();
+
+		if(url.find("/notification") == 0)
+		{
+			bool update = url.find("force") != std::string::npos;
+			auto ctrls = controllers->getControllers();
+
+			if(!update)
+			{
+				for(auto it = ctrls.begin(); it != ctrls.end(); ++it)
+				{
+					if(it->second->hasNotifications())
+					{
+						update = true;
+						break;
+					}
+				}
+			}
+
+			if(!update)
+			{
+				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+				resp.send() << "<null>";
+				return;
+			}
+
+			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+			std::ostream& out = resp.send();
+			resp.setContentType("application/json");
+
+			rapidjson::Document doc;
+			auto & alloc = doc.GetAllocator();
+			doc.SetArray();
+
+			for (auto it = ctrls.begin(); it != ctrls.end(); ++it)
+			{
+				if(it->second->hasNotifications())
+				{
+					rapidjson::Document notif;
+					notif.Parse(it->second->getNotifications().c_str());
+					if (notif.IsArray())
+					{
+						doc.PushBack(notif.GetArray(), alloc);
+					}
+				}
+			}
+			std::string temp = commproto::JSONUtils::stringify(doc);
+			out << temp;
+
+
+		}
+
 		if (url.find("/update") == 0)
 		{
 			bool update = controllers->hasUpdate() || (url.find("force")!=std::string::npos);
@@ -174,7 +228,7 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 	}
 }
 
-void UxRequestHandler::handleToggle(KVMap&& map)
+void UxRequestHandler::handleToggle(KVMap&& map) const
 {
 	std::string connection = "";
 	uint32_t controlId = 0;
