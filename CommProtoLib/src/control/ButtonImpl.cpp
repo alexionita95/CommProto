@@ -42,7 +42,7 @@ namespace commproto
 			void ButtonImpl::press()
 			{
 				Message msg = PressButtonSerializer::serialize(std::move(PressButtonMessage(pressId, id)));
-				generator->send(msg);
+				generator->send(std::move(msg));
 			}
 
 			std::string ButtonImpl::getUx()

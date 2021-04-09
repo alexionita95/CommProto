@@ -2,8 +2,8 @@
 #include <commproto/logger/Logging.h>
 #include <commproto/service/ParserDelegatorFactory.h>
 #include <commproto/endpoint/EndpointChains.h>
+#include <commproto/messages/KeepAlive.h>
 #include "../parser/TypeMapperImpl.h"
-#include "commproto/messages/KeepAlive.h"
 
 namespace commproto {
 	namespace service {

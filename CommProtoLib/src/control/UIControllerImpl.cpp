@@ -2,6 +2,10 @@
 #include <sstream>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/logger/Logging.h>
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace commproto
 {
@@ -75,6 +79,37 @@ namespace commproto
 				}
 				socket->sendBytes(msg);
 			}
+
+			void UIControllerImpl::addNotification(const NotificationHandle& notification)
+			{
+				const uint32_t id = notification->getId();
+				if(notifications.find(id) != notifications.end())
+				{
+					return;
+				}
+
+				notifications.emplace(id, notification);
+			}
+
+			NotificationHandle UIControllerImpl::getNotification(const uint32_t id) const
+			{
+				auto it = notifications.find(id);
+				if(it == notifications.end())
+				{
+					return nullptr;
+				}
+				return it->second;
+			}
+
+			void UIControllerImpl::displayNotification(const uint32_t id) const
+			{
+				auto it = notifications.find(id);
+				if (it == notifications.end())
+				{
+					return;
+				}
+				socket->sendBytes(it->second->serializeDisplay());
+			}
 		}
 
 		namespace ux
@@ -87,6 +122,7 @@ namespace commproto
 				, socket{ socket_ }
 				, connectionId{ id }
 				, update{ true }
+				, hasNotif{false}
 			{
 			}
 
@@ -167,6 +203,76 @@ namespace commproto
 			void UIControllerImpl::notifyUpdate()
 			{
 				update = true;
+			}
+
+			void UIControllerImpl::addNotification(const NotificationHandle& notification)
+			{
+				const uint32_t id = notification->getId();
+				if (notifications.find(id) != notifications.end())
+				{
+					return;
+				}
+
+				notifications.emplace(id, notification);
+			}
+
+			NotificationHandle UIControllerImpl::getNotification(const uint32_t id) const
+			{
+				auto it = notifications.find(id);
+				if (it == notifications.end())
+				{
+					return nullptr;
+				}
+				return it->second;
+			}
+
+			void UIControllerImpl::displayNotification(const uint32_t id)
+			{
+				//TODO: implement
+				auto it = notifications.find(id);
+				if (it == notifications.end())
+				{
+					return;
+				}
+				hasNotif = true;
+				pendingNotifications.enqueue(id);
+								
+			}
+
+			bool UIControllerImpl::hasNotifications() const
+			{
+				return hasNotif;
+			}
+
+			std::string UIControllerImpl::getNotifications()
+			{
+				rapidjson::Value arr;
+				arr.SetArray();
+				uint32_t id = 0;
+				while(pendingNotifications.try_dequeue(id))
+				{
+					auto it = notifications.find(id);
+					if(it == notifications.end())
+					{
+						continue;
+					}
+					rapidjson::Document notif;
+					notif.Parse(it->second->getUx().c_str());
+					if(!notif.IsObject())
+					{
+						continue;
+					}
+					arr.PushBack(notif.GetObject(),notif.GetAllocator());
+				}
+				hasNotif = false;
+				if (!arr.Size()) 
+				{
+					return std::string{};
+				}
+				rapidjson::StringBuffer sb;
+				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+				arr.Accept(writer);
+				return sb.GetString();
 			}
 		}
 	}

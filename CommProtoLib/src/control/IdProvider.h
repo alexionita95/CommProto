@@ -6,6 +6,7 @@
 #include "ButtonImpl.h"
 #include "ToggleImpl.h"
 #include "LabelImpl.h"
+#include "NotificationImpl.h"
 
 namespace commproto
 {
@@ -21,6 +22,8 @@ namespace commproto
 					, toggleId{ mapper->registerType<ToggleMessage>() }
 					, labelId{ mapper->registerType<LabelMessage>() }
 					, labelUpdateId{ mapper->registerType<LabelUpdateMessage>() }
+					, notificationId{ mapper->registerType<NotificationMessage>() }
+					, displayNotificationId{ mapper->registerType<DisplayNotificationMessage>() }
 				{
 
 				}
@@ -28,6 +31,8 @@ namespace commproto
 				const uint32_t toggleId;
 				const uint32_t labelId;
 				const uint32_t labelUpdateId;
+				const uint32_t notificationId;
+				const uint32_t displayNotificationId;
 			};
 
 		}
@@ -41,12 +46,14 @@ namespace commproto
 					: buttonId{ mapper->registerType<PressButtonMessage>() }
 					, toggleId{ mapper->registerType<ToggleMessage>() }
 					, sendToId{ mapper->registerType<service::SendToMessage>() }
+					, notificationResponseId{ mapper->registerType<NotificationResponseMessage>() }
 				{
 
 				}
 				const uint32_t buttonId;
 				const uint32_t toggleId;
 				const uint32_t sendToId;
+				const uint32_t notificationResponseId;
 			};
 		}
 

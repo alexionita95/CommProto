@@ -2,6 +2,7 @@
 #include "ButtonImpl.h"
 #include "UIControllerImpl.h"
 #include "IdProvider.h"
+#include "NotificationImpl.h"
 
 namespace commproto
 {
@@ -33,6 +34,13 @@ namespace commproto
 				uint32_t id = controller->reserveId();
 				controller->addControl(std::make_shared<LabelImpl>(name, id, controller->getIdProvider().labelId, controller->getIdProvider().labelUpdateId, text, controller));
 				return id;
+			}
+
+			NotificationHandle UIFactory::addNotification(const std::string& name) const
+			{
+				NotificationHandle notif = std::make_shared<NotificationImpl>(name, controller->reserveId(), controller->getIdProvider().notificationId,controller->getIdProvider().displayNotificationId);
+				controller->addNotification(notif);
+				return notif;
 			}
 
 			UIControllerHandle UIFactory::build() const

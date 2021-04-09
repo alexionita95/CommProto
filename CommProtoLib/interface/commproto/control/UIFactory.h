@@ -19,6 +19,7 @@ namespace commproto
 				uint32_t addButton(const std::string& name, const ButtonAction& action) const;
 				uint32_t addToggle(const std::string& name, const ToggleAction & action, const bool defaultState = false) const;
 				uint32_t addLabel(const std::string& name, const std::string & text) const;
+				NotificationHandle addNotification(const std::string& name) const;
 				UIControllerHandle build() const;
 			private:
 				UIControllerHandle controller;

@@ -6,6 +6,10 @@
 #include <sstream>
 #include "ToggleImpl.h"
 #include "LabelImpl.h"
+#include "NotificationImpl.h"
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace commproto
 {
@@ -24,14 +28,14 @@ namespace commproto
 				template <typename ControlType>
 				std::string generate(const ControlType& control) const;
 
-				void send(Message msg) const;
+				void send(Message && msg) const;
 				void notifyUpdate() const;
 			protected:
 				UIController& manager;
 
 			};
 
-			inline void Generator::send(Message msg) const
+			inline void Generator::send(Message&& msg) const
 			{
 				manager.send(msg);
 			}
@@ -70,7 +74,7 @@ namespace commproto
 				sstream << "</div>";
 				return sstream.str();
 			}
-
+			 
 			template <>
 			inline std::string Generator::generate(const LabelImpl& control) const
 			{
@@ -78,6 +82,40 @@ namespace commproto
 				sstream <<"<span class=\"c_label\">" << control.getName() << ": "<< control.getText() << "</span>";
 				return sstream.str();
 			}
+
+
+			template <>
+			inline std::string Generator::generate(const NotificationImpl& control) const
+			{
+				
+				rapidjson::Document obj;
+				auto &alloc = obj.GetAllocator();
+
+				rapidjson::Value connectionId(std::to_string(manager.getConnectionId()).c_str(), alloc);
+				obj.AddMember("connection", connectionId, alloc);
+
+				rapidjson::Value notifId(std::to_string(control.getId()).c_str(),alloc);
+				obj.AddMember("id", notifId, alloc);
+
+				std::vector<std::string> options = control.getOptions();
+				rapidjson::Value arr;
+				arr.SetArray();
+				for(auto str: options)
+				{
+					arr.PushBack(rapidjson::Value{}.SetString(str.c_str(),str.length()), alloc);
+				}
+
+				obj.AddMember("options", arr, alloc);
+
+				rapidjson::StringBuffer sb;
+				rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+				obj.Accept(writer);
+
+				return sb.GetString();
+
+
+			}
+
 
 			using GeneratorHandle = std::shared_ptr<Generator>;
 		}
