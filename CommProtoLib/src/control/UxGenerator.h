@@ -7,8 +7,6 @@
 #include "ToggleImpl.h"
 #include "LabelImpl.h"
 #include "NotificationImpl.h"
-#include <rapidjson/document.h>
-#include <commproto/utils/JSONUtils.h>
 
 namespace commproto
 {
@@ -68,17 +66,17 @@ namespace commproto
 				sstream.str(std::string());
 
 				sstream << "<div class=\"toggle-switch\">";
-				sstream << control.getName() << " : <input type=\"checkbox\" id=\""<< controlIdString <<"\" onclick=\"postToggle(this, '"<< manager.getConnectionName() <<"', '"<< control.getId() <<"')\"" << (control.getState()?" checked>":" >");
-				sstream << "<label for=\""<< controlIdString <<"\"></label>";
+				sstream << control.getName() << " : <input type=\"checkbox\" id=\"" << controlIdString << "\" onclick=\"postToggle(this, '" << manager.getConnectionName() << "', '" << control.getId() << "')\"" << (control.getState() ? " checked>" : " >");
+				sstream << "<label for=\"" << controlIdString << "\"></label>";
 				sstream << "</div>";
 				return sstream.str();
 			}
-			 
+
 			template <>
 			inline std::string Generator::generate(const LabelImpl& control) const
 			{
 				std::stringstream sstream;
-				sstream <<"<span class=\"c_label\">" << control.getName() << ": "<< control.getText() << "</span>";
+				sstream << "<span class=\"c_label\">" << control.getName() << ": " << control.getText() << "</span>";
 				return sstream.str();
 			}
 
@@ -86,29 +84,34 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const NotificationImpl& control) const
 			{
+				std::stringstream stream;
 				
-				rapidjson::Document obj;
-				auto &alloc = obj.GetAllocator();
+				stream << "notification-" << manager.getConnectionName() << "-" << control.getId();
+				std::string notifId = stream.str();
 
-				rapidjson::Value connectionId(std::to_string(manager.getConnectionId()).c_str(), alloc);
-				obj.AddMember("connection", connectionId, alloc);
+				stream.clear();
+				stream.str(std::string());
 
-				rapidjson::Value notifId(std::to_string(control.getId()).c_str(),alloc);
-				obj.AddMember("id", notifId, alloc);
+				stream << "onclick = \"invoke(event)\"";
+				stream << "name='postNotification'";
+				stream << "connectionId=\"" << manager.getConnectionName() << "\"";
+				stream << "controlId=\"" << control.getId() << "\"";
+				stream << "elementId=\"" << notifId << "\"";
+				stream << "optionStr=\"";
+				std::string attributes = stream.str();
+				stream.clear();
+				stream.str(std::string());
 
-				std::vector<std::string> options = control.getOptions();
-				rapidjson::Value arr;
-				arr.SetArray();
-				for(auto str: options)
+				stream << "<div class=\"notification\" id=\"" << notifId << "\">";
+				stream << control.getName() << "<br>";
+				auto options = control.getOptions();
+				for(auto opt : options)
 				{
-					arr.PushBack(rapidjson::Value{}.SetString(str.c_str(),str.length()), alloc);
+					stream << "<button " << attributes << opt << "\" >" << opt << " </button>";
 				}
 
-				obj.AddMember("options", arr, alloc);
-
-				return JSONUtils::stringify(obj);
-
-
+				stream << "</div>";
+				return stream.str();
 			}
 
 

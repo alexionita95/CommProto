@@ -72,7 +72,7 @@ namespace commproto
 
 			std::string NotificationImpl::getUx()
 			{
-				return generator->generate(this);
+				return generator->generate(*this);
 			}
 
 			void NotificationImpl::execute(const std::string& option)

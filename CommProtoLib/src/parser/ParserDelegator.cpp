@@ -38,12 +38,19 @@ namespace commproto
 			auto it = idToParser.find(msgId);
 			if (it == idToParser.end())
 			{
-                LOG_WARNING("Could not find a parser for message id %d",msgId);
+				if (warnOnNoParser) {
+					LOG_WARNING("Could not find a parser for message id %d", msgId);
+				}
 				return false;
 			}
 			it->second->parse(std::move(stream));
 			return true;
 
+		}
+
+		void ParserDelegator::setNoParserWarining(const bool warning)
+		{
+			warnOnNoParser = warning;
 		}
 
 		void ParserDelegator::registerParserInternal(const std::string& typeName, const ParserHandle& parser)

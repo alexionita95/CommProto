@@ -11,7 +11,8 @@ enum class ControlType : uint8_t
 	Button = 0,
 	Slider,
 	Toggle,
-	Label
+	Label,
+	Notification
 };
 
 using KVMap = std::map<std::string, std::string>;
@@ -30,6 +31,7 @@ private:
 	void handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const;
 	void handleButton(KVMap&& map) const;
 	void handleToggle(KVMap&& map) const;
+	void handleNotification(KVMap && map) const;
 	void parseKVMap(KVMap&& map) const;
 	commproto::control::ux::UxControllersHandle controllers;
 

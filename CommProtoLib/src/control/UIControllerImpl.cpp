@@ -2,9 +2,6 @@
 #include <sstream>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/logger/Logging.h>
-#include <rapidjson/rapidjson.h>
-#include <rapidjson/document.h>
-#include <commproto/utils/JSONUtils.h>
 
 namespace commproto
 {
@@ -211,12 +208,12 @@ namespace commproto
 
 			void UIControllerImpl::addNotification(const NotificationHandle& notification)
 			{
-				const uint32_t id = notification->getId();
+				const uint32_t id = notification->getId();		
 				if (notifications.find(id) != notifications.end())
 				{
 					return;
 				}
-
+				LOG_INFO("Adding notification with id %d", id);
 				notifications.emplace(id, notification);
 			}
 
@@ -232,48 +229,49 @@ namespace commproto
 
 			void UIControllerImpl::displayNotification(const uint32_t id)
 			{
-				//TODO: implement
 				auto it = notifications.find(id);
 				if (it == notifications.end())
 				{
 					return;
 				}
+				std::lock_guard<std::mutex> lock(notificationMutex);
+				pendingNotifications.push_back(id);
 				hasNotif = true;
-				pendingNotifications.enqueue(id);
 								
 			}
 
-			bool UIControllerImpl::hasNotifications() const
+			bool UIControllerImpl::hasNotifications()
 			{
 				return hasNotif;
 			}
 
 			std::string UIControllerImpl::getNotifications()
 			{
-				rapidjson::Value arr;
-				arr.SetArray();
-				uint32_t id = 0;
-				while(pendingNotifications.try_dequeue(id))
+				std::stringstream stream;
+				std::lock_guard<std::mutex> lock(notificationMutex);
+				for(auto id : pendingNotifications)
 				{
 					auto it = notifications.find(id);
 					if(it == notifications.end())
 					{
 						continue;
 					}
-					rapidjson::Document notif;
-					notif.Parse(it->second->getUx().c_str());
-					if(!notif.IsObject())
-					{
-						continue;
-					}
-					arr.PushBack(notif.GetObject(),notif.GetAllocator());
+					stream << it->second->getUx();
 				}
 				hasNotif = false;
-				if (!arr.Size()) 
+				return stream.str();
+			}
+
+			void UIControllerImpl::dismissNotification(const uint32_t id)
+			{
+				std::lock_guard<std::mutex> lock(notificationMutex);
+				auto it = std::find(pendingNotifications.begin(), pendingNotifications.end(),id);
+				if(it == pendingNotifications.end())
 				{
-					return std::string{};
+					return;
 				}
-				return JSONUtils::stringify(arr);
+
+				pendingNotifications.erase(it);
 			}
 		}
 	}

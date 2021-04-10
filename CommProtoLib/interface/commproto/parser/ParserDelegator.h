@@ -22,6 +22,11 @@ namespace commproto
 		class ParserDelegator
 		{
 		public:
+			ParserDelegator()
+				:warnOnNoParser(true)
+			{
+				
+			}
 			virtual ~ParserDelegator() = default;
 			template <class T>
 			void registerParser(const ParserHandle & parser);
@@ -30,8 +35,8 @@ namespace commproto
 			std::map<std::string, uint32_t> getMappings() const;
 
 			virtual bool parse(Message & msg);
+			void setNoParserWarining(const bool warning);
 
-			
 
 		private:
 
@@ -39,6 +44,7 @@ namespace commproto
 			std::map<std::string, ParserHandle> nameToParser;
 			std::map<std::string, uint32_t> nameToId;
 			std::map<uint32_t, ParserHandle> idToParser;
+			bool warnOnNoParser;
 		};
 
 		template <class T>

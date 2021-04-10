@@ -105,12 +105,6 @@ int main(int argc, const char * argv[])
 
 	//delegator to parse incoming messages
 	auto uiFactory = std::make_shared<control::endpoint::UIFactory>("myUI", mapper, socket);
-	uiFactory->addButton("Toggle +/-", [&direction]()
-	{
-		LOG_INFO("MyButton has been pressed");
-		direction *= -1;
-
-	});
 
 	uiFactory->addToggle("Toggle increment 0.x/x.0", [&increment](bool state)
 	{
@@ -125,13 +119,24 @@ int main(int argc, const char * argv[])
 		}
 	});
 
-	auto notif = uiFactory->addNotification("HELLO I AM NOTIFICATION");
-	notif->addOption("o... okay");
-	notif->addOption("uh... cool?");
+	auto notif = uiFactory->addNotification("You just pressed the notification button.");
+	notif->addOption("Oh... okay?");
+	notif->setAction([](const std::string& option)
+	{
+		LOG_INFO("Generic notification response with option :\"%s\"", option.c_str());
+	});
+	control::endpoint::UIControllerHandle controller = uiFactory->build();
+
+	uiFactory->addButton("Send me a notification", [&direction, &controller, &notif]()
+	{
+		LOG_INFO("MyButton has been pressed");
+		controller->displayNotification(notif->getId());
+
+	});
+
 
 	uint32_t tempId = uiFactory->addLabel("Temperature", "0.00 C");
 
-	control::endpoint::UIControllerHandle controller = uiFactory->build();
 	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper, controller);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
 	parser::ParserDelegatorHandle delegator = endpoint::ParserDelegatorFactory::build(channelDelegator);
@@ -156,7 +161,7 @@ int main(int argc, const char * argv[])
 	int counter = 0;
 	int updateCounter = 2000;
 	float temp = 0.00f;
-	bool notifSent = false;
+	
 	while (true)
 	{
 		builder->pollAndReadTimes(100);
@@ -164,18 +169,14 @@ int main(int argc, const char * argv[])
 		++counter;
 		if (counter == updateCounter)
 		{
-			LOG_INFO("Updating temperature");
+			
 			temp += direction * increment;
+			
 			std::stringstream tempStr;
 			tempStr.precision(3);
 			tempStr << temp << " C";
 			std::static_pointer_cast<control::endpoint::Label>(controller->getControl(tempId))->setText(tempStr.str());
 			counter = 0;
-		}
-		if(!notifSent && temp >= 0.1)
-		{
-			controller->displayNotification(notif->getId());
-			notifSent = true;
 		}
 	}
     socket->shutdown();

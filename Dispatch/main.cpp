@@ -1,9 +1,13 @@
+#define PARSER_DELEGATOR_NO_WARNING
+
 #include <commproto/service/Dispatch.h>
 #include <SocketImpl.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/service/Connection.h>
 #include <commproto/config/ConfigParser.h>
 #include "commproto/logger/FileLogger.h"
+
+
 
 namespace ConfigValues
 {

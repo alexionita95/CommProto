@@ -21,6 +21,7 @@ namespace commproto {
 			, terminationId(0)
 		{
 			socket->sendByte(sizeof(void*));
+			delegator->setNoParserWarining(false);
 			channelMappingId = mapper->registerType<endpoint::ChannelMappingMessage>();
 			terminationId = mapper->registerType<endpoint::ChannelTerminationMessage>();
 

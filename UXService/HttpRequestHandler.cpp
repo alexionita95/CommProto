@@ -7,15 +7,14 @@
 #include <fstream>
 #include <commproto/control/Toggle.h>
 #include <Poco/Path.h>
-#include <rapidjson/fwd.h>
-#include <rapidjson/document.h>
-#include "commproto/utils/JSONUtils.h"
+#include <sstream>
 
 const std::map<std::string, ControlType> stringMap = {
 	{ "button",ControlType::Button },
 	{ "slider",ControlType::Slider },
 	{ "toggle",ControlType::Toggle },
-	{ "label",ControlType::Label }
+	{ "label",ControlType::Label },
+	{"notification",ControlType::Notification}
 };
 
 void UxRequestHandler::handleBase(const KVMap& map, std::string& connection, uint32_t& controlId) const
@@ -82,7 +81,10 @@ void UxRequestHandler::parseKVMap(KVMap&& map) const
 		handleToggle(std::move(map));
 		break;
 	case ControlType::Label: break;
-	default: ;
+	case ControlType::Notification:
+		handleNotification(std::move(map));
+		break;
+	default:;
 	}
 }
 
@@ -91,66 +93,45 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 	if (req.getMethod().compare("POST") == 0)
 	{
 		std::string url = req.getURI();
-
-		if(url.find("/notification") == 0)
+		if (url.find("/notification") == 0)
 		{
-			bool update = url.find("force") != std::string::npos;
-			auto ctrls = controllers->getControllers();
-
-			if(!update)
-			{
-				for(auto it = ctrls.begin(); it != ctrls.end(); ++it)
-				{
-					if(it->second->hasNotifications())
-					{
-						update = true;
-						break;
-					}
-				}
-			}
-
-			if(!update)
-			{
-				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-				resp.send() << "<null>";
-				return;
-			}
-
-			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
-			std::ostream& out = resp.send();
-			resp.setContentType("application/json");
-
-			rapidjson::Document doc;
-			auto & alloc = doc.GetAllocator();
-			doc.SetArray();
-
-			for (auto it = ctrls.begin(); it != ctrls.end(); ++it)
-			{
-				if(it->second->hasNotifications())
-				{
-					rapidjson::Document notif;
-					notif.Parse(it->second->getNotifications().c_str());
-					if (notif.IsArray())
-					{
-						doc.PushBack(notif.GetArray(), alloc);
-					}
-				}
-			}
-			std::string temp = commproto::JSONUtils::stringify(doc);
-			out << temp;
-
-
-		}
-
-		if (url.find("/update") == 0)
-		{
-			bool update = controllers->hasUpdate() || (url.find("force")!=std::string::npos);
+			bool update = controllers->hasNotifications() || (url.find("force") != std::string::npos);
 			if (!update)
 			{
 				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 				resp.send() << "<null>";
 				return;
 			}
+
+			LOG_INFO("POST%s ", url.c_str());
+			auto ctrls = controllers->getControllers();
+			resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+			std::ostream& out = resp.send();
+			resp.setContentType("text/html");
+
+			std::stringstream stream;
+
+			for (auto it = ctrls.begin(); it != ctrls.end(); ++it)
+			{
+				if (update || it->second->hasNotifications())
+				{
+					stream << it->second->getNotifications();
+				}
+			}
+			out << stream.str();
+
+		}
+
+		if (url.find("/update") == 0)
+		{
+			bool update = controllers->hasUpdate() || (url.find("force") != std::string::npos);
+			if (!update)
+			{
+				resp.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+				resp.send() << "<null>";
+				return;
+			}
+			LOG_INFO("POST%s ", url.c_str());
 			std::ostream& out = resp.send();
 
 			//TODO: actually handle other controllers
@@ -165,7 +146,6 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		}
 		if (url.compare("/action") == 0)
 		{
-			LOG_INFO("POST action - action ");
 			std::string connection;
 			std::string control;
 			Poco::Net::HTMLForm form(req, req.stream());
@@ -179,10 +159,10 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 			parseKVMap(std::move(map));
 		}
 	}
-	if(req.getMethod().compare("GET") == 0)
+	if (req.getMethod().compare("GET") == 0)
 	{
 		std::string uri = req.getURI();
-		if(uri == "/")
+		if (uri == "/")
 		{
 			uri = "/index.html";
 		}
@@ -193,12 +173,12 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		std::string extension = Poco::toLower(path.getExtension());
 		if (extension == "css") {
 			resp.setContentType("text/css");
-		} 
-		else if(extension == "html")
+		}
+		else if (extension == "html")
 		{
 			resp.setContentType("text/html");
-		} 
-		else if(extension == "js")
+		}
+		else if (extension == "js")
 		{
 			resp.setContentType("application/javascript");
 		}
@@ -226,6 +206,34 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		file.close();
 		out.flush();
 	}
+}
+
+void UxRequestHandler::handleNotification(KVMap&& map) const
+{
+	std::string connection = "";
+	uint32_t controlId = 0;
+	handleBase(map, connection, controlId);
+	auto controller = controllers->getController(connection);
+	if (!controller)
+	{
+		return;
+	}
+
+	auto it = map.find("option");
+	if (it == map.end())
+	{
+		return;
+	}
+
+	commproto::control::ux::NotificationHandle notif = std::static_pointer_cast<commproto::control::ux::Notification>(controller->getNotification(controlId));
+	if (!notif)
+	{
+		return;
+	}
+
+	notif->execute(it->second);	
+	controller->dismissNotification(controlId);
+
 }
 
 void UxRequestHandler::handleToggle(KVMap&& map) const

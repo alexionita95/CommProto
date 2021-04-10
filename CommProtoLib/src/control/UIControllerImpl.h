@@ -5,7 +5,6 @@
 #include <commproto/sockets/Socket.h>
 #include <map>
 #include "IdProvider.h"
-#include <concurrentqueue.h>
 
 
 namespace commproto
@@ -57,8 +56,9 @@ namespace commproto
 				void addNotification(const NotificationHandle& notification) override;
 				NotificationHandle getNotification(const uint32_t id) const override;
 				void displayNotification(const uint32_t id) override;
-				bool hasNotifications() const override;
+				bool hasNotifications() override;
 				std::string getNotifications() override;
+				void dismissNotification(const uint32_t id) override;
 			private:
 				std::map<uint32_t, ControlHandle> controls;
 				std::map<uint32_t, NotificationHandle> notifications;
@@ -69,7 +69,8 @@ namespace commproto
 				std::mutex controlMutex;
 				std::atomic_bool update;
 				std::atomic_bool hasNotif;
-				moodycamel::ConcurrentQueue<uint32_t> pendingNotifications;
+				std::vector<uint32_t> pendingNotifications;
+				std::mutex notificationMutex;
 			};
 		}
 	}

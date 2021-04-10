@@ -23,6 +23,7 @@ namespace commproto
 				UIControllerHandle getController(const std::string& name);
 				std::map<std::string, UIControllerHandle> getControllers();
 				bool hasUpdate();
+				bool hasNotifications();
 
 			private:
 				std::map<std::string, UIControllerHandle> controllers;

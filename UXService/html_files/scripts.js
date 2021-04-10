@@ -1,3 +1,20 @@
+function invoke(event)
+{
+    let nameOfFunction = event.target.getAttribute('name');
+    let conn = event.target.getAttribute('connectionId');
+    let controlId = event.target.getAttribute('controlId');
+    console.log(nameOfFunction);
+    console.log(conn);
+    console.log(controlId);
+    if(nameOfFunction == "postNotification")
+    {
+        let elementId = event.target.getAttribute('elementId');
+        let optionStr = event.target.getAttribute('optionStr');
+        window[nameOfFunction](conn,controlId,elementId,optionStr);
+    }
+}
+
+
 function postToggle(toggle, connection, id)
 {
     var http = new XMLHttpRequest();
@@ -31,10 +48,23 @@ function forceUpdateUI()
 var notificationURI = "notification";
 function forceNotifications()
 {
-    updateURI = "notification-force";
+    notificationURI = "notification-force";
     getNotifications();
-    updateURI = "notification";
+    notificationURI = "notification";
 }  
+
+function postNotification(connection,id, elemId,optionStr)
+{
+    document.getElementById(elemId).remove();
+    var http = new XMLHttpRequest();
+    var data = new FormData();
+    data.append('connection',connection);
+    data.append('controlType','notification');
+    data.append('controlId',id);
+    data.append('option',optionStr);
+    http.open('POST', 'action', true);
+    http.send(data);
+}
 
 function getNotifications()
 {
@@ -50,12 +80,13 @@ function getNotifications()
                 } 
                 else 
                 {
-                    console.log(xhttp.responseText);
+                   console.log('updating notifications');
+                   document.getElementById('notifications').innerHTML = xhttp.responseText;
                 }
             }
         } 
         
-    };  
+    };
     xhttp.open('POST', notificationURI, true);
     xhttp.send();
 }
@@ -75,7 +106,7 @@ function updateUI()
                 else 
                 {
                     console.log('updating UI');
-                    document.getElementById('demo').innerHTML = xhttp.responseText;
+                    document.getElementById('uis').innerHTML = xhttp.responseText;
                 }
             }
         } 
@@ -84,7 +115,16 @@ function updateUI()
     xhttp.open('POST', updateURI, true);
     xhttp.send();
 }
-forceUpdateUI();
-forceNotifications();
-var updateUiId = setInterval(function() {updateUI();}, 1000);
-var notificationsId = setInterval(function() {getNotifications();}, 1000);
+
+function startUpdating()
+{
+    forceUpdateUI();
+    forceNotifications();
+
+    var updateUiId = setInterval(function() {updateUI();}, 1000);
+
+    var notificationsId = setInterval(function() {getNotifications();}, 1000);
+}
+
+startUpdating();
+

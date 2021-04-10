@@ -12,7 +12,7 @@ namespace commproto
 			rapidjson::StringBuffer sb;
 			rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
 			doc.Accept(writer);
-			return sb.GetString();
+			return std::string{ sb.GetString() };
 	    }
 
 	    std::string stringify(const rapidjson::Value& obj)
@@ -20,7 +20,7 @@ namespace commproto
 			rapidjson::StringBuffer sb;
 			rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
 			obj.Accept(writer);
-			return sb.GetString();
+			return std::string{ sb.GetString() };
 	    }
     }
 }

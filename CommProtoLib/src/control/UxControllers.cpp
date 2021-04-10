@@ -66,6 +66,19 @@ namespace commproto
 		        }
 		        return false;
 	        }
+
+	        bool UxControllers::hasNotifications()
+	        {
+				std::lock_guard<std::mutex> lock(controllerMutex);
+				for (auto it : controllers)
+				{
+					if (it.second->hasNotifications())
+					{
+						return true;
+					}
+				}
+				return false;
+	        }
         }
     }
 }

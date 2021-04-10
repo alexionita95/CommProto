@@ -25,6 +25,7 @@ namespace commproto
 				void handle(messages::MessageBase&& data) override;
 			private:
 				ux::UIControllerHandle controller;
+
 			};
 
 
