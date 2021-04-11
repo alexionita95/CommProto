@@ -29,7 +29,7 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 
 
-add_library(${PROJECT_NAME} STATIC ${PROJECT_SRC} ${ROOT_INCLUDE})
+add_library(${PROJECT_NAME} STATIC ${PROJECT_SRC})
 
 foreach(source IN LISTS PROJECT_SRC)
     get_filename_component(source_path "${source}" PATH)
@@ -38,9 +38,9 @@ foreach(source IN LISTS PROJECT_SRC)
 endforeach()  
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 ConcurrentQueue rapidjson)
+    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
 elseif(DEFINED RPI)
-    target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ConcurrentQueue rapidjson)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 endif()
 
 target_include_directories(${PROJECT_NAME} INTERFACE interface ${PD_INTERFACE_FOLDER})

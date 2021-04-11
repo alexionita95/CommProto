@@ -3,7 +3,7 @@
 #include <commproto/service/ParserDelegatorFactory.h>
 #include <commproto/endpoint/EndpointChains.h>
 #include <commproto/messages/KeepAlive.h>
-#include "../parser/TypeMapperImpl.h"
+#include <commproto/parser/MappingType.h>
 
 namespace commproto {
 	namespace service {
@@ -16,7 +16,7 @@ namespace commproto {
 			, dispatch{ dispatch_ }
 			, delegator{ ParserDelegatorFactory::build(*this, dispatch_) }
 			, builder{ std::make_shared<parser::MessageBuilder>(socket_,delegator)}
-			, mapper{std::make_shared<messages::TypeMapperImpl>(std::make_shared<messages::TypeMapperObserver>(socket))}
+			, mapper{messages::TypeMapperFactory::build(socket)}
 			, channelMappingId(0)
 			, terminationId(0)
 		{

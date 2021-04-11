@@ -1,7 +1,7 @@
 #ifndef CONTROL_ID_PROVIDER_H
 #define CONTROL_ID_PROVIDER_H
 #include <commproto/service/ServiceChains.h>
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 
 #include "ButtonImpl.h"
 #include "ToggleImpl.h"

@@ -1,5 +1,4 @@
 #include <commproto/endpoint/ParserDelegatorFactory.h>
-#include <commproto/service/ParserDelegator.h>
 #include <commproto/endpoint/ChannelMappingHandler.h>
 #include <commproto/endpoint/EndpointChains.h>
 #include <commproto/endpoint/RegisterIdHandler.h>

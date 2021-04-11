@@ -1,4 +1,4 @@
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 
 #include "../parser/TypeMapperImpl.h"
 

@@ -5,7 +5,8 @@
 #include <commproto/sockets/Socket.h>
 #include <map>
 #include "IdProvider.h"
-
+#include <mutex>
+#include <atomic>
 
 namespace commproto
 {

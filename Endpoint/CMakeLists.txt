@@ -6,7 +6,7 @@ add_executable(${PROJECT_NAME}
     main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} CommProto)
+target_link_libraries(${PROJECT_NAME} CommProtoService)
 
 include_directories(.)
 

@@ -1,6 +1,6 @@
 #ifndef COMMPROTO_TYPE_MAPPER_IMPL_H
 #define COMMPROTO_TYPE_MAPPER_IMPL_H
-#include  <commproto/messages/MessageMapper.h>
+#include  <commproto/messages/TypeMapper.h>
 #include "TypeMapperObserver.h"
 #include <map>
 

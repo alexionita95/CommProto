@@ -1,11 +1,11 @@
 #include <commproto/parser/ParserDelegatorUtils.h>
-#include "MappingType.h"
+#include <commproto/parser/MappingType.h>
 #include <commproto/messages/KeepAlive.h>
 
 namespace commproto
 {
-    namespace parser
-    {
+	namespace parser
+	{
 
 		class MappingTypeParser : public Parser
 		{
@@ -43,7 +43,7 @@ namespace commproto
 			ParserDelegatorHandle delegator;
 		};
 
-        void buildBase(const ParserDelegatorHandle & delegator)
+		void buildBase(const ParserDelegatorHandle & delegator)
 		{
 
 			ParserHandle mappingParser = std::make_shared<MappingTypeParser>(std::make_shared<MappingTypeHandler>(delegator));
@@ -55,13 +55,13 @@ namespace commproto
 			delegator->registerParser<messages::KeepAliveMessage>(keepAliveParser);
 		}
 
-	    void sendMappings(const ParserDelegatorHandle& delegator, const sockets::SocketHandle& socket)
-	    {
+		void sendMappings(const ParserDelegatorHandle& delegator, const sockets::SocketHandle& socket)
+		{
 			auto mappings = delegator->getMappings();
-			for(auto it = mappings.begin(); it != mappings.end();++it)
-			{				
+			for (auto it = mappings.begin(); it != mappings.end(); ++it)
+			{
 				socket->sendBytes(messages::MappingTypeSerializer::serialize(std::move(messages::MappingType(it->first, it->second))));
 			}
-	    }
-    }
+		}
+	}
 }

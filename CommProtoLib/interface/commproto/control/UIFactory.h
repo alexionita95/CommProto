@@ -3,7 +3,7 @@
 #include <commproto/control/UIController.h>
 #include <commproto/control/Button.h>
 #include <commproto/sockets/Socket.h>
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 #include <commproto/control/Toggle.h>
 
 namespace commproto

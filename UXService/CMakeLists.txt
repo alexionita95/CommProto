@@ -14,7 +14,7 @@ file(GLOB_RECURSE PROJECT_SRC RELATIVE
 
 add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
-target_link_libraries(${PROJECT_NAME} CommProto Poco::Net Poco::Util)
+target_link_libraries(${PROJECT_NAME} CommProtoService Poco::Net Poco::Util)
 
 include_directories(.)
 

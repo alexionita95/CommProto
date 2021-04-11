@@ -1,7 +1,7 @@
 #include <commproto/service/ParserDelegator.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/service/Connection.h>
-#include "../parser/MappingType.h"
+#include <commproto/parser/MappingType.h>
 
 namespace commproto
 {

@@ -1,7 +1,7 @@
 #ifndef COMMPROTO_TYPE_MAPPER_OBSERVER_H
 #define COMMPROTO_TYPE_MAPPER_OBSERVER_H
 #include <commproto/sockets/Socket.h>
-#include "MappingType.h"
+#include <commproto/parser/MappingType.h>
 #include "commproto/logger/Logging.h"
 
 namespace commproto

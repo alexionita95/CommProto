@@ -1,6 +1,6 @@
 #include "UxDelegatorProvider.h"
 #include <commproto/parser/ParserDelegatorUtils.h>
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 #include <commproto/control/ParserDelegatorUtils.h>
 #include <commproto/logger/Logging.h>
 

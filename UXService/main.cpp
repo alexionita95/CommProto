@@ -3,7 +3,7 @@
 #include <commproto/logger/Logging.h>
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
 #include <commproto/control/UxControllers.h>

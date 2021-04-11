@@ -1,9 +1,8 @@
-#include <commproto/service/Dispatch.h>
 #include <SocketImpl.h>
 #include <commproto/logger/Logging.h>
 #include <commproto/messages/SenderMaping.h>
 #include <commproto/service/ServiceChains.h>
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
@@ -11,7 +10,9 @@
 #include <commproto/control/ParserDelegatorUtils.h>
 #include <commproto/control/Label.h>
 #include <sstream>
-#include "commproto/config/ConfigParser.h"
+#include <commproto/config/ConfigParser.h>
+#include <commproto/parser/MessageBuilder.h>
+#include <thread>
 
 namespace ConfigValues
 {

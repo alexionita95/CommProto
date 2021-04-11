@@ -5,7 +5,6 @@
 #include <commproto/messages/SinglePropertyMessage.h>
 #include <commproto/common/Common.h>
 #include <commproto/parser/ByteStream.h>
-#include <commproto/service/Dispatch.h>
 
 namespace commproto
 {

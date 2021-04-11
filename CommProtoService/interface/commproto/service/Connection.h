@@ -6,7 +6,7 @@
 #include <atomic>
 #include <concurrentqueue.h>
 #include <mutex>
-#include <commproto/messages/MessageMapper.h>
+#include <commproto/messages/TypeMapper.h>
 #include "ParserDelegator.h"
 
 

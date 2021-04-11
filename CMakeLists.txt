@@ -18,6 +18,7 @@ endif()
 
 set(CMAKE_FOLDER "Libs")
 add_subdirectory(CommProtoLib)
+add_subdirectory(CommProtoService)
 
 set(CMAKE_FOLDER "Runnable")
 #add_subdirectory(ServerApp)
