@@ -50,7 +50,7 @@ set(ARDUINO_LIB_DEPLOY_LOCATION "H:\\Facultate\\licenta\\ArduinoLibs\\libraries"
 message("DEPLOY LOCATION == ${ARDUINO_LIB_DEPLOY_LOCATION}")
 
 add_custom_target(DEPLOY DEPENDS ${PROJECT_NAME} EspApp
-	COMMAND python "${CMAKE_SOURCE_DIR}/makelib/makelib.py" "${CMAKE_SOURCE_DIR}" "${ARDUINO_LIB_DEPLOY_LOCATION}\\DeviceWrapper")
+	COMMAND python "${CMAKE_SOURCE_DIR}/makelib/makelib.py" "${CMAKE_SOURCE_DIR}" "${ARDUINO_LIB_DEPLOY_LOCATION}/DeviceWrapper")
 
 if(WIN32)
     add_subdirectory(test)

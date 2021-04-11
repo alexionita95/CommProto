@@ -7,6 +7,16 @@ import os
 import re
 
 
+def copy_dir_contents(source,dst):
+    src_files = os.listdir(source)
+    for file_name in src_files:
+        full_file_name = os.path.join(source, file_name)
+        print ("copying ",full_file_name," to ", dst)
+        if os.path.isfile(full_file_name):
+            copy(full_file_name, dst)
+        if os.path.isdir(full_file_name):
+            copy_dir_contents(full_file_name,dst)
+
 
 def copy_contents(source,dst):
     src_files = os.listdir(source)
@@ -38,18 +48,18 @@ if os.path.exists(dst):
 os.mkdir(dst)
 
 
-# copy everything from src to destination
-cppSourceFiles = src +"\\CommProtoLib\\src"
-copy_contents(cppSourceFiles,dst)
+# copy everything from sources to root dir
+srcDir = src +"/CommProtoLib/src"
+copy_dir_contents(srcDir, dst)
 
 # copy from pd folder
-espPdFiles = src +"\\CommProtoLib\\pd\\esp\\interface"
+espPdFiles = src +"/CommProtoLib/pd/esp/interface"
 copy_contents(espPdFiles,dst)
 
 # copy everything from interface   
-interfaceDir = src +"\\CommProtoLib\\interface\\commproto"
-copytree(interfaceDir, os.path.join(dst,"commproto"));
+interfaceDir = src +"/CommProtoLib/interface/commproto"
+copytree(interfaceDir, os.path.join(dst,"commproto"))
 
-# copy stuff from esp_app
-espAppSrc = src+"/EspApp"
-copy_contents_cond(espAppSrc, dst,["source.cpp","CMakeLists.txt"])
+# copy stuff from ConcurrentQueue
+cqSrc = src+"/ConcurrentQueue/moodycamel"
+copy_contents_cond(cqSrc, dst,["CMakeLists.txt"])
