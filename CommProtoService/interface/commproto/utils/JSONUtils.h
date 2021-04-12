@@ -14,4 +14,4 @@ namespace commproto
 }
 
 
-#endif JSON_UTILS_H
+#endif //JSON_UTILS_H

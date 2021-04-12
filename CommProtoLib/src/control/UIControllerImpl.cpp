@@ -2,6 +2,7 @@
 #include <sstream>
 #include <commproto/service/ServiceChains.h>
 #include <commproto/logger/Logging.h>
+#include <algorithm>
 
 namespace commproto
 {
@@ -235,7 +236,7 @@ namespace commproto
 					return;
 				}
 				std::lock_guard<std::mutex> lock(notificationMutex);
-				pendingNotifications.push_back(id);
+                pendingNotifications.push_back(id);
 				hasNotif = true;
 								
 			}
