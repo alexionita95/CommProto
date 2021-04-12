@@ -11,7 +11,6 @@ set(CMAKE_FOLDER "ThirdParty")
 add_subdirectory(gtest)
 add_subdirectory(ConcurrentQueue)
 add_subdirectory(rapidjson)
-
 IF(WIN32)
 add_subdirectory(poco)
 endif()
@@ -25,8 +24,12 @@ set(CMAKE_FOLDER "Runnable")
 add_subdirectory(Dispatch)
 add_subdirectory(Endpoint)
 add_subdirectory(UXService)
-
-
 if(DEFINED RPI)
 add_subdirectory(AuthService)
 endif()
+
+if(WIN32)
+set(CMAKE_FOLDER "Runnable")
+add_subdirectory(AuthDevice)
+endif()
+

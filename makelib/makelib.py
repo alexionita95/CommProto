@@ -63,3 +63,7 @@ copytree(interfaceDir, os.path.join(dst,"commproto"))
 # copy stuff from ConcurrentQueue
 cqSrc = src+"/ConcurrentQueue/moodycamel"
 copy_contents_cond(cqSrc, dst,["CMakeLists.txt"])
+
+# copy stuff from AuthDevice
+cqSrc = src+"AuthDevice"
+copy_contents_cond(cqSrc, dst,["CMakeLists.txt","main.cpp"])
