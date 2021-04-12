@@ -6,9 +6,9 @@
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
-#include <commproto/control/UIFactory.h>
-#include <commproto/control/ParserDelegatorUtils.h>
-#include <commproto/control/Label.h>
+#include <commproto/control/endpoint/UIFactory.h>
+#include <commproto/control/endpoint/ParserDelegatorUtils.h>
+#include <commproto/control/endpoint/Label.h>
 #include <sstream>
 #include <commproto/config/ConfigParser.h>
 #include <commproto/parser/MessageBuilder.h>
@@ -136,7 +136,7 @@ int main(int argc, const char * argv[])
 	});
 
 
-	uint32_t tempId = uiFactory->addLabel("Temperature", "0.00 C");
+	control::endpoint::LabelHandle tempLabel = uiFactory->addLabel("Temperature", "0.00 C");
 
 	std::shared_ptr<EndpointProvider> provider = std::make_shared<EndpointProvider>(mapper, controller);
 	endpoint::ChannelParserDelegatorHandle channelDelegator = std::make_shared<endpoint::ChannelParserDelegator>(provider);
@@ -176,7 +176,7 @@ int main(int argc, const char * argv[])
 			std::stringstream tempStr;
 			tempStr.precision(3);
 			tempStr << temp << " C";
-			std::static_pointer_cast<control::endpoint::Label>(controller->getControl(tempId))->setText(tempStr.str());
+			tempLabel->setText(tempStr.str());
 			counter = 0;
 		}
 	}

@@ -1,7 +1,7 @@
 #ifndef HTTP_SERVER_H
 #define HTTP_SERVER_H
 #include <Poco/Net/HTTPRequestHandlerFactory.h>
-#include <commproto/control/UxControllers.h>
+#include <commproto/control/ux/UxControllers.h>
 #include <Poco/Util/ServerApplication.h>
 #include <Poco/Net/HTTPServer.h>
 

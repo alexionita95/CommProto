@@ -6,7 +6,7 @@
 #include <commproto/messages/TypeMapper.h>
 #include <commproto/endpoint/ChannelParserDelegator.h>
 #include <commproto/endpoint/ParserDelegatorFactory.h>
-#include <commproto/control/UxControllers.h>
+#include <commproto/control/ux/UxControllers.h>
 #include <commproto/config/ConfigParser.h>
 #include <commproto/logger/FileLogger.h>
 

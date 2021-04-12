@@ -2,8 +2,8 @@
 #define UX_DELEGATOR_PROVIDER
 
 #include <commproto/parser/ParserDelegator.h>
-#include <commproto/control/UxControllers.h>
-#include <commproto/control/UIFactory.h>
+#include <commproto/control/ux/UxControllers.h>
+#include <commproto/control/ux/UIFactory.h>
 #include <commproto/endpoint/DelegatorProvider.h>
 
 

@@ -1,7 +1,7 @@
 #include "UxDelegatorProvider.h"
 #include <commproto/parser/ParserDelegatorUtils.h>
 #include <commproto/messages/TypeMapper.h>
-#include <commproto/control/ParserDelegatorUtils.h>
+#include <commproto/control/ux/ParserDelegatorUtils.h>
 #include <commproto/logger/Logging.h>
 
 commproto::parser::ParserDelegatorHandle buildSelfDelegator()

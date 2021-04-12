@@ -1,11 +1,11 @@
 #include "HttpRequestHandler.h"
-#include <commproto/control/Button.h>
+#include <commproto/control/ux/Button.h>
 #include <commproto/logger/Logging.h>
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <fstream>
-#include <commproto/control/Toggle.h>
+#include <commproto/control/ux/Toggle.h>
 #include <Poco/Path.h>
 #include <sstream>
 

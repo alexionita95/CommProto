@@ -2,7 +2,7 @@
 #define HTTP_REQUEST_HANDLER_H
 #include <map>
 #include <Poco/Net/HTTPRequestHandler.h>
-#include <commproto/control/UxControllers.h>
+#include <commproto/control/ux/UxControllers.h>
 #include <Poco/Net/HTTPResponse.h>
 
 
