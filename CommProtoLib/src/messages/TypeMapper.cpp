@@ -1,6 +1,6 @@
 #include <commproto/messages/TypeMapper.h>
 
-#include "../parser/TypeMapperImpl.h"
+#include "TypeMapperImpl.h"
 
 namespace commproto
 {

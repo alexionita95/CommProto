@@ -18,7 +18,7 @@ namespace commproto
 			{
 			public:
 				Generator(UIController& manager_)
-					: manager{ manager_ }
+					: manager( manager_)
 				{
 
 				}

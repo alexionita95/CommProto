@@ -25,12 +25,12 @@ struct EndpointData
 class AuthDevice
 {
 public:
-	AuthDevice(DeviceWrapper& device);
+	AuthDevice(DeviceWrapper* device);
 	void setup();
 	void loop();
 	void finishReading(const EndpointData& data);
 private:
-	DeviceWrapper& device;
+	DeviceWrapper* device;
 	bool finishedReading;
 	EndpointData targetDevice;
 };
@@ -38,10 +38,10 @@ private:
 class DeviceDataHandler : public commproto::parser::Handler
 {
 public:
-	DeviceDataHandler(AuthDevice& device_);
+	DeviceDataHandler(AuthDevice* device_);
 	void handle(commproto::messages::MessageBase&& data) override;
 public:
-	AuthDevice& device;
+	AuthDevice* device;
 };
 
 #endif // AUTH_DEVICE_H

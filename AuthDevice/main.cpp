@@ -12,5 +12,5 @@ public:
 int main(int argc, const char * argv[])
 {
 	WindowsAuthDeviceWrapper wrapper;
-	AuthDevice dev(wrapper);
+	AuthDevice dev(&wrapper);
 }
