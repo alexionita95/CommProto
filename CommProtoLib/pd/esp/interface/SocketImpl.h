@@ -43,7 +43,7 @@ public:
         return client.connected();
     }
        
-    void close() override{
+    void shutdown() override{
         isInitialized = false;
         socketMode = Mode::Unassigned;
         client.stop();
@@ -118,7 +118,7 @@ public:
     }
 
     //initialize the socket as a server and bind it to [port]
-    bool initServer(const uint32_t port) override
+    bool initServer(const std::string& addr, const uint32_t port) override
     {
         if (isInitialized || socketMode != Mode::Unassigned)
         {

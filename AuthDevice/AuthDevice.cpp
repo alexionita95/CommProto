@@ -4,7 +4,7 @@
 #include <commproto/messages/TypeMapper.h>
 #include <commproto/parser/ParserDelegatorFactory.h>
 #include <commproto/parser/ParserDelegatorUtils.h>
-
+#include "commproto/logger/Logging.h"
 
 
 DeviceDataHandler::DeviceDataHandler(AuthDevice* device_) :
@@ -46,11 +46,13 @@ AuthDevice::AuthDevice(DeviceWrapper* device_)
 
 void AuthDevice::setup()
 {
+	LOG_INFO("Setup called");
 	device->setBaudRate(115200);
 }
 
 void AuthDevice::loop()
 {
+	LOG_INFO("Loop function");
 	if(!device)
 	{
 		return;
@@ -70,6 +72,11 @@ void AuthDevice::loop()
 			finishedReading = false;
 			targetDevice.reset();
 			commproto::sockets::SocketHandle connection = device->connectTo(name, "COMPROTO", "192.168.1.10", 9001);
+			if(!connection)
+			{
+				LOG_INFO("Could not connect to network %s", name.c_str());
+				return;
+			}
 			commproto::parser::ParserDelegatorHandle delegator = build(this);
 			commproto::parser::MessageBuilderHandle builder = std::make_shared<commproto::parser::MessageBuilder>(connection, delegator);
 			commproto::messages::TypeMapperHandle mapper = commproto::messages::TypeMapperFactory::build(connection);
