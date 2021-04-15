@@ -20,9 +20,8 @@ using KVMap = std::map<std::string, std::string>;
 class UxRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-	UxRequestHandler(const commproto::control::ux::UxControllersHandle & controllers) : controllers{ controllers }
+	UxRequestHandler(const commproto::control::ux::UxControllersHandle & controllers, const KVMap& mimetypes) : controllers{ controllers }, mimetypes {mimetypes}
 	{
-
 	}
 
 	void handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp) override;
@@ -33,7 +32,10 @@ private:
 	void handleToggle(KVMap&& map) const;
 	void handleNotification(KVMap && map) const;
 	void parseKVMap(KVMap&& map) const;
+    
 	commproto::control::ux::UxControllersHandle controllers;
+    KVMap mimetypes;
+
 
 };
 

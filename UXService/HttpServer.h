@@ -10,10 +10,15 @@
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-	RequestHandlerFactory(const commproto::control::ux::UxControllersHandle & controller) : controller{ controller } {}
+	RequestHandlerFactory(const commproto::control::ux::UxControllersHandle & controller) : controller{ controller }
+	{
+        loadMimeTypes();
+	}
 	Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest&) override;
 private:
+    void loadMimeTypes();
 	commproto::control::ux::UxControllersHandle controller;
+    KVMap mimetypes;
 };
 
 class UxServerApp : public Poco::Util::ServerApplication

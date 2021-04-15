@@ -10,6 +10,7 @@
 #include <sstream>
 #include "Poco/StreamCopier.h"
 
+
 const std::map<std::string, ControlType> stringMap = {
 	{ "button",ControlType::Button },
 	{ "slider",ControlType::Slider },
@@ -88,7 +89,6 @@ void UxRequestHandler::parseKVMap(KVMap&& map) const
 	default:;
 	}
 }
-
 void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Net::HTTPServerResponse& resp)
 {
 	if (req.getMethod().compare("POST") == 0)
@@ -172,26 +172,15 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 
 		Poco::Path path(uri);
 		std::string extension = Poco::toLower(path.getExtension());
-		if (extension == "css") {
-			resp.setContentType("text/css");
-		}
-		else if (extension == "html")
-		{
-			resp.setContentType("text/html");
-		}
-		else if (extension == "js")
-		{
-			resp.setContentType("application/javascript");
-		}
-        else if (extension == "png")
+        if(mimetypes.find(extension) != mimetypes.end())
         {
-            resp.setContentType("image/png");
+            resp.setContentType(mimetypes[extension]);
         }
-		else
-		{
-			resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
-			return;
-		}
+        else
+        {
+            resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+            return;
+        }
 		resp.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
 
 		Poco::Path root("html_files");
