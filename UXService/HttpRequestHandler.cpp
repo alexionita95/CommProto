@@ -8,6 +8,7 @@
 #include <commproto/control/ux/Toggle.h>
 #include <Poco/Path.h>
 #include <sstream>
+#include "Poco/StreamCopier.h"
 
 const std::map<std::string, ControlType> stringMap = {
 	{ "button",ControlType::Button },
@@ -182,6 +183,10 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		{
 			resp.setContentType("application/javascript");
 		}
+        else if (extension == "png")
+        {
+            resp.setContentType("image/png");
+        }
 		else
 		{
 			resp.setStatus(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
@@ -193,15 +198,10 @@ void UxRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& req, Poco::Ne
 		std::string reqFile = uri.substr(1);
 		root.append(reqFile);
 		std::ostream& out = resp.send();
-		std::ifstream file(root.toString());
+		std::ifstream file(root.toString(), std::ifstream::in | std::ifstream::binary);
 		if (file.is_open())
 		{
-			while (!file.eof())
-			{
-				std::string line;
-				std::getline(file, line);
-				out << line << std::endl;
-			}
+            Poco::StreamCopier::copyStream(file, out);
 		}
 		file.close();
 		out.flush();
