@@ -82,6 +82,8 @@ function getNotifications()
                 {
                    console.log('updating notifications');
                    document.getElementById('notifications').innerHTML = xhttp.responseText;
+				    $(".toast").toast({ autohide: false });
+					$('.toast').toast('show');
                 }
             }
         } 
