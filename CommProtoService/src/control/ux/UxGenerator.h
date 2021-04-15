@@ -3,7 +3,10 @@
 
 #include <commproto/control/ux/UIController.h>
 #include <sstream>
-
+#include <fstream>
+#include <map>
+#include <regex>
+#include "TemplateEngine.h"
 #include "ButtonImpl.h"
 #include "ToggleImpl.h"
 #include "LabelImpl.h"
@@ -53,7 +56,7 @@ namespace commproto
 			inline std::string Generator::generate(const ButtonImpl& control) const
 			{
 				std::stringstream sstream;
-				sstream << "<button onclick = \"postButton('" << manager.getConnectionName() << "','" << control.getId() << "')\">" << control.getName() << " </button>";
+				sstream << "<button class=\"btn btn-primary\" onclick = \"postButton('" << manager.getConnectionName() << "','" << control.getId() << "')\">" << control.getName() << " </button>";
 				return sstream.str();
 			}
 
@@ -85,10 +88,18 @@ namespace commproto
 			template <>
 			inline std::string Generator::generate(const NotificationImpl& control) const
 			{
-				std::stringstream stream;
-				
+                std::map<std::string, std::string> values;
+                
+                values.emplace("title", "Notification");
+                values.emplace("timestamp", "just now");
+                values.emplace("content", control.getName());
+                
+
+                std::stringstream stream;
 				stream << "notification-" << manager.getConnectionName() << "-" << control.getId();
 				std::string notifId = stream.str();
+
+                values.emplace("id", notifId);
 
 				stream.clear();
 				stream.str(std::string());
@@ -103,16 +114,14 @@ namespace commproto
 				stream.clear();
 				stream.str(std::string());
 
-				stream << "<div class=\"notification\" id=\"" << notifId << "\">";
-				stream << control.getName() << "<br>";
+
 				auto options = control.getOptions();
 				for(auto opt : options)
 				{
-					stream << "<button " << attributes << opt << "\" >" << opt << " </button>";
+					stream << "<button class=\"btn btn-primary\" " << attributes << opt << "\" >" << opt << " </button>";
 				}
-
-				stream << "</div>";
-				return stream.str();
+                values.emplace("buttons", stream.str());
+                return TemplateEngine::instance()->getControlTemplate("notification", values);
 			}
 
 			using GeneratorHandle = std::shared_ptr<Generator>;
